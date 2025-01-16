@@ -1,0 +1,59 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Us</title>
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
+            color: #333;
+        }
+        .about-container {
+            padding: 20px;
+            background-color: #ffffff;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .about-title {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #007bff;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .about-content p {
+            margin-bottom: 15px;
+        }
+        footer {
+            margin-top: 40px;
+            padding: 20px;
+            background-color: #007bff;
+            color: white;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container about-container">
+        <h1 class="about-title"><i class="fas fa-info-circle"></i> About Us</h1>
+        <a href="{% url 'home' %}" class="btn btn-secondary mb-3"><i class="fas fa-home"></i> Home</a>
+        <div class="about-content">
+            <p>Welcome to the Alumni Management System of our department. We aim to connect our alumni and provide a platform for networking and collaboration.</p>
+            <p>Our department has a rich history of excellence in education and research. We are proud of our alumni and their achievements in various fields.</p>
+            <p>Contact us for more information about our programs and events.</p>
+        </div>
+    </div>
+    <footer>
+        <p>Contact us: info@college.edu | Phone: (123) 456-7890</p>
+    </footer>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

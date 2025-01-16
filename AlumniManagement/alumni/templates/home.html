@@ -1,0 +1,156 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alumni Portal</title>
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <style>
+        /* Reset all elements to remove default margin and padding */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        /* Set the background and font styles for the whole page */
+        body {
+            font-family: Arial, sans-serif;
+            color: white;
+            background-color: black;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        
+        /* Header styling for logo and buttons container */
+        .header {
+            position: relative;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 2; /* Make sure header is above background image */
+        }
+        
+        /* Logo styling */
+        .logo {
+            padding-top: 10px;
+            padding-left: 40px;
+            font-size: 20px;
+        }
+        
+        .logo h1 {
+            font-size: 48px;
+            font-weight: bold;
+            color: #ffcc00; /* TCS yellow */
+        }
+        
+        .portal {
+            font-size: 48px;
+            font-weight: lighter;
+            color: yellow; /* Different yellow for emphasis */
+        }
+        
+        /* Buttons in header */
+        .buttons {
+            padding-right: 50px;
+            text-align: right;
+        }
+        
+        .buttons button {
+            background-color: #ffcc00;
+            border: none;
+            color: black;
+            padding: 10px 20px;
+            font-size: 16px;
+            margin: 5px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        
+        .buttons nav a {
+            color: #ffcc00;
+            margin: 0 10px;
+            font-size: 14px;
+            text-decoration: none;
+        }
+        
+        /* Full-screen background image */
+        .background-image {
+            position: fixed; /* Fixed position for full background */
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url("{% static 'images/Img-1.png' %}"); /* Replace with actual path */
+            background-size: cover; /* Cover entire screen */
+            background-position: center; /* Center image */
+            z-index: 1; /* Place behind other elements */
+            filter: blur(0px); /* Blur effect for the background */
+        }
+        
+        /* Overlay to add dark fade at top */
+        .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.3)); /* Black fade effect */
+            z-index: 1; /* Keep overlay above background */
+        }
+    </style>
+</head>
+<body>
+    <!-- Header Section -->
+    <div class="header">
+        <div class="logo">
+            <span>DR. VITHALRAO VIKHE PATIL COLLEGE OF ENGINEERING AHMEDNAGAR</span>
+            <h1>ALUMNI <br><span class="portal">PORTAL</span></h1>
+        </div>
+        <div class="buttons">
+            <!--
+            <a href="{% url 'admin_registration' %}" class="btn btn-primary">
+            <i class="fas fa-user-plus"></i> Admin Registration
+            </a>
+            <a href="{% url 'admin_login' %}" class="btn btn-secondary">
+            <i class="fas fa-sign-in-alt"></i> Admin Login
+            </a>
+            -->
+            <a href="{% url 'alumni_login' %}" class="btn btn-info">
+            <i class="fas fa-user-graduate"></i> Alumni Login
+            </a>
+            <!--
+            <a href="{% url 'alumni_coordinator_registration' %}" class="btn btn-warning">
+            <i class="fas fa-user-plus"></i> Alumni Coordinator Registration
+            </a>
+            -->
+            <a href="{% url 'alumni_coordinator_login' %}" class="btn btn-danger">
+            <i class="fas fa-sign-in-alt"></i> Alumni Coordinator Login
+            </a>
+            <a href="{% url 'gallery' %}" class="btn btn-success">
+            <i class="fas fa-images"></i> Gallery
+            </a>
+            <a href="{% url 'about_us' %}" class="btn btn-dark">
+            <i class="fas fa-info-circle"></i> About Us
+            </a>
+        </div>
+            </nav>
+        </div>
+    </div>
+
+    <!-- Full Background Image and Overlay -->
+    <div class="background-image"></div>
+    
+    <div class="overlay"></div>
+
+    <!-- Footer Section -->
+    <footer>
+        <p>&copy; 2023 DR. VITHALRAO VIKHE PATIL COLLEGE OF ENGINEERING AHMEDNAGAR. All rights reserved.</p>
+    </footer>
+</body>
+</html>

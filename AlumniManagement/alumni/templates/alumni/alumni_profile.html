@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alumni Profile</title>
+    {% load static %}
+    
+    <!-- Font Awesome and Bootstrap CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    
+    <style>
+        .profile-photo {
+            width: 150px;
+            height: 150px;
+            object-fit: cover;
+            border: 5px solid #fff;
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.8);
+        }
+        .card {
+            border: none;
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.8);
+        }
+        .btn-logout, .btn-primary, .list-inline-item a {
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.8);
+        }
+        .card-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+        .text-muted {
+            font-size: 0.9rem;
+        }
+        .list-inline-item a {
+            color: inherit;
+            text-decoration: none;
+        }
+        .list-inline-item a:hover {
+            color: #007bff;
+        }
+        .btn-logout {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+        }
+    </style>
+</head>
+<body class="bg-light">
+    <div class="container mt-5">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <a href="{% url 'logout' %}" class="btn btn-danger btn-logout">Logout</a>
+                <div class="d-flex align-items-center mb-4">
+                    <img src="{{ alumni.profile_photo.url }}" alt="Profile Photo" class="rounded-circle mr-3 profile-photo">
+                    <div>
+                        <h2 class="card-title mb-0">{{ alumni.name }}</h2>
+                        <p class="text-muted mb-1"><i class="fas fa-envelope"></i> <strong>Email:</strong> <a href="mailto:{{ alumni.email }}">{{ alumni.email }}</a></p>
+                        <p class="text-muted mb-0"><i class="fas fa-phone"></i> <strong>Mobile:</strong> <a href="tel:{{ alumni.mobile }}">{{ alumni.mobile }}</a></p>
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <p><i class="fas fa-briefcase"></i> <strong>Current Job Profile:</strong> {{ alumni.current_job_profile }}</p>
+                    <p><i class="fas fa-building"></i> <strong>Current Company:</strong> {{ alumni.current_company }}</p>
+                    <p><i class="fas fa-map-marker-alt"></i> <strong>Location:</strong> {{ alumni.current_job_location }}</p>
+                    <p><i class="fas fa-city"></i> <strong>City:</strong> {{ alumni.city }}</p>
+                    <p><i class="fas fa-map"></i> <strong>Sub District:</strong> {{ alumni.sub_district }}</p>
+                    <p><i class="fas fa-map-signs"></i> <strong>District:</strong> {{ alumni.district }}</p>
+                    <p><i class="fas fa-flag"></i> <strong>State:</strong> {{ alumni.state }}</p>
+                    <p><i class="fas fa-mail-bulk"></i> <strong>Pincode:</strong> {{ alumni.pincode }}</p>
+                    <p><i class="fas fa-globe"></i> <strong>Country:</strong> {{ alumni.country }}</p>
+                    <p><i class="fas fa-home"></i> <strong>Full Address:</strong> {{ alumni.full_address }}</p>
+                    <p><i class="fas fa-graduation-cap"></i> <strong>Graduation Year:</strong> {{ alumni.graduation_year }}</p>
+                    <p><i class="fas fa-briefcase"></i> <strong>Experience:</strong> {{ alumni.experience }} years</p>
+                </div>
+                <div class="mb-4">
+                    <ul class="list-inline">
+                        <li><strong>Social Media Links:</strong></li>
+                        {% if alumni.facebook %}
+                        <li class="list-inline-item"><a href="{{ alumni.facebook }}" class="text-primary" title="Facebook"><i class="fab fa-facebook fa-2x"></i></a></li>
+                        {% endif %}
+                        {% if alumni.github %}
+                        <li class="list-inline-item"><a href="{{ alumni.github }}" class="text-dark" title="GitHub"><i class="fab fa-github fa-2x"></i></a></li>
+                        {% endif %}
+                        {% if alumni.instagram %}
+                        <li class="list-inline-item"><a href="{{ alumni.instagram }}" class="text-danger" title="Instagram"><i class="fab fa-instagram fa-2x"></i></a></li>
+                        {% endif %}
+                        {% if alumni.linkedin %}
+                        <li class="list-inline-item"><a href="{{ alumni.linkedin }}" class="text-info" title="LinkedIn"><i class="fab fa-linkedin fa-2x"></i></a></li>
+                        {% endif %}
+                        {% if alumni.mobile %}
+                        <li class="list-inline-item"><a href="https://wa.me/{{ alumni.mobile }}" class="text-success" title="WhatsApp"><i class="fab fa-whatsapp fa-2x"></i></a></li>
+                        {% endif %}
+                    </ul>
+                </div>
+                <a href="{% url 'alumni_edit_profile' %}" class="btn btn-primary">Edit Profile</a>
+                <a href="{% url 'share_alumni_profile' alumni.id %}" class="btn btn-secondary">Share Profile</a>
+            </div>
+        </div>
+    </div>
+    <!-- jQuery, Popper.js, and Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

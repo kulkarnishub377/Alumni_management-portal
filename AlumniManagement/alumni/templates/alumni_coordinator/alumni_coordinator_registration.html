@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alumni Coordinator Registration</title>
+    {% load static %}
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .card {
+            border-radius: 15px;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+        }
+        .card-header {
+            background-color: #343a40;
+            color: white;
+            border-radius: 15px 15px 0 0;
+            text-align: center;
+        }
+        .form-group label {
+            font-weight: bold;
+        }
+        .btn-primary {
+            background-color: #343a40;
+            border: none;
+        }
+        .btn-primary:hover {
+            background-color: #23272b;
+        }
+        .form-control {
+            border-radius: 10px;
+        }
+        .form-group i {
+            margin-right: 5px;
+        }
+        .form-control {
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h2><i class="fas fa-user-plus"></i> Alumni Coordinator Registration</h2>
+                    </div>
+                    <div class="card-body">
+                        <form method="post" action="{% url 'alumni_coordinator_registration' %}">
+                            {% csrf_token %}
+                            <div class="form-group">
+                                <label for="id_name"><i class="fas fa-user"></i> Name</label>
+                                {{ form.name }}
+                            </div>
+                            <div class="form-group">
+                                <label for="id_email"><i class="fas fa-envelope"></i> Email</label>
+                                {{ form.email }}
+                            </div>
+                            <div class="form-group">
+                                <label for="id_password"><i class="fas fa-lock"></i> Password</label>
+                                {{ form.password }}
+                            </div>
+                            <div class="form-group"></div>
+                                <label for="id_mobile"><i class="fas fa-phone"></i> Mobile</label>
+                                {{ form.mobile }}
+                            </div>
+                            <button type="submit" class="btn btn-primary btn-block"><i class="fas fa-user-plus"></i> Register</button>
+                        </form>
+                        <p class="mt-3 text-center">Already have an account? <a href="{% url 'alumni_coordinator_login' %}">Login here</a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

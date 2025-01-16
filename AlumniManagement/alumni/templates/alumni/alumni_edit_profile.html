@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Profile</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            margin: 40px auto;
+        }
+
+        h2 {
+            color: #343a40;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            font-weight: bold;
+            color: #495057;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .form-group input, .form-group select, .form-group textarea {
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            padding: 10px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .btn-primary {
+            background-color: #007bff;
+            border-color: #007bff;
+            color: #ffffff;
+            padding: 10px 20px;
+            border-radius: 4px;
+            text-align: center;
+            display: inline-block;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .btn-primary:hover {
+            background-color: #0056b3;
+            border-color: #004085;
+        }
+
+        .btn-back {
+            background-color: #6c757d;
+            border-color: #6c757d;
+            color: #ffffff;
+            padding: 10px 20px;
+            border-radius: 4px;
+            text-align: center;
+            display: inline-block;
+            cursor: pointer;
+            text-decoration: none;
+            margin-top: 20px;
+        }
+
+        .btn-back:hover {
+            background-color: #5a6268;
+            border-color: #545b62;
+        }
+
+        .profile-photo-preview {
+            display: block;
+            margin-top: 10px;
+            max-width: 100px;
+            max-height: 100px;
+            border-radius: 50%;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <h2 class="mb-4">Edit Profile</h2>
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}" role="alert">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+        <form method="post" action="{% url 'alumni_edit_profile' %}" enctype="multipart/form-data">
+            {% csrf_token %}
+            {{ form.non_field_errors }}
+            <div class="form-group">
+                <label for="id_profile_photo"><i class="fas fa-camera"></i> Profile Photo</label>
+                {{ form.profile_photo.errors }}
+                {{ form.profile_photo }}
+                {% if user.profile_photo %}
+                    <img id="profile-photo-preview" class="profile-photo-preview" src="{{ user.profile_photo.url }}" alt="Profile Photo Preview">
+                {% else %}
+                    <img id="profile-photo-preview" class="profile-photo-preview hidden" alt="Profile Photo Preview">
+                {% endif %}
+            </div>
+            <div class="form-group">
+                <label for="id_name"><i class="fas fa-user"></i> Name</label>
+                {{ form.name.errors }}
+                {{ form.name }}
+            </div>
+            <div class="form-group">
+                <label for="id_mobile"><i class="fas fa-phone"></i> Mobile</label>
+                {{ form.mobile.errors }}
+                {{ form.mobile }}
+            </div>
+            <div class="form-group">
+                <label for="id_email"><i class="fas fa-envelope"></i> Email</label>
+                {{ form.email.errors }}
+                {{ form.email }}
+            </div>
+            <div class="form-group">
+                <label for="id_current_job_profile"><i class="fas fa-briefcase"></i> Current Job Profile</label>
+                {{ form.current_job_profile.errors }}
+                {{ form.current_job_profile }}
+            </div>
+            <div class="form-group">
+                <label for="id_current_company"><i class="fas fa-building"></i> Current Company</label>
+                {{ form.current_company.errors }}
+                {{ form.current_company }}
+            </div>
+            <div class="form-group">
+                <label for="id_current_job_location"><i class="fas fa-map-marker-alt"></i> Current Job Location</label>
+                {{ form.current_job_location.errors }}
+                {{ form.current_job_location }}
+            </div>
+            <div class="form-group">
+                <label for="id_city"><i class="fas fa-city"></i> City</label>
+                {{ form.city.errors }}
+                {{ form.city }}
+            </div>
+            <div class="form-group">
+                <label for="id_sub_district"><i class="fas fa-map"></i> Sub District</label>
+                {{ form.sub_district.errors }}
+                {{ form.sub_district }}
+            </div>
+            <div class="form-group">
+                <label for="id_district"><i class="fas fa-map-signs"></i> District</label>
+                {{ form.district.errors }}
+                {{ form.district }}
+            </div>
+            <div class="form-group">
+                <label for="id_state"><i class="fas fa-flag"></i> State</label>
+                {{ form.state.errors }}
+                {{ form.state }}
+            </div>
+            <div class="form-group">
+                <label for="id_pincode"><i class="fas fa-mail-bulk"></i> Pincode</label>
+                {{ form.pincode.errors }}
+                {{ form.pincode }}
+            </div>
+            <div class="form-group">
+                <label for="id_is_international"><i class="fas fa-globe"></i> Is International</label>
+                {{ form.is_international.errors }}
+                {{ form.is_international }}
+            </div>
+            <div class="form-group">
+                <label for="id_country"><i class="fas fa-globe-americas"></i> Country</label>
+                {{ form.country.errors }}
+                {{ form.country }}
+            </div>
+            <div class="form-group">
+                <label for="id_full_address"><i class="fas fa-address-card"></i> Full Address</label>
+                {{ form.full_address.errors }}
+                {{ form.full_address }}
+            </div>
+            <div class="form-group">
+                <label for="id_graduation_year"><i class="fas fa-graduation-cap"></i> Graduation Year</label>
+                {{ form.graduation_year.errors }}
+                {{ form.graduation_year }}
+            </div>
+            <div class="form-group">
+                <label for="id_experience"><i class="fas fa-briefcase"></i> Experience</label>
+                {{ form.experience.errors }}
+                {{ form.experience }}
+            </div>
+            <div class="form-group">
+                <label for="id_facebook"><i class="fab fa-facebook"></i> Facebook</label>
+                {{ form.facebook.errors }}
+                {{ form.facebook }}
+            </div>
+            <div class="form-group">
+                <label for="id_github"><i class="fab fa-github"></i> GitHub</label>
+                {{ form.github.errors }}
+                {{ form.github }}
+            </div>
+            <div class="form-group">
+                <label for="id_instagram"><i class="fab fa-instagram"></i> Instagram</label>
+                {{ form.instagram.errors }}
+                {{ form.instagram }}
+            </div>
+            <div class="form-group">
+                <label for="id_linkedin"><i class="fab fa-linkedin"></i> LinkedIn</label>
+                {{ form.linkedin.errors }}
+                {{ form.linkedin }}
+            </div>
+            <button type="submit" class="btn btn-primary">Save Changes</button>
+        </form>
+        <a href="javascript:history.back()" class="btn btn-back"><i class="fas fa-arrow-left"></i> Back</a>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        document.getElementById('id_profile_photo').addEventListener('change', function(event) {
+            const [file] = event.target.files;
+            if (file) {
+                const preview = document.getElementById('profile-photo-preview');
+                preview.src = URL.createObjectURL(file);
+                preview.style.display = 'block';
+            }
+        });
+    </script>
+</body>
+</html>

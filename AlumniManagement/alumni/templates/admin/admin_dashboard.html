@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+</head>
+<body>
+    <div class="container">
+        <h1 class="mt-4">Admin Dashboard</h1>
+        <a href="{% url 'admin_logout' %}" class="btn btn-danger">Logout</a>
+        <div class="mt-4">
+            <input type="text" id="search" placeholder="Search Alumni..." class="form-control">
+        </div>
+        <table class="table table-striped mt-3">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Graduation Year</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="alumniTable">
+                {% for alumni in alumni_list %}
+                <tr>
+                    <td>{{ alumni.id }}</td>
+                    <td>{{ alumni.name }}</td>
+                    <td>{{ alumni.email }}</td>
+                    <td>{{ alumni.graduation_year }}</td>
+                    <td>
+                        <a href="{% url 'edit_alumni' alumni.id %}" class="btn btn-warning">Edit</a>
+                        <a href="{% url 'delete_alumni' alumni.id %}" class="btn btn-danger">Delete</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <div class="pagination">
+            {% if page_obj.has_previous %}
+                <a href="?page=1">First</a>
+                <a href="?page={{ page_obj.previous_page_number }}">Previous</a>
+            {% endif %}
+            <span>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}">Next</a>
+                <a href="?page={{ page_obj.paginator.num_pages }}">Last</a>
+            {% endif %}
+        </div>
+    </div>
+    <form method="post" action="{% url 'admin_login' %}">
+        {% csrf_token %}
+        <!-- form fields -->
+        <input type="email" name="email" placeholder="Email" required>
+        <input type="password" name="password" placeholder="Password" required>
+        <button type="submit">Login</button>
+    </form>
+    <script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
+    <script>
+        document.getElementById('search').addEventListener('keyup', function() {
+            let filter = this.value.toLowerCase();
+            let rows = document.querySelectorAll('#alumniTable tr');
+            rows.forEach(row => {
+                let cells = row.getElementsByTagName('td');
+                let match = Array.from(cells).some(cell => cell.textContent.toLowerCase().includes(filter));
+                row.style.display = match ? '' : 'none';
+            });
+        });
+    </script>
+</body>
+</html>
