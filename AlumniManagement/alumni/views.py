@@ -120,10 +120,13 @@ def alumni_registration(request):
     if request.method == 'POST':
         form = AlumniRegistrationForm(request.POST, request.FILES)
         if form.is_valid():
-            form.save()
+            alumni = form.save(commit=False)
+            if 'is_international' not in request.POST:
+                alumni.is_international = False
+            alumni.save()
             return redirect('alumni_login')
     else:
-        form = AlumniRegistrationForm()
+        form = AlumniRegistrationForm(initial={'is_international': False})
     return render(request, 'alumni/alumni_registration.html', {'form': form, 'form_action': 'alumni_registration'})
 
 # Alumni Login
@@ -236,76 +239,85 @@ def share_alumni_profile(request, id):
     card = Image.new('RGB', (600, 800), color=(255, 255, 255))
     draw = ImageDraw.Draw(card)
     
+    # Add header image
+    header_image_path = 'C:/Users/Shubham/Desktop/dvvpcoe/dvvpcoe/AlumniManagement/alumni/static/images/header-2.jpg'
+    try:
+        header_image = Image.open(header_image_path)
+        header_image = header_image.resize((600, 100))
+        card.paste(header_image, (0, 0))
+    except FileNotFoundError:
+        draw.text((20, 20), "Header Image Not Found", fill="red", font=font_bold)
+    
     # Use a regular available font
     font_bold = ImageFont.load_default()
     font_regular = ImageFont.load_default()
-
-    # Add college and department name
-    draw.text((20, 20), "Dr. Vithalrao Vikhe Patil College of Engineering", fill="blue", font=font_bold)
-    draw.text((20, 50), "Department of Electronics and Telecommunication", fill="blue", font=font_bold)
 
     # Add profile photo
     if alumni.profile_photo:
         profile_photo = Image.open(alumni.profile_photo.path)
         profile_photo = profile_photo.resize((100, 100))
-        card.paste(profile_photo, (20, 100))
+        card.paste(profile_photo, (20, 120))
         # Add text details with bold labels and bullet points
-        draw.text((140, 100), "• Name:", fill="black", font=font_bold)
-        draw.text((240, 100), alumni.name, fill="black", font=font_regular)
+        draw.text((140, 120), "• Name:", fill="black", font=font_bold)
+        draw.text((240, 120), alumni.name, fill="black", font=font_regular)
         
-        draw.text((140, 130), "• Email:", fill="black", font=font_bold)
-        draw.text((240, 130), alumni.email, fill="black", font=font_regular)
+        draw.text((140, 150), "• Email:", fill="black", font=font_bold)
+        draw.text((240, 150), alumni.email, fill="black", font=font_regular)
         
-        draw.text((140, 160), "• Mobile:", fill="black", font=font_bold)
-        draw.text((240, 160), alumni.mobile, fill="black", font=font_regular)
+        draw.text((140, 180), "• Mobile:", fill="black", font=font_bold)
+        draw.text((240, 180), alumni.mobile, fill="black", font=font_regular)
         
-        draw.text((140, 190), "• Job:", fill="black", font=font_bold)
-        draw.text((240, 190), alumni.current_job_profile, fill="black", font=font_regular)
+        draw.text((140, 210), "• Job:", fill="black", font=font_bold)
+        draw.text((240, 210), alumni.current_job_profile, fill="black", font=font_regular)
         
-        draw.text((140, 220), "• Company:", fill="black", font=font_bold)
-        draw.text((240, 220), alumni.current_company, fill="black", font=font_regular)
+        draw.text((140, 240), "• Company:", fill="black", font=font_bold)
+        draw.text((240, 240), alumni.current_company, fill="black", font=font_regular)
         
-        draw.text((140, 250), "• Location:", fill="black", font=font_bold)
-        draw.text((240, 250), alumni.current_job_location, fill="black", font=font_regular)
+        draw.text((140, 270), "• Location:", fill="black", font=font_bold)
+        draw.text((240, 270), alumni.current_job_location, fill="black", font=font_regular)
         
-        draw.text((140, 280), "• City:", fill="black", font=font_bold)
-        draw.text((240, 280), alumni.city, fill="black", font=font_regular)
+        draw.text((140, 300), "• City:", fill="black", font=font_bold)
+        draw.text((240, 300), alumni.city, fill="black", font=font_regular)
         
-        draw.text((140, 310), "• Sub District:", fill="black", font=font_bold)
-        draw.text((240, 310), alumni.sub_district, fill="black", font=font_regular)
+        draw.text((140, 330), "• Sub District:", fill="black", font=font_bold)
+        draw.text((240, 330), alumni.sub_district, fill="black", font=font_regular)
         
-        draw.text((140, 340), "• District:", fill="black", font=font_bold)
-        draw.text((240, 340), alumni.district, fill="black", font=font_regular)
+        draw.text((140, 360), "• District:", fill="black", font=font_bold)
+        draw.text((240, 360), alumni.district, fill="black", font=font_regular)
         
-        draw.text((140, 370), "• State:", fill="black", font=font_bold)
-        draw.text((240, 370), alumni.state, fill="black", font=font_regular)
+        draw.text((140, 390), "• State:", fill="black", font=font_bold)
+        draw.text((240, 390), alumni.state, fill="black", font=font_regular)
         
-        draw.text((140, 400), "• Pincode:", fill="black", font=font_bold)
-        draw.text((240, 400), alumni.pincode, fill="black", font=font_regular)
+        draw.text((140, 420), "• Pincode:", fill="black", font=font_bold)
+        draw.text((240, 420), alumni.pincode, fill="black", font=font_regular)
         
-        draw.text((140, 430), "• Country:", fill="black", font=font_bold)
-        draw.text((240, 430), alumni.country, fill="black", font=font_regular)
+        draw.text((140, 450), "• Country:", fill="black", font=font_bold)
+        draw.text((240, 450), alumni.country, fill="black", font=font_regular)
         
-        draw.text((140, 460), "• Full Address:", fill="black", font=font_bold)
-        draw.text((240, 460), alumni.full_address, fill="black", font=font_regular)
+        draw.text((140, 480), "• Full Address:", fill="black", font=font_bold)
+        draw.text((240, 480), alumni.full_address, fill="black", font=font_regular)
         
-        draw.text((140, 490), "• Graduation Year:", fill="black", font=font_bold)
-        draw.text((280, 490), str(alumni.graduation_year), fill="black", font=font_regular)
+        draw.text((140, 510), "• Graduation Year:", fill="black", font=font_bold)
+        draw.text((280, 510), str(alumni.graduation_year), fill="black", font=font_regular)
         
-        draw.text((140, 520), "• Experience:", fill="black", font=font_bold)
-        draw.text((240, 520), f"{alumni.experience} years", fill="black", font=font_regular)
+        draw.text((140, 540), "• Experience:", fill="black", font=font_bold)
+        draw.text((240, 540), f"{alumni.experience} years", fill="black", font=font_regular)
         
-        draw.text((140, 550), "• LinkedIn:", fill="black", font=font_bold)
-        draw.text((220, 550), alumni.linkedin, fill="black", font=font_regular)
+        if alumni.linkedin:
+            draw.text((140, 570), "• LinkedIn:", fill="black", font=font_bold)
+            draw.text((220, 570), alumni.linkedin, fill="black", font=font_regular)
         
-        draw.text((140, 580), "• Facebook:", fill="black", font=font_bold)
-        draw.text((220, 580), alumni.facebook, fill="black", font=font_regular)
+        if alumni.facebook:
+            draw.text((140, 600), "• Facebook:", fill="black", font=font_bold)
+            draw.text((220, 600), alumni.facebook, fill="black", font=font_regular)
         
-        draw.text((140, 610), "• Instagram:", fill="black", font=font_bold)
-        draw.text((220, 610), alumni.instagram, fill="black", font=font_regular)
+        if alumni.instagram:
+            draw.text((140, 630), "• Instagram:", fill="black", font=font_bold)
+            draw.text((220, 630), alumni.instagram, fill="black", font=font_regular)
         
-        draw.text((140, 640), "• GitHub:", fill="black", font=font_bold)
-        draw.text((200, 640), alumni.github, fill="black", font=font_regular)
+        if alumni.github:
+            draw.text((140, 660), "• GitHub:", fill="black", font=font_bold)
+            draw.text((200, 660), alumni.github, fill="black", font=font_regular)
 
     # Save image to a BytesIO object
     image_io = BytesIO()

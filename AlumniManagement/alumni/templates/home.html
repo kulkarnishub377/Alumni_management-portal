@@ -1,10 +1,10 @@
-{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Alumni Portal</title>
+    {% load static %}
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
@@ -124,6 +124,9 @@
             <a href="{% url 'alumni_login' %}" class="btn btn-info">
             <i class="fas fa-user-graduate"></i> Alumni Login
             </a>
+            <a href="{% url 'alumni_registration' %}" class="btn btn-primary">
+            <i class="fas fa-user-plus"></i> Alumni Registration
+            </a>
             <!--
             <a href="{% url 'alumni_coordinator_registration' %}" class="btn btn-warning">
             <i class="fas fa-user-plus"></i> Alumni Coordinator Registration
@@ -151,6 +154,7 @@
     <!-- Footer Section -->
     <footer>
         <p>&copy; 2023 DR. VITHALRAO VIKHE PATIL COLLEGE OF ENGINEERING AHMEDNAGAR. All rights reserved.</p>
+        <p>Contact us: info@college.edu | Phone: (123) 456-7890</p>
     </footer>
 </body>
 </html>
