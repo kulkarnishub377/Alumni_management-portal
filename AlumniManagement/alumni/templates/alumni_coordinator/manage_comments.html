@@ -41,6 +41,10 @@
         <h1 class="comments-title">Manage Comments</h1>
     <!-- <a href="{% url 'home' %}" class="btn btn-secondary mb-3">Home</a> -->
         <a href="{% url 'add_comment' %}" class="btn btn-primary mb-3">Add Comment</a>
+        <form method="post" action="{% url 'add_comment' %}">
+            {% csrf_token %}
+            <!-- form fields -->
+        </form>
         <div class="list-group">
             {% for comment in comments %}
             <div class="list-group-item">

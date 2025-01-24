@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alumni Profile</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+            position: relative;
+        }
+        .header img {
+            width: 100%;
+            border-radius: 10px 10px 0 0;
+        }
+        .header h2 {
+            margin: 0;
+            font-size: 2em;
+            color: #333;
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(255, 255, 255, 0.8);
+            padding: 10px 20px;
+            border-radius: 5px;
+        }
+        .profile-photo {
+            width: 150px;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 50%;
+            margin: 0 auto;
+            display: block;
+            margin-top: -75px;
+            border: 5px solid #fff;
+        }
+        .details {
+            margin-top: 20px;
+        }
+        .details p {
+            font-size: 1.2em;
+            margin: 5px 0;
+        }
+        .details p span {
+            font-weight: bold;
+        }
+        .details p i {
+            margin-right: 10px;
+            color: #007bff;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <img src="{% static 'images/header-2.jpg' %}" alt="Header Image">
+            <h2>{{ alumni.full_name }}</h2>
+        </div>
+        <img src="{{ alumni.profile_photo.url }}" alt="Profile Photo" class="profile-photo">
+        <div class="details">
+            <p><i class="fas fa-envelope"></i><span>Email:</span> {{ alumni.email }}</p>
+            <p><i class="fas fa-phone"></i><span>Mobile:</span> {{ alumni.mobile }}</p>
+            <p><i class="fas fa-briefcase"></i><span>Current Job Profile:</span> {{ alumni.current_job_profile }}</p>
+            <p><i class="fas fa-building"></i><span>Current Company:</span> {{ alumni.current_company }}</p>
+            <p><i class="fas fa-map-marker-alt"></i><span>Current Job Location:</span> {{ alumni.current_job_location }}</p>
+            <p><i class="fas fa-industry"></i><span>Sector:</span> {{ alumni.sector }}</p>
+            <p><i class="fas fa-city"></i><span>City:</span> {{ alumni.city }}</p>
+            <p><i class="fas fa-map"></i><span>Sub District:</span> {{ alumni.sub_district }}</p>
+            <p><i class="fas fa-map-signs"></i><span>District:</span> {{ alumni.district }}</p>
+            <p><i class="fas fa-flag"></i><span>State:</span> {{ alumni.state }}</p>
+            <p><i class="fas fa-mail-bulk"></i><span>Pincode:</span> {{ alumni.pincode }}</p>
+            <p><i class="fas fa-globe"></i><span>Country:</span> {{ alumni.country }}</p>
+            <p><i class="fas fa-home"></i><span>Full Address:</span> {{ alumni.full_address }}</p>
+            <p><i class="fas fa-graduation-cap"></i><span>Graduation Year:</span> {{ alumni.graduation_year }}</p>
+            <p><i class="fas fa-briefcase"></i><span>Experience:</span> {{ alumni.experience }}</p>
+            <p><i class="fab fa-linkedin"></i><span>LinkedIn:</span> <a href="{{ alumni.linkedin }}" target="_blank">{{ alumni.linkedin }}</a></p>
+            <p><i class="fab fa-facebook"></i><span>Facebook:</span> <a href="{{ alumni.facebook }}" target="_blank">{{ alumni.facebook }}</a></p>
+            <p><i class="fab fa-instagram"></i><span>Instagram:</span> <a href="{{ alumni.instagram }}" target="_blank">{{ alumni.instagram }}</a></p>
+            <p><i class="fab fa-github"></i><span>GitHub:</span> <a href="{{ alumni.github }}" target="_blank">{{ alumni.github }}</a></p>
+        </div>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

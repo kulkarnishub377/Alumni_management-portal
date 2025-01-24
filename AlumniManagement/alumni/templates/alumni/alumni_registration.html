@@ -5,12 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Alumni Registration</title>
     {% load static %}
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/5.1.3/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <style>
         body {
             background-color: #f8f9fa;
-            font-family: 'Arial', sans-serif;
+            font-family: Arial, sans-serif;
         }
         .outer-container {
             display: flex;
@@ -19,241 +19,222 @@
             min-height: 100vh;
             padding: 20px;
         }
-        .card {
-            border-radius: 15px;
-            background: #ffffff;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            padding: 20px;
+        .container {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
             max-width: 600px;
             width: 100%;
         }
-        .card-title {
-            font-size: 2rem;
-            font-weight: bold;
-            color: #343a40;
-            text-align: center;
-            margin-bottom: 20px;
+        .form-group i {
+            margin-right: 5px;
+        }
+        .profile-photo-preview {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 50%;
+            margin-bottom: 10px;
+            display: none;
         }
         .form-group label {
             font-weight: bold;
-            color: #495057;
         }
-        .form-group i {
-            margin-right: 5px;
-            color: #495057;
+        .form-group .text-danger {
+            font-size: 0.875em;
         }
-        .form-group i.fa-user { color: #007bff; }
-        .form-group i.fa-envelope { color: #dc3545; }
-        .form-group i.fa-calendar-alt { color: #28a745; }
-        .form-group i.fa-camera { color: #ffc107; }
-        .form-group i.fa-mobile-alt { color: #17a2b8; }
-        .form-group i.fa-lock { color: #6c757d; }
-        .form-group i.fa-briefcase { color: #fd7e14; }
-        .form-group i.fa-building { color: #20c997; }
-        .form-group i.fa-map-marker-alt { color: #e83e8c; }
-        .form-group i.fa-city { color: #6610f2; }
-        .form-group i.fa-map { color: #343a40; }
-        .form-group i.fa-map-pin { color: #007bff; }
-        .form-group i.fa-globe { color: #28a745; }
-        .form-group i.fa-flag { color: #dc3545; }
-        .form-group i.fa-address-card { color: #ffc107; }
-        .form-group i.fa-facebook { color: #3b5998; }
-        .form-group i.fa-github { color: #333; }
-        .form-group i.fa-instagram { color: #e4405f; }
-        .form-group i.fa-linkedin { color: #0077b5; }
         .btn-primary {
             background-color: #007bff;
             border-color: #007bff;
-            width: 100%;
-            font-size: 1.25rem;
-            padding: 10px;
         }
         .btn-primary:hover {
             background-color: #0056b3;
             border-color: #0056b3;
         }
-        .form-group input, .form-group select {
-            border-radius: 5px;
-            border: 1px solid #ced4da;
-            width: 90%;
-            padding: 10px;
-            margin-bottom: 10px;
-        }
-        .form-group input::placeholder, .form-group select::placeholder {
-            color: #6c757d;
-        }
         .top-icon {
-            font-size: 4rem;
+            font-size: 3em;
             color: #007bff;
             text-align: center;
             margin-bottom: 20px;
         }
-        .profile-photo-preview {
-            display: flex;
-            justify-content: center;
-            margin-bottom: 10px;
-        }
-        .profile-photo-preview img {
-            max-width: 150px;
-            border-radius: 50%;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-        .d-none {
-            display: none;
-        }
-        #profilePhotoPreviewImg {
-            max-width: 150px;
-            border-radius: 50%;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-        #profilePhoto {
-            display: none;
-        }
-        .links {
+        .header {
             text-align: center;
-            margin-top: 20px;
+            margin-bottom: 20px;
         }
-        .links a {
-            color: #007bff;
-            text-decoration: none;
-            margin: 0 10px;
+        .header h2 {
+            margin: 0;
+            font-size: 2em;
+            color: #333;
         }
-        .links a:hover {
-            text-decoration: underline;
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ced4da;
+            border-radius: 5px;
+            margin-top: 5px;
+        }
+        .form-group input[type="radio"] {
+            width: auto;
+            margin-right: 10px;
         }
     </style>
 </head>
 <body>
     <div class="outer-container">
-        <div class="card shadow-sm">
-            <div class="card-body">
+        <div class="container">
+            <div class="header">
                 <div class="top-icon">
                     <i class="fas fa-user-graduate"></i>
                 </div>
-                <form method="post" enctype="multipart/form-data">
-                    {% csrf_token %}
-                    <div class="profile-photo-preview" id="profilePhotoPreview">
-                        <img id="profilePhotoPreviewImg" src="#" alt="Profile Photo" class="d-none">
-                    </div>
-                    <div class="form-group mb-3">
-                        <label for="id_name"><i class="fas fa-user"></i> Name</label>
-                        <input type="text" id="id_name" name="name" placeholder=" eg. Shubham Kulkarni" class="form-control" required>
-                    </div>
-                    <div class="form-group mb-3">
-                        <label for="id_email"><i class="fas fa-envelope"></i> Email</label>
-                        <input type="email" id="id_email" name="email" placeholder="eg.  21shubhamkulkarni@gmail.com" class="form-control" required>
-                    </div>
-                    <div class="form-group mb-3">
-                        <label for="id_graduation_year"><i class="fas fa-calendar-alt"></i> Graduation Year</label>
-                        <input type="text" id="id_graduation_year" name="graduation_year" placeholder="eg. 2025" class="form-control" required>
-                    </div>
-                    <div class="form-group mb-3">
-                        <label for="id_profile_photo"><i class="fas fa-camera"></i> Profile Photo</label>
-                        <input type="file" id="id_profile_photo" name="profile_photo" class="form-control" onchange="previewProfilePhoto(event)" required>
-                    </div>
-                    <div class="form-group mb-3">
-                        <label for="id_mobile"><i class="fas fa-mobile-alt"></i> Mobile</label>
-                        <input type="text" id="id_mobile" name="mobile" placeholder="eg.  +91**********" class="form-control" required>
-                    </div>
-                    <div class="form-group mb-3">
-                        <label for="id_password1"><i class="fas fa-lock"></i> Password</label>
-                        <input type="password" id="id_password1" name="password1" placeholder="********" class="form-control" required>
-                    </div>
-                    <div class="form-group mb-3">
-                        <label for="id_password2"><i class="fas fa-lock"></i> Confirm Password</label>
-                        <input type="password" id="id_password2" name="password2" placeholder="********" class="form-control" required>
-                    </div>
-                    <div class="form-group mb-3">
-                        <label for="id_current_job_profile"><i class="fas fa-briefcase"></i> Current Job Profile</label>
-                        <input type="text" id="id_current_job_profile" name="current_job_profile" placeholder="eg. AI Engineer" class="form-control" required>
-                    </div>
-                    <div class="form-group mb-3">
-                        <label for="id_current_company"><i class="fas fa-building"></i> Current Company</label>
-                        <input type="text" id="id_current_company" name="current_company" placeholder="eg. IBM India Pvt. Ltd." class="form-control" required>
-                    </div>
-                    <div class="form-group mb-3">
-                        <label for="id_current_job_location"><i class="fas fa-map-marker-alt"></i> Current Job Location</label>
-                        <input type="text" id="id_current_job_location" name="current_job_location" placeholder="eg.  PUNE, INDIA" class="form-control" required>
-                    </div>
-                    <div class="form-group mb-3">
-                        <label for="id_city"><i class="fas fa-city"></i> Village / City</label>
-                        <input type="text" id="id_city" name="city" placeholder="eg. Shrirampur" class="form-control" required>
-                    </div>
-                    <div class="form-group mb-3">
-                        <label for="id_sub_district"><i class="fas fa-map"></i> Sub District</label>
-                        <input type="text" id="id_sub_district" name="sub_district" placeholder="eg. Shrirampur" class="form-control" required>
-                    </div>
-                    <div class="form-group mb-3">
-                        <label for="id_district"><i class="fas fa-map"></i> District</label>
-                        <input type="text" id="id_district" name="district" placeholder="eg. Ahilyanagar" class="form-control" required>
-                    </div>
-                    <div class="form-group mb-3">
-                        <label for="id_state"><i class="fas fa-map"></i> State</label>
-                        <input type="text" id="id_state" name="state" placeholder="eg. Maharashtra" class="form-control" required>
-                    </div>
-                    <div class="form-group mb-3">
-                        <label for="id_pincode"><i class="fas fa-map-pin"></i> Pincode</label>
-                        <input type="text" id="id_pincode" name="pincode" placeholder="eg. 413709" class="form-control" required>
-                    </div>
-                    <div class="form-group mb-3">
-                        <label for="id_is_international"><i class="fas fa-globe"></i> Is International</label>
-                        <select id="id_is_international" name="is_international" class="form-control" required>
-                            <option value="False" selected>No</option>
-                            <option value="True">Yes</option>
-                        </select>
-                    </div>
-                    <div class="form-group mb-3">
-                        <label for="id_country"><i class="fas fa-flag"></i> Country</label>
-                        <input type="text" id="id_country" name="country" placeholder="eg. India" class="form-control" required>
-                    </div>
-                    <div class="form-group mb-3">
-                        <label for="id_full_address"><i class="fas fa-address-card"></i> Full Address</label>
-                        <input type="text" id="id_full_address" name="full_address" placeholder="eg. Morge Wasti, ward no7, Shrirampur, Ahilyanagar, Maharashtra, 413721" class="form-control" required>
-                    </div>
-                    <div class="form-group mb-3">
-                        <label for="id_experience"><i class="fas fa-briefcase"></i> Experience</label>
-                        <input type="text" id="id_experience" name="experience" placeholder="eg. 0 years" class="form-control" required>
-                    </div>
-                    <div class="form-group mb-3">
-                        <label for="id_facebook"><i class="fab fa-facebook"></i> Facebook</label>
-                        <input type="text" id="id_facebook" name="facebook" placeholder="eg. https://facebook.com/" class="form-control">
-                    </div>
-                    <div class="form-group mb-3">
-                        <label for="id_github"><i class="fab fa-github"></i> GitHub</label>
-                        <input type="text" id="id_github" name="github" placeholder="eg. https://github.com/" class="form-control">
-                    </div>
-                    <div class="form-group mb-3">
-                        <label for="id_instagram"><i class="fab fa-instagram"></i> Instagram</label>
-                        <input type="text" id="id_instagram" name="instagram" placeholder="eg. https://instagram.com/" class="form-control">
-                    </div>
-                    <div class="form-group mb-3">
-                        <label for="id_linkedin"><i class="fab fa-linkedin"></i> LinkedIn</label>
-                        <input type="text" id="id_linkedin" name="linkedin" placeholder="eg. https://linkedin.com/in/" class="form-control" required>
-                    </div>
-                    <button type="submit" class="btn btn-primary btn-block">
-                        <i class="fas fa-user-plus"></i> Register
-                    </button>
-                </form>
-                <div class="links">
-                    <a href="{% url 'home' %}">Home</a> /
-                    <a href="{% url 'alumni_login' %}">Already registered? Login</a>
+                <h2>Alumni Registration</h2>
+            </div>
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="text-center mb-4">
+                    <img id="profilePhotoPreview" class="profile-photo-preview" src="#" alt="Profile Photo Preview">
                 </div>
+                <div class="form-group">
+                    <label for="profile_photo"><i class="fas fa-camera"></i> Profile Photo</label>
+                    {{ form.profile_photo }}
+                    <div class="text-danger">{{ form.profile_photo.errors }}</div>
+                </div>
+                <div class="form-group">
+                    <label for="full_name"><i class="fas fa-user"></i> Full Name</label>
+                    {{ form.full_name }}
+                    <div class="text-danger">{{ form.full_name.errors }}</div>
+                </div>
+                <div class="form-group">
+                    <label for="mobile"><i class="fas fa-phone"></i> Mobile</label>
+                    {{ form.mobile }}
+                    <div class="text-danger">{{ form.mobile.errors }}</div>
+                </div>
+                <div class="form-group">
+                    <label for="email"><i class="fas fa-envelope"></i> Email</label>
+                    {{ form.email }}
+                    <div class="text-danger">{{ form.email.errors }}</div>
+                </div>
+                <div class="form-group">
+                    <label for="current_job_profile"><i class="fas fa-briefcase"></i> Current Job Profile</label>
+                    {{ form.current_job_profile }}
+                    <div class="text-danger">{{ form.current_job_profile.errors }}</div>
+                </div>
+                <div class="form-group">
+                    <label for="current_company"><i class="fas fa-building"></i> Current Company</label>
+                    {{ form.current_company }}
+                    <div class="text-danger">{{ form.current_company.errors }}</div>
+                </div>
+                <div class="form-group">
+                    <label for="current_job_location"><i class="fas fa-map-marker-alt"></i> Current Job Location</label>
+                    {{ form.current_job_location }}
+                    <div class="text-danger">{{ form.current_job_location.errors }}</div>
+                </div>
+                <div class="form-group">
+                    <label for="sector"><i class="fas fa-industry"></i> Sector</label>
+                    {{ form.sector }}
+                    <div class="text-danger">{{ form.sector.errors }}</div>
+                </div>
+                <div class="form-group">
+                    <label for="city"><i class="fas fa-city"></i> City</label>
+                    {{ form.city }}
+                    <div class="text-danger">{{ form.city.errors }}</div>
+                </div>
+                <div class="form-group">
+                    <label for="sub_district"><i class="fas fa-map"></i> Sub District</label>
+                    {{ form.sub_district }}
+                    <div class="text-danger">{{ form.sub_district.errors }}</div>
+                </div>
+                <div class="form-group">
+                    <label for="district"><i class="fas fa-map-signs"></i> District</label>
+                    {{ form.district }}
+                    <div class="text-danger">{{ form.district.errors }}</div>
+                </div>
+                <div class="form-group">
+                    <label for="state"><i class="fas fa-flag"></i> State</label>
+                    {{ form.state }}
+                    <div class="text-danger">{{ form.state.errors }}</div>
+                </div>
+                <div class="form-group">
+                    <label for="pincode"><i class="fas fa-mail-bulk"></i> Pincode</label>
+                    {{ form.pincode }}
+                    <div class="text-danger">{{ form.pincode.errors }}</div>
+                </div>
+                <div class="form-group">
+                    <label for="is_international"><i class="fas fa-globe"></i> Is International</label>
+                    <div>
+                        <label><input type="radio" name="is_international" value="yes"> Yes</label>
+                        <label><input type="radio" name="is_international" value="no"> No</label>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="country"><i class="fas fa-globe"></i> Country</label>
+                    {{ form.country }}
+                    <div class="text-danger">{{ form.country.errors }}</div>
+                </div>
+                <div class="form-group">
+                    <label for="full_address"><i class="fas fa-address-card"></i> Full Address</label>
+                    {{ form.full_address }}
+                    <div class="text-danger">{{ form.full_address.errors }}</div>
+                </div>
+                <div class="form-group">
+                    <label for="graduation_year"><i class="fas fa-calendar"></i> Graduation Year</label>
+                    {{ form.graduation_year }}
+                    <div class="text-danger">{{ form.graduation_year.errors }}</div>
+                </div>
+                <div class="form-group">
+                    <label for="experience"><i class="fas fa-briefcase"></i> Experience</label>
+                    {{ form.experience }}
+                    <div class="text-danger">{{ form.experience.errors }}</div>
+                </div>
+                <div class="form-group">
+                    <label for="facebook"><i class="fab fa-facebook"></i> Facebook</label>
+                    {{ form.facebook }}
+                    <div class="text-danger">{{ form.facebook.errors }}</div>
+                </div>
+                <div class="form-group">
+                    <label for="github"><i class="fab fa-github"></i> GitHub</label>
+                    {{ form.github }}
+                    <div class="text-danger">{{ form.github.errors }}</div>
+                </div>
+                <div class="form-group">
+                    <label for="instagram"><i class="fab fa-instagram"></i> Instagram</label>
+                    {{ form.instagram }}
+                    <div class="text-danger">{{ form.instagram.errors }}</div>
+                </div>
+                <div class="form-group">
+                    <label for="linkedin"><i class="fab fa-linkedin"></i> LinkedIn</label>
+                    {{ form.linkedin }}
+                    <div class="text-danger">{{ form.linkedin.errors }}</div>
+                </div>
+                <div class="form-group">
+                    <label for="password1"><i class="fas fa-lock"></i> Password</label>
+                    {{ form.password1 }}
+                    <div class="text-danger">{{ form.password1.errors }}</div>
+                </div>
+                <div class="form-group">
+                    <label for="password2"><i class="fas fa-lock"></i> Confirm Password</label>
+                    {{ form.password2 }}
+                    <div class="text-danger">{{ form.password2.errors }}</div>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">Register</button>
+            </form>
+            <div class="text-center mt-3">
+                <a href="{% url 'alumni_login' %}">Already have an account? Login here</a>
+            </div>
+            <div class="text-center mt-2">
+                <a href="{% url 'home' %}">Back to Home</a>
             </div>
         </div>
     </div>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/5.1.3/js/bootstrap.min.js"></script>
     <script>
-        function previewProfilePhoto(event) {
-            const reader = new FileReader();
-            reader.onload = function() {
-                const output = document.getElementById('profilePhotoPreviewImg');
-                output.src = reader.result;
-                output.classList.remove('d-none');
-            };
-            reader.readAsDataURL(event.target.files[0]);
-        }
+        document.querySelector('input[name="profile_photo"]').addEventListener('change', function(event) {
+            const [file] = event.target.files;
+            if (file) {
+                const preview = document.getElementById('profilePhotoPreview');
+                preview.src = URL.createObjectURL(file);
+                preview.style.display = 'block';
+            }
+        });
     </script>
 </body>
 </html>

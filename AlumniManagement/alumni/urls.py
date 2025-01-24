@@ -30,4 +30,10 @@ urlpatterns = [
     path('delete_comment/<int:id>/', views.delete_comment, name='delete_comment'),
     path('edit_alumni_coordinator_profile/', views.edit_alumni_coordinator_profile, name='edit_alumni_coordinator_profile'),
     path('about/', views.about_us, name='about_us'),
+    path('batch-mentor/login/', views.batch_mentor_login, name='batch_mentor_login'),
+    path('batch-mentor/register/', views.batch_mentor_registration, name='batch_mentor_registration'),
+    path('batch-mentor/dashboard/', views.batch_mentor_dashboard, name='batch_mentor_dashboard'),
+    path('batch-mentor/view/', views.view_batch_mentors, name='view_batch_mentors'),
+    path('batch-mentor/edit/<int:id>/', views.edit_batch_mentor, name='edit_batch_mentor'),
+    path('batch-mentor/delete/<int:id>/', views.delete_batch_mentor, name='delete_batch_mentor'),
 ]

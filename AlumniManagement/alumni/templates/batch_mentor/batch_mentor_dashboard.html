@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Batch Mentor Dashboard</title>
+    {% load static %}
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            margin-top: 50px;
+        }
+        .card {
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .card-header {
+            background-color: #007bff;
+            color: white;
+            font-size: 1.5rem;
+            text-align: center;
+        }
+        .btn-primary {
+            background-color: #007bff;
+            border: none;
+        }
+        .btn-primary:hover {
+            background-color: #0056b3;
+        }
+        .table {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <div class="card-header">
+                Batch Mentor Dashboard
+            </div>
+            <div class="card-body">
+                <h5>Mentor Details</h5>
+                <p>Name: {{ mentor.name }}</p>
+                <p>Email: {{ mentor.email }}</p>
+                <p>Mobile: {{ mentor.mobile }}</p>
+                <p>Assigned Batch: {{ mentor.assigned_batch }}</p>
+                <a href="{% url 'edit_batch_mentor' mentor.id %}" class="btn btn-primary">Edit Profile</a>
+                <hr>
+                <h5>Alumni List</h5>
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Mobile</th>
+                            <th>Graduation Year</th>
+                            <th>Current Job Profile</th>
+                            <th>Current Company</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for alumni in alumni_list %}
+                        <tr>
+                            <td>{{ alumni.full_name }}</td>
+                            <td>{{ alumni.email }}</td>
+                            <td>{{ alumni.mobile }}</td>
+                            <td>{{ alumni.graduation_year }}</td>
+                            <td>{{ alumni.current_job_profile }}</td>
+                            <td>{{ alumni.current_company }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                <a href="{% url 'export_alumni_to_excel' %}" class="btn btn-primary">Download to Excel</a>
+            </div>
+        </div>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

@@ -135,6 +135,9 @@
             <a href="{% url 'alumni_coordinator_login' %}" class="btn btn-danger">
             <i class="fas fa-sign-in-alt"></i> Alumni Coordinator Login
             </a>
+            <a href="{% url 'batch_mentor_login' %}" class="btn btn-primary">
+            <i class="fas fa-user"></i> Batch Mentor Login
+            </a>
             <a href="{% url 'gallery' %}" class="btn btn-success">
             <i class="fas fa-images"></i> Gallery
             </a>
@@ -150,6 +153,15 @@
     <div class="background-image"></div>
     
     <div class="overlay"></div>
+
+    <!-- Admin Login Form -->
+    <form method="post" action="{% url 'admin_login' %}">
+        {% csrf_token %}
+        <!-- form fields -->
+        <input type="email" name="email" placeholder="Email" required>
+        <input type="password" name="password" placeholder="Password" required>
+        <button type="submit">Login</button>
+    </form>
 
     <!-- Footer Section -->
     <footer>

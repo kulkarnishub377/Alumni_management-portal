@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Batch Mentor Registration</title>
+    {% load static %}
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .container {
+            max-width: 600px;
+            margin-top: 50px;
+            padding: 30px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+        }
+        .form-group {
+            margin-bottom: 1.5rem;
+            position: relative;
+        }
+        .form-group label {
+            font-weight: bold;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 0.5rem 2.5rem 0.5rem 1rem;
+            border: 1px solid #ced4da;
+            border-radius: 5px;
+        }
+        .form-group .fa {
+            position: absolute;
+            top: 50%;
+            left: 10px;
+            transform: translateY(-50%);
+            color: #ced4da;
+        }
+        .btn-group {
+            display: flex;
+            justify-content: space-between;
+        }
+        .btn-group .btn {
+            width: 48%;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2 class="text-center mb-4">Batch Mentor Registration</h2>
+        <form method="post" action="{% url 'batch_mentor_registration' %}">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="id_name">Name</label>
+                <i class="fas fa-user"></i>
+                {{ form.name }}
+            </div>
+            <div class="form-group">
+                <label for="id_email">Email</label>
+                <i class="fas fa-envelope"></i>
+                {{ form.email }}
+            </div>
+            <div class="form-group">
+                <label for="id_password">Password</label>
+                <i class="fas fa-lock"></i>
+                {{ form.password }}
+            </div>
+            <div class="form-group">
+                <label for="id_mobile">Mobile</label>
+                <i class="fas fa-phone"></i>
+                {{ form.mobile }}
+            </div>
+            <div class="form-group">
+                <label for="id_assigned_batch">Assigned Batch</label>
+                <i class="fas fa-users"></i>
+                {{ form.assigned_batch }}
+            </div>
+            <div class="btn-group">
+                <button type="submit" class="btn btn-primary">Register</button>
+                <a href="{% url 'alumni_coordinator_dashboard' %}" class="btn btn-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="https://kit.fontawesome.com/a076d05399.js"></script>
+</body>
+</html>

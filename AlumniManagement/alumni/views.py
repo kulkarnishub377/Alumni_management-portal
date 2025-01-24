@@ -7,19 +7,20 @@ sys.setrecursionlimit(1000)
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
-from .models import Admin, Alumni, AlumniCoordinator, Comment
-from .models import GalleryPhoto  # Uncomment this line to use GalleryPhoto
-from .forms import AdminRegistrationForm, AlumniRegistrationForm, AlumniCoordinatorRegistrationForm, AlumniEditForm, GalleryPhotoForm, CommentForm
+from .models import Admin, Alumni, AlumniCoordinator, Comment, GalleryPhoto, BatchMentor
+from .forms import (
+    AdminRegistrationForm, AlumniRegistrationForm, AlumniCoordinatorRegistrationForm,
+    AlumniEditForm, GalleryPhotoForm, CommentForm, AlumniCoordinatorEditForm, BatchMentorRegistrationForm, BatchMentorLoginForm
+)
 from django.contrib.auth.forms import AuthenticationForm
 from django.urls import path
 from . import views
-from django.http import HttpResponse
 from django.template.loader import render_to_string
 from django.core.mail import send_mail, EmailMessage
 from io import BytesIO
 from PIL import Image, ImageDraw, ImageFont
 import requests
-from .forms import AlumniCoordinatorEditForm
+import os
 
 # Home Page
 def home(request):
@@ -120,14 +121,20 @@ def alumni_registration(request):
     if request.method == 'POST':
         form = AlumniRegistrationForm(request.POST, request.FILES)
         if form.is_valid():
-            alumni = form.save(commit=False)
-            if 'is_international' not in request.POST:
-                alumni.is_international = False
-            alumni.save()
-            return redirect('alumni_login')
+            if form.cleaned_data['password1'] == form.cleaned_data['password2']:
+                alumni = form.save(commit=False)
+                if 'is_international' not in request.POST:
+                    alumni.is_international = False
+                alumni.save()
+                messages.success(request, 'Registration successful. Please log in.')
+                return redirect('alumni_login')
+            else:
+                messages.error(request, 'Passwords do not match.')
+        else:
+            messages.error(request, 'Please correct the error below.')
     else:
         form = AlumniRegistrationForm(initial={'is_international': False})
-    return render(request, 'alumni/alumni_registration.html', {'form': form, 'form_action': 'alumni_registration'})
+    return render(request, 'alumni/alumni_registration.html', {'form': form})
 
 # Alumni Login
 def alumni_login(request):
@@ -139,7 +146,7 @@ def alumni_login(request):
             user = authenticate(request, username=email, password=password)
             if user is not None:
                 login(request, user)
-                request.session['alumni_id'] = user.id  # Update session with alumni ID
+                request.session['alumni_id'] = user.id
                 return redirect('alumni_profile')
             else:
                 messages.error(request, 'Invalid email or password')
@@ -165,10 +172,8 @@ def alumni_edit_profile(request):
         form = AlumniEditForm(request.POST, request.FILES, instance=alumni)
         if form.is_valid():
             form.save()
-            # Update session data
-            request.session['alumni_id'] = alumni.id
             messages.success(request, 'Profile updated successfully.')
-            return redirect('alumni_profile')
+            return redirect('alumni_edit_profile')  # Redirect to the same page
         else:
             messages.error(request, 'Please correct the error below.')
     else:
@@ -179,12 +184,28 @@ def alumni_edit_profile(request):
 def edit_alumni(request, id):
     alumni = Alumni.objects.get(pk=id)
     if request.method == 'POST':
-        form = AlumniRegistrationForm(request.POST, request.FILES, instance=alumni)
+        form = AlumniEditForm(request.POST, request.FILES, instance=alumni)
         if form.is_valid():
             form.save()
+            messages.success(request, 'Profile updated successfully.')
             return redirect('alumni_profile')
+        else:
+            messages.error(request, 'Please correct the error below.')
     else:
-        form = AlumniRegistrationForm(instance=alumni)
+        form = AlumniEditForm(instance=alumni)
+    return render(request, 'alumni/alumni_edit_profile.html', {'form': form})
+
+# Edit Alumni Profile
+def edit_profile(request):
+    if request.method == 'POST':
+        form = AlumniEditForm(request.POST, request.FILES, instance=request.user.alumni_profile)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Profile updated successfully.')
+            return redirect('edit_profile')  # Redirect to the same page
+    else:
+        form = AlumniEditForm(instance=request.user.alumni_profile)
+    
     return render(request, 'alumni/alumni_edit_profile.html', {'form': form})
 
 # Delete Alumni
@@ -206,7 +227,7 @@ def export_alumni_to_excel(request):
 
     # Define the columns
     columns = [
-        'Profile Photo', 'Name', 'Email', 'Mobile', 'Current Job Profile', 'Current Company',
+        'Profile Photo', 'Full Name', 'Email', 'Mobile', 'Current Job Profile', 'Current Company',
         'Current Job Location', 'City', 'Sub District', 'District', 'State', 'Pincode',
         'Country', 'Graduation Year', 'Experience', 'LinkedIn', 'Facebook', 'Instagram', 'GitHub'
     ]
@@ -217,7 +238,7 @@ def export_alumni_to_excel(request):
 
     # Write the data rows
     rows = Alumni.objects.all().values_list(
-        'profile_photo', 'name', 'email', 'mobile', 'current_job_profile', 'current_company',
+        'profile_photo', 'full_name', 'email', 'mobile', 'current_job_profile', 'current_company',
         'current_job_location', 'city', 'sub_district', 'district', 'state', 'pincode',
         'country', 'graduation_year', 'experience', 'linkedin', 'facebook', 'instagram', 'github'
     )
@@ -231,103 +252,65 @@ def export_alumni_to_excel(request):
 
 # Share Alumni Profile
 def share_alumni_profile(request, id):
-    if not request.user.is_authenticated:
-        return redirect('alumni_login')
-    alumni = Alumni.objects.get(pk=id)
-    
-    # Generate profile card image
-    card = Image.new('RGB', (600, 800), color=(255, 255, 255))
-    draw = ImageDraw.Draw(card)
-    
-    # Add header image
-    header_image_path = 'C:/Users/Shubham/Desktop/dvvpcoe/dvvpcoe/AlumniManagement/alumni/static/images/header-2.jpg'
     try:
-        header_image = Image.open(header_image_path)
-        header_image = header_image.resize((600, 100))
-        card.paste(header_image, (0, 0))
-    except FileNotFoundError:
-        draw.text((20, 20), "Header Image Not Found", fill="red", font=font_bold)
-    
-    # Use a regular available font
-    font_bold = ImageFont.load_default()
-    font_regular = ImageFont.load_default()
+        alumni = Alumni.objects.get(pk=id)
+        header_image_path = os.path.join(os.path.dirname(__file__), 'static', 'images', 'header-2.jpg')
+        
+        # Create a blank image
+        image = Image.new('RGB', (800, 1200), color='white')
+        draw = ImageDraw.Draw(image)
+        font = ImageFont.truetype("arial.ttf", 20)
+        font_bold = ImageFont.truetype("arialbd.ttf", 24)
 
-    # Add profile photo
-    if alumni.profile_photo:
-        profile_photo = Image.open(alumni.profile_photo.path)
-        profile_photo = profile_photo.resize((100, 100))
-        card.paste(profile_photo, (20, 120))
-        # Add text details with bold labels and bullet points
-        draw.text((140, 120), "• Name:", fill="black", font=font_bold)
-        draw.text((240, 120), alumni.name, fill="black", font=font_regular)
-        
-        draw.text((140, 150), "• Email:", fill="black", font=font_bold)
-        draw.text((240, 150), alumni.email, fill="black", font=font_regular)
-        
-        draw.text((140, 180), "• Mobile:", fill="black", font=font_bold)
-        draw.text((240, 180), alumni.mobile, fill="black", font=font_regular)
-        
-        draw.text((140, 210), "• Job:", fill="black", font=font_bold)
-        draw.text((240, 210), alumni.current_job_profile, fill="black", font=font_regular)
-        
-        draw.text((140, 240), "• Company:", fill="black", font=font_bold)
-        draw.text((240, 240), alumni.current_company, fill="black", font=font_regular)
-        
-        draw.text((140, 270), "• Location:", fill="black", font=font_bold)
-        draw.text((240, 270), alumni.current_job_location, fill="black", font=font_regular)
-        
-        draw.text((140, 300), "• City:", fill="black", font=font_bold)
-        draw.text((240, 300), alumni.city, fill="black", font=font_regular)
-        
-        draw.text((140, 330), "• Sub District:", fill="black", font=font_bold)
-        draw.text((240, 330), alumni.sub_district, fill="black", font=font_regular)
-        
-        draw.text((140, 360), "• District:", fill="black", font=font_bold)
-        draw.text((240, 360), alumni.district, fill="black", font=font_regular)
-        
-        draw.text((140, 390), "• State:", fill="black", font=font_bold)
-        draw.text((240, 390), alumni.state, fill="black", font=font_regular)
-        
-        draw.text((140, 420), "• Pincode:", fill="black", font=font_bold)
-        draw.text((240, 420), alumni.pincode, fill="black", font=font_regular)
-        
-        draw.text((140, 450), "• Country:", fill="black", font=font_bold)
-        draw.text((240, 450), alumni.country, fill="black", font=font_regular)
-        
-        draw.text((140, 480), "• Full Address:", fill="black", font=font_bold)
-        draw.text((240, 480), alumni.full_address, fill="black", font=font_regular)
-        
-        draw.text((140, 510), "• Graduation Year:", fill="black", font=font_bold)
-        draw.text((280, 510), str(alumni.graduation_year), fill="black", font=font_regular)
-        
-        draw.text((140, 540), "• Experience:", fill="black", font=font_bold)
-        draw.text((240, 540), f"{alumni.experience} years", fill="black", font=font_regular)
-        
-        if alumni.linkedin:
-            draw.text((140, 570), "• LinkedIn:", fill="black", font=font_bold)
-            draw.text((220, 570), alumni.linkedin, fill="black", font=font_regular)
-        
-        if alumni.facebook:
-            draw.text((140, 600), "• Facebook:", fill="black", font=font_bold)
-            draw.text((220, 600), alumni.facebook, fill="black", font=font_regular)
-        
-        if alumni.instagram:
-            draw.text((140, 630), "• Instagram:", fill="black", font=font_bold)
-            draw.text((220, 630), alumni.instagram, fill="black", font=font_regular)
-        
-        if alumni.github:
-            draw.text((140, 660), "• GitHub:", fill="black", font=font_bold)
-            draw.text((200, 660), alumni.github, fill="black", font=font_regular)
+        # Draw the header image
+        try:
+            header_image = Image.open(header_image_path)
+            header_image = header_image.resize((800, 200))
+            image.paste(header_image, (0, 0))
+        except FileNotFoundError:
+            draw.text((20, 20), "Header Image Not Found", fill="red", font=font_bold)
 
-    # Save image to a BytesIO object
-    image_io = BytesIO()
-    card.save(image_io, format='PNG')
-    image_io.seek(0)
+        # Draw the profile photo
+        try:
+            profile_photo = Image.open(alumni.profile_photo.path)
+            profile_photo = profile_photo.resize((150, 150))
+            image.paste(profile_photo, (325, 220))
+        except FileNotFoundError:
+            draw.text((325, 220), "Profile Photo Not Found", fill="red", font=font_bold)
 
-    # Send image as response
-    response = HttpResponse(image_io, content_type='image/png')
-    response['Content-Disposition'] = f'attachment; filename="{alumni.name}_profile.png"'
-    return response
+        # Draw the profile details
+        def draw_text(draw, position, label, value, font, label_font):
+            if value:
+                draw.text(position, f"{label}: {value}", fill="black", font=font)
+            else:
+                draw.text(position, f"{label}: N/A", fill="black", font=font)
+
+        draw_text(draw, (20, 400), "• Full Name", alumni.full_name, font, font_bold)
+        draw_text(draw, (20, 440), "• Email", alumni.email, font, font_bold)
+        draw_text(draw, (20, 480), "• Mobile", alumni.mobile, font, font_bold)
+        draw_text(draw, (20, 520), "• Current Job Profile", alumni.current_job_profile, font, font_bold)
+        draw_text(draw, (20, 560), "• Current Company", alumni.current_company, font, font_bold)
+        draw_text(draw, (20, 600), "• Current Job Location", alumni.current_job_location, font, font_bold)
+        draw_text(draw, (20, 640), "• Sector", alumni.sector, font, font_bold)
+        draw_text(draw, (20, 680), "• City", alumni.city, font, font_bold)
+        draw_text(draw, (20, 720), "• Sub District", alumni.sub_district, font, font_bold)
+        draw_text(draw, (20, 760), "• District", alumni.district, font, font_bold)
+        draw_text(draw, (20, 800), "• State", alumni.state, font, font_bold)
+        draw_text(draw, (20, 840), "• Pincode", alumni.pincode, font, font_bold)
+        draw_text(draw, (20, 880), "• Country", alumni.country, font, font_bold)
+        draw_text(draw, (20, 920), "• Full Address", alumni.full_address, font, font_bold)
+        draw_text(draw, (20, 960), "• Graduation Year", alumni.graduation_year, font, font_bold)
+        draw_text(draw, (20, 1000), "• Experience", alumni.experience, font, font_bold)
+        draw_text(draw, (20, 1040), "• LinkedIn", alumni.linkedin, font, font_bold)
+        draw_text(draw, (20, 1080), "• Facebook", alumni.facebook, font, font_bold)
+        draw_text(draw, (20, 1120), "• Instagram", alumni.instagram, font, font_bold)
+        draw_text(draw, (20, 1160), "• GitHub", alumni.github, font, font_bold)
+
+        response = HttpResponse(content_type="image/jpeg")
+        image.save(response, "JPEG")
+        return response
+    except Alumni.DoesNotExist:
+        return HttpResponse("Alumni not found", status=404)
 
 # Gallery Page
 def gallery(request):
@@ -408,3 +391,78 @@ def logout_view(request):
 # Register
 def register(request):
     return HttpResponse("This is the registration page.")
+
+# Batch Mentor Registration
+def batch_mentor_registration(request):
+    if 'coordinator_id' not in request.session:
+        return redirect('alumni_coordinator_login')
+    if request.method == 'POST':
+        form = BatchMentorRegistrationForm(request.POST)
+        if form.is_valid():
+            mentor = form.save(commit=False)
+            mentor.set_password(form.cleaned_data['password1'])
+            mentor.save()
+            return redirect('alumni_coordinator_dashboard')
+    else:
+        form = BatchMentorRegistrationForm()
+    return render(request, 'alumni_coordinator/batch_mentor_registration.html', {'form': form})
+
+# Batch Mentor Login
+def batch_mentor_login(request):
+    if request.method == 'POST':
+        form = BatchMentorLoginForm(request.POST)
+        if form.is_valid():
+            email = form.cleaned_data.get('email')
+            password = form.cleaned_data.get('password')
+            user = authenticate(request, username=email, password=password)
+            if user is not None:
+                login(request, user)
+                request.session['mentor_id'] = user.id
+                return redirect('batch_mentor_dashboard')
+            else:
+                messages.error(request, 'Invalid email or password')
+        else:
+            messages.error(request, 'Invalid email or password')
+    else:
+        form = BatchMentorLoginForm()
+    return render(request, 'batch_mentor/batch_mentor_login.html', {'form': form})
+
+# Batch Mentor Dashboard
+def batch_mentor_dashboard(request):
+    if 'mentor_id' not in request.session:
+        return redirect('batch_mentor_login')
+    mentor = BatchMentor.objects.get(pk=request.session['mentor_id'])
+    alumni_list = Alumni.objects.filter(graduation_year=mentor.assigned_batch)
+    return render(request, 'batch_mentor/batch_mentor_dashboard.html', {
+        'mentor': mentor,
+        'alumni_list': alumni_list
+    })
+
+# View Batch Mentors
+def view_batch_mentors(request):
+    if 'coordinator_id' not in request.session:
+        return redirect('alumni_coordinator_login')
+    mentors = BatchMentor.objects.all()
+    return render(request, 'alumni_coordinator/view_batch_mentors.html', {'mentors': mentors})
+
+# Edit Batch Mentor
+def edit_batch_mentor(request, id):
+    if 'coordinator_id' not in request.session:
+        return redirect('alumni_coordinator_login')
+    mentor = BatchMentor.objects.get(pk=id)
+    if request.method == 'POST':
+        form = BatchMentorRegistrationForm(request.POST, instance=mentor)
+        if form.is_valid():
+            form.save()
+            return redirect('view_batch_mentors')
+    else:
+        form = BatchMentorRegistrationForm(instance=mentor)
+    return render(request, 'alumni_coordinator/edit_batch_mentor.html', {'form': form})
+
+# Delete Batch Mentor
+def delete_batch_mentor(request, id):
+    if 'coordinator_id' not in request.session:
+        return redirect('alumni_coordinator_login')
+    mentor = BatchMentor.objects.get(pk=id)
+    mentor.delete()
+    return redirect('view_batch_mentors')
