@@ -109,6 +109,18 @@
         #profilePhoto {
             display: none;
         }
+        .links {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .links a {
+            color: #007bff;
+            text-decoration: none;
+            margin: 0 10px;
+        }
+        .links a:hover {
+            text-decoration: underline;
+        }
     </style>
 </head>
 <body>
@@ -118,88 +130,89 @@
                 <div class="top-icon">
                     <i class="fas fa-user-graduate"></i>
                 </div>
-                <form>
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
                     <div class="profile-photo-preview" id="profilePhotoPreview">
                         <img id="profilePhotoPreviewImg" src="#" alt="Profile Photo" class="d-none">
                     </div>
                     <div class="form-group mb-3">
                         <label for="id_name"><i class="fas fa-user"></i> Name</label>
-                        <input type="text" id="id_name" name="name" placeholder=" eg. Shubham Kulkarni" class="form-control">
+                        <input type="text" id="id_name" name="name" placeholder=" eg. Shubham Kulkarni" class="form-control" required>
                     </div>
                     <div class="form-group mb-3">
                         <label for="id_email"><i class="fas fa-envelope"></i> Email</label>
-                        <input type="email" id="id_email" name="email" placeholder="eg.  21shubhamkulkarni@gmail.com" class="form-control">
+                        <input type="email" id="id_email" name="email" placeholder="eg.  21shubhamkulkarni@gmail.com" class="form-control" required>
                     </div>
                     <div class="form-group mb-3">
                         <label for="id_graduation_year"><i class="fas fa-calendar-alt"></i> Graduation Year</label>
-                        <input type="text" id="id_graduation_year" name="graduation_year" placeholder="eg. 2025" class="form-control">
+                        <input type="text" id="id_graduation_year" name="graduation_year" placeholder="eg. 2025" class="form-control" required>
                     </div>
                     <div class="form-group mb-3">
                         <label for="id_profile_photo"><i class="fas fa-camera"></i> Profile Photo</label>
-                        <input type="file" id="id_profile_photo" name="profile_photo" class="form-control" onchange="previewProfilePhoto(event)">
+                        <input type="file" id="id_profile_photo" name="profile_photo" class="form-control" onchange="previewProfilePhoto(event)" required>
                     </div>
                     <div class="form-group mb-3">
                         <label for="id_mobile"><i class="fas fa-mobile-alt"></i> Mobile</label>
-                        <input type="text" id="id_mobile" name="mobile" placeholder="eg.  +91**********" class="form-control">
+                        <input type="text" id="id_mobile" name="mobile" placeholder="eg.  +91**********" class="form-control" required>
                     </div>
                     <div class="form-group mb-3">
-                        <label for="id_password1"><i class="fas fa"-lock"></i> Password</label>
-                        <input type="password" id="id_password1" name="password1" placeholder="********" class="form-control">
+                        <label for="id_password1"><i class="fas fa-lock"></i> Password</label>
+                        <input type="password" id="id_password1" name="password1" placeholder="********" class="form-control" required>
                     </div>
                     <div class="form-group mb-3">
                         <label for="id_password2"><i class="fas fa-lock"></i> Confirm Password</label>
-                        <input type="password" id="id_password2" name="password2" placeholder="********" class="form-control">
+                        <input type="password" id="id_password2" name="password2" placeholder="********" class="form-control" required>
                     </div>
                     <div class="form-group mb-3">
                         <label for="id_current_job_profile"><i class="fas fa-briefcase"></i> Current Job Profile</label>
-                        <input type="text" id="id_current_job_profile" name="current_job_profile" placeholder="eg. AI Engineer" class="form-control">
+                        <input type="text" id="id_current_job_profile" name="current_job_profile" placeholder="eg. AI Engineer" class="form-control" required>
                     </div>
                     <div class="form-group mb-3">
                         <label for="id_current_company"><i class="fas fa-building"></i> Current Company</label>
-                        <input type="text" id="id_current_company" name="current_company" placeholder="eg. IBM India Pvt. Ltd." class="form-control">
+                        <input type="text" id="id_current_company" name="current_company" placeholder="eg. IBM India Pvt. Ltd." class="form-control" required>
                     </div>
                     <div class="form-group mb-3">
                         <label for="id_current_job_location"><i class="fas fa-map-marker-alt"></i> Current Job Location</label>
-                        <input type="text" id="id_current_job_location" name="current_job_location" placeholder="eg.  PUNE, INDIA" class="form-control">
+                        <input type="text" id="id_current_job_location" name="current_job_location" placeholder="eg.  PUNE, INDIA" class="form-control" required>
                     </div>
                     <div class="form-group mb-3">
                         <label for="id_city"><i class="fas fa-city"></i> Village / City</label>
-                        <input type="text" id="id_city" name="city" placeholder="eg. Shrirampur" class="form-control">
+                        <input type="text" id="id_city" name="city" placeholder="eg. Shrirampur" class="form-control" required>
                     </div>
                     <div class="form-group mb-3">
                         <label for="id_sub_district"><i class="fas fa-map"></i> Sub District</label>
-                        <input type="text" id="id_sub_district" name="sub_district" placeholder="eg. Shrirampur" class="form-control">
+                        <input type="text" id="id_sub_district" name="sub_district" placeholder="eg. Shrirampur" class="form-control" required>
                     </div>
                     <div class="form-group mb-3">
                         <label for="id_district"><i class="fas fa-map"></i> District</label>
-                        <input type="text" id="id_district" name="district" placeholder="eg. Ahilyanagar" class="form-control">
+                        <input type="text" id="id_district" name="district" placeholder="eg. Ahilyanagar" class="form-control" required>
                     </div>
                     <div class="form-group mb-3">
                         <label for="id_state"><i class="fas fa-map"></i> State</label>
-                        <input type="text" id="id_state" name="state" placeholder="eg. Maharashtra" class="form-control">
+                        <input type="text" id="id_state" name="state" placeholder="eg. Maharashtra" class="form-control" required>
                     </div>
                     <div class="form-group mb-3">
                         <label for="id_pincode"><i class="fas fa-map-pin"></i> Pincode</label>
-                        <input type="text" id="id_pincode" name="pincode" placeholder="eg. 413709" class="form-control">
+                        <input type="text" id="id_pincode" name="pincode" placeholder="eg. 413709" class="form-control" required>
                     </div>
                     <div class="form-group mb-3">
                         <label for="id_is_international"><i class="fas fa-globe"></i> Is International</label>
-                        <select id="id_is_international" name="is_international" class="form-control">
+                        <select id="id_is_international" name="is_international" class="form-control" required>
                             <option value="False" selected>No</option>
                             <option value="True">Yes</option>
                         </select>
                     </div>
                     <div class="form-group mb-3">
                         <label for="id_country"><i class="fas fa-flag"></i> Country</label>
-                        <input type="text" id="id_country" name="country" placeholder="eg. India" class="form-control">
+                        <input type="text" id="id_country" name="country" placeholder="eg. India" class="form-control" required>
                     </div>
                     <div class="form-group mb-3">
                         <label for="id_full_address"><i class="fas fa-address-card"></i> Full Address</label>
-                        <input type="text" id="id_full_address" name="full_address" placeholder="eg. Morge Wasti, ward no7, Shrirampur, Ahilyanagar, Maharashtra, 413721" class="form-control">
+                        <input type="text" id="id_full_address" name="full_address" placeholder="eg. Morge Wasti, ward no7, Shrirampur, Ahilyanagar, Maharashtra, 413721" class="form-control" required>
                     </div>
                     <div class="form-group mb-3">
                         <label for="id_experience"><i class="fas fa-briefcase"></i> Experience</label>
-                        <input type="text" id="id_experience" name="experience" placeholder="eg. 0 years" class="form-control">
+                        <input type="text" id="id_experience" name="experience" placeholder="eg. 0 years" class="form-control" required>
                     </div>
                     <div class="form-group mb-3">
                         <label for="id_facebook"><i class="fab fa-facebook"></i> Facebook</label>
@@ -215,12 +228,16 @@
                     </div>
                     <div class="form-group mb-3">
                         <label for="id_linkedin"><i class="fab fa-linkedin"></i> LinkedIn</label>
-                        <input type="text" id="id_linkedin" name="linkedin" placeholder="eg. https://linkedin.com/in/" class="form-control">
+                        <input type="text" id="id_linkedin" name="linkedin" placeholder="eg. https://linkedin.com/in/" class="form-control" required>
                     </div>
                     <button type="submit" class="btn btn-primary btn-block">
                         <i class="fas fa-user-plus"></i> Register
                     </button>
                 </form>
+                <div class="links">
+                    <a href="{% url 'home' %}">Home</a> /
+                    <a href="{% url 'alumni_login' %}">Already registered? Login</a>
+                </div>
             </div>
         </div>
     </div>
@@ -239,4 +256,4 @@
         }
     </script>
 </body>
-</html></div>
+</html>

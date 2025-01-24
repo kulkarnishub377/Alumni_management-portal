@@ -66,7 +66,7 @@ class Alumni(AbstractBaseUser, PermissionsMixin):
     objects = AlumniManager()
 
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['name', 'mobile']
+    REQUIRED_FIELDS = ['name', 'mobile', 'city', 'sub_district', 'district', 'state', 'pincode', 'full_address', 'graduation_year', 'experience', 'linkedin']
 
     def __str__(self):
         return self.email

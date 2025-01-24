@@ -5,24 +5,29 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Login</title>
     {% load static %}
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
 </head>
 <body>
     <div class="container">
-        <h2>Admin Login</h2>
+        <h2 class="text-center">Admin Login</h2>
         <form method="post" action="{% url 'admin_login' %}">
             {% csrf_token %}
             <div class="form-group">
                 <label for="email">Email:</label>
-                <input type="email" id="email" name="email" placeholder="Email" required>
+                <input type="email" id="email" name="email" class="form-control" placeholder="Email" required>
             </div>
             <div class="form-group">
                 <label for="password">Password:</label>
-                <input type="password" id="password" name="password" placeholder="Password" required>
+                <input type="password" id="password" name="password" class="form-control" placeholder="Password" required>
             </div>
-            <button type="submit">Login</button>
+            <button type="submit" class="btn btn-primary">Login</button>
         </form>
-        <p>Don't have an account? <a href="{% url 'admin_registration' %}">Register here</a></p>
+        <p class="register-link text-center">Don't have an account? <a href="{% url 'admin_registration' %}">Register here</a></p>
+        <p class="home-link text-center"><a href="{% url 'home' %}">Home</a></p>
     </div>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
 </html>

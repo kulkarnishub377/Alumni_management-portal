@@ -53,7 +53,7 @@
 <body>
     <div class="container gallery-container">
         <h1 class="gallery-title"><i class="fas fa-images"></i> Gallery</h1>
-        <a href="{% url 'home' %}" class="btn btn-secondary mb-3"><i class="fas fa-home"></i> Home</a>
+        <button onclick="history.back()" class="btn btn-secondary mb-3"><i class="fas fa-arrow-left"></i> Back</button>
         <div class="gallery-grid">
             {% for photo in photos %}
             <div class="gallery-image">
