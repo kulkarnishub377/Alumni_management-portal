@@ -10,6 +10,7 @@
     <style>
         body {
             background-color: #f8f9fa;
+            font-family: Arial, sans-serif;
         }
         .container {
             max-width: 600px;
@@ -46,11 +47,15 @@
         .btn-group .btn {
             width: 48%;
         }
+        .login-link {
+            text-align: center;
+            margin-top: 20px;
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h2 class="text-center mb-4">Batch Mentor Registration</h2>
+        <h2 class="text-center mb-4">Register Batch Mentor</h2>
         <form method="post" action="{% url 'batch_mentor_registration' %}">
             {% csrf_token %}
             <div class="form-group">
@@ -66,7 +71,12 @@
             <div class="form-group">
                 <label for="id_password">Password</label>
                 <i class="fas fa-lock"></i>
-                {{ form.password }}
+                {{ form.password1 }}
+            </div>
+            <div class="form-group">
+                <label for="id_password2">Confirm Password</label>
+                <i class="fas fa-lock"></i>
+                {{ form.password2 }}
             </div>
             <div class="form-group">
                 <label for="id_mobile">Mobile</label>
@@ -80,9 +90,12 @@
             </div>
             <div class="btn-group">
                 <button type="submit" class="btn btn-primary">Register</button>
-                <a href="{% url 'alumni_coordinator_dashboard' %}" class="btn btn-secondary">Cancel</a>
+                <a href="javascript:history.back()" class="btn btn-secondary">Back</a>
             </div>
         </form>
+        <div class="login-link">
+            <a href="{% url 'batch_mentor_login' %}">Already have an account? Login here</a>
+        </div>
     </div>
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>

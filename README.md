@@ -11,6 +11,7 @@ Welcome to the Alumni Management Portal! This project is designed to help manage
 - Generate reports and analytics
 - User authentication and authorization
 - Responsive design
+- Batch Mentor management
 
 ## Technology Stack
 

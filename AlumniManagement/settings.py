@@ -138,4 +138,6 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 LOGIN_URL = '/alumni/login/'
 
-AUTH_USER_MODEL = 'alumni.Alumni'
+AUTH_USER_MODEL = 'alumni.BatchMentor'
+
+# ...existing code...

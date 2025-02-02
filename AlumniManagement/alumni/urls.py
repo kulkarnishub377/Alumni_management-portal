@@ -36,4 +36,5 @@ urlpatterns = [
     path('batch-mentor/view/', views.view_batch_mentors, name='view_batch_mentors'),
     path('batch-mentor/edit/<int:id>/', views.edit_batch_mentor, name='edit_batch_mentor'),
     path('batch-mentor/delete/<int:id>/', views.delete_batch_mentor, name='delete_batch_mentor'),
+    path('batch-mentor/export/', views.export_batch_mentor_to_excel, name='export_batch_mentor_to_excel'),
 ]

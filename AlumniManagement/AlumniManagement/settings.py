@@ -32,7 +32,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'alumni',
+    'alumni',  # Ensure this is the correct app name
 ]
 
 MIDDLEWARE = [
@@ -115,4 +115,4 @@ MEDIA_ROOT = BASE_DIR / "static/media"
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-AUTH_USER_MODEL = 'alumni.Alumni'
+AUTH_USER_MODEL = 'alumni.BatchMentor'

@@ -4,10 +4,10 @@ import xlwt
 from django.http import HttpResponse
 sys.setrecursionlimit(1000)
 
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
-from .models import Admin, Alumni, AlumniCoordinator, Comment, GalleryPhoto, BatchMentor
+from .models import Admin, Alumni, AlumniCoordinator, Comment, GalleryPhoto, BatchMentor, Batch
 from .forms import (
     AdminRegistrationForm, AlumniRegistrationForm, AlumniCoordinatorRegistrationForm,
     AlumniEditForm, GalleryPhotoForm, CommentForm, AlumniCoordinatorEditForm, BatchMentorRegistrationForm, BatchMentorLoginForm
@@ -227,9 +227,10 @@ def export_alumni_to_excel(request):
 
     # Define the columns
     columns = [
-        'Profile Photo', 'Full Name', 'Email', 'Mobile', 'Current Job Profile', 'Current Company',
+        'Full Name', 'Email', 'Mobile', 'Profile Photo', 'Current Job Profile', 'Current Company',
         'Current Job Location', 'City', 'Sub District', 'District', 'State', 'Pincode',
-        'Country', 'Graduation Year', 'Experience', 'LinkedIn', 'Facebook', 'Instagram', 'GitHub'
+        'Is International', 'Country', 'Full Address', 'Graduation Year', 'Experience', 'Facebook',
+        'GitHub', 'Instagram', 'LinkedIn', 'Sector'
     ]
 
     # Write the column headers
@@ -238,9 +239,10 @@ def export_alumni_to_excel(request):
 
     # Write the data rows
     rows = Alumni.objects.all().values_list(
-        'profile_photo', 'full_name', 'email', 'mobile', 'current_job_profile', 'current_company',
+        'full_name', 'email', 'mobile', 'profile_photo', 'current_job_profile', 'current_company',
         'current_job_location', 'city', 'sub_district', 'district', 'state', 'pincode',
-        'country', 'graduation_year', 'experience', 'linkedin', 'facebook', 'instagram', 'github'
+        'is_international', 'country', 'full_address', 'graduation_year', 'experience', 'facebook',
+        'github', 'instagram', 'linkedin', 'sector'
     )
 
     for row_num, row in enumerate(rows, start=1):
@@ -402,7 +404,7 @@ def batch_mentor_registration(request):
             mentor = form.save(commit=False)
             mentor.set_password(form.cleaned_data['password1'])
             mentor.save()
-            return redirect('alumni_coordinator_dashboard')
+            return redirect(request.META.get('HTTP_REFERER', 'batch_mentor_login'))
     else:
         form = BatchMentorRegistrationForm()
     return render(request, 'alumni_coordinator/batch_mentor_registration.html', {'form': form})
@@ -415,9 +417,9 @@ def batch_mentor_login(request):
             email = form.cleaned_data.get('email')
             password = form.cleaned_data.get('password')
             user = authenticate(request, username=email, password=password)
-            if user is not None:
+            if user is not None and isinstance(user, BatchMentor):
                 login(request, user)
-                request.session['mentor_id'] = user.id
+                request.session['mentor_id'] = user.id  # Set the session variable
                 return redirect('batch_mentor_dashboard')
             else:
                 messages.error(request, 'Invalid email or password')
@@ -425,14 +427,14 @@ def batch_mentor_login(request):
             messages.error(request, 'Invalid email or password')
     else:
         form = BatchMentorLoginForm()
-    return render(request, 'batch_mentor/batch_mentor_login.html', {'form': form})
+    return render(request, 'alumni_coordinator/batch_mentor_login.html', {'form': form})
 
 # Batch Mentor Dashboard
 def batch_mentor_dashboard(request):
     if 'mentor_id' not in request.session:
         return redirect('batch_mentor_login')
     mentor = BatchMentor.objects.get(pk=request.session['mentor_id'])
-    alumni_list = Alumni.objects.filter(graduation_year=mentor.assigned_batch)
+    alumni_list = Alumni.objects.filter(graduation_year__in=mentor.assigned_batches.values_list('graduation_year', flat=True))
     return render(request, 'batch_mentor/batch_mentor_dashboard.html', {
         'mentor': mentor,
         'alumni_list': alumni_list
@@ -454,15 +456,73 @@ def edit_batch_mentor(request, id):
         form = BatchMentorRegistrationForm(request.POST, instance=mentor)
         if form.is_valid():
             form.save()
+            messages.success(request, 'Batch Mentor updated successfully.')
             return redirect('view_batch_mentors')
+        else:
+            messages.error(request, 'Please correct the error below.')
     else:
         form = BatchMentorRegistrationForm(instance=mentor)
-    return render(request, 'alumni_coordinator/edit_batch_mentor.html', {'form': form})
+    form.fields['assigned_batches'].queryset = Batch.objects.all()
+    return render(request, 'alumni_coordinator/edit_batch_mentor.html', {'form': form, 'mentor': mentor})
+
+def view_batch_mentors(request):
+
+    batch_mentors = BatchMentor.objects.all()  # Fetch all batch mentors from the database
+
+    context = {
+
+        'BatchMentor': batch_mentors
+
+    }
+
+    return render(request, 'alumni_coordinator/view_batch_mentors.html', context)
 
 # Delete Batch Mentor
 def delete_batch_mentor(request, id):
     if 'coordinator_id' not in request.session:
         return redirect('alumni_coordinator_login')
-    mentor = BatchMentor.objects.get(pk=id)
+    mentor = get_object_or_404(BatchMentor, pk=id)
     mentor.delete()
+    messages.success(request, 'Batch Mentor deleted successfully.')
     return redirect('view_batch_mentors')
+
+# Export Batch Mentor Data to Excel
+def export_batch_mentor_to_excel(request):
+    if 'mentor_id' not in request.session:
+        return redirect('batch_mentor_login')
+    
+    mentor = BatchMentor.objects.get(pk=request.session['mentor_id'])
+    alumni_list = Alumni.objects.filter(graduation_year__in=mentor.assigned_batches.values_list('graduation_year', flat=True))
+    
+    response = HttpResponse(content_type='application/ms-excel')
+    response['Content-Disposition'] = f'attachment; filename="alumni_data_batch_{mentor.id}.xls"'
+
+    wb = xlwt.Workbook(encoding='utf-8')
+    ws = wb.add_sheet('Alumni Data')
+
+    # Define the columns
+    columns = [
+        'Full Name', 'Email', 'Mobile', 'Profile Photo', 'Current Job Profile', 'Current Company',
+        'Current Job Location', 'City', 'Sub District', 'District', 'State', 'Pincode',
+        'Is International', 'Country', 'Full Address', 'Graduation Year', 'Experience', 'Facebook',
+        'GitHub', 'Instagram', 'LinkedIn', 'Sector'
+    ]
+
+    # Write the column headers
+    for col_num, column_title in enumerate(columns):
+        ws.write(0, col_num, column_title)
+
+    # Write the data rows
+    rows = alumni_list.values_list(
+        'full_name', 'email', 'mobile', 'profile_photo', 'current_job_profile', 'current_company',
+        'current_job_location', 'city', 'sub_district', 'district', 'state', 'pincode',
+        'is_international', 'country', 'full_address', 'graduation_year', 'experience', 'facebook',
+        'github', 'instagram', 'linkedin', 'sector'
+    )
+
+    for row_num, row in enumerate(rows, start=1):
+        for col_num, cell_value in enumerate(row):
+            ws.write(row_num, col_num, str(cell_value))
+
+    wb.save(response)
+    return response

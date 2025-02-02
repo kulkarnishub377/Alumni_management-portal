@@ -3,13 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Edit Coordinator Profile</title>
+    <title>Batch Mentor Login</title>
     {% load static %}
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <style>
         body {
             background-color: #f8f9fa;
+            font-family: Arial, sans-serif;
         }
         .container {
             max-width: 600px;
@@ -46,18 +47,17 @@
         .btn-group .btn {
             width: 48%;
         }
+        .register-link {
+            text-align: center;
+            margin-top: 20px;
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h2 class="text-center mb-4">Edit Profile</h2>
-        <form method="post" action="{% url 'edit_coordinator_profile' %}">
+        <h2 class="text-center mb-4">Batch Mentor Login</h2>
+        <form method="post" action="{% url 'batch_mentor_login' %}">
             {% csrf_token %}
-            <div class="form-group">
-                <label for="id_name">Name</label>
-                <i class="fas fa-user"></i>
-                {{ form.name }}
-            </div>
             <div class="form-group">
                 <label for="id_email">Email</label>
                 <i class="fas fa-envelope"></i>
@@ -68,16 +68,21 @@
                 <i class="fas fa-lock"></i>
                 {{ form.password }}
             </div>
-            <div class="form-group">
-                <label for="id_mobile">Mobile</label>
-                <i class="fas fa-phone"></i>
-                {{ form.mobile }}
-            </div>
+            {% if messages %}
+                <div class="alert alert-danger">
+                    {% for message in messages %}
+                        <p>{{ message }}</p>
+                    {% endfor %}
+                </div>
+            {% endif %}
             <div class="btn-group">
-                <button type="submit" class="btn btn-primary">Save Changes</button>
-                <a href="{% url 'alumni_coordinator_dashboard' %}" class="btn btn-secondary">Cancel</a>
+                <button type="submit" class="btn btn-primary">Login</button>
+                <a href="javascript:history.back()" class="btn btn-secondary">Back</a>
             </div>
         </form>
+        <div class="register-link">
+            <a href="{% url 'batch_mentor_registration' %}">Don't have an account? Register here</a>
+        </div>
     </div>
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>

@@ -1,8 +1,5 @@
 from django.db import models
-from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin, AbstractUser
-from django.conf import settings
-from django.contrib.auth.hashers import make_password, check_password
-import django.utils.timezone
+from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 
 class Admin(models.Model):
     name = models.CharField(max_length=255)
@@ -120,9 +117,6 @@ class Comment(models.Model):
     def __str__(self):
         return self.text[:50]
 
-    class Meta:
-        app_label = 'alumni'
-
 class BatchMentorManager(BaseUserManager):
     def create_user(self, email, password=None, **extra_fields):
         if not email:
@@ -139,55 +133,38 @@ class BatchMentorManager(BaseUserManager):
             raise ValueError('Superuser must have is_superuser=True.')
         return self.create_user(email, password, **extra_fields)
 
-class BatchMentor(AbstractUser):
-    username = None  # Remove the username field
-    first_name = None  # Exclude the first_name field
-    last_name = None  # Exclude the last_name field
+class BatchMentor(AbstractBaseUser, PermissionsMixin):
     name = models.CharField(max_length=255)
     email = models.EmailField(unique=True)
     mobile = models.CharField(max_length=15)
-    assigned_batch = models.CharField(max_length=100)
-    date_joined = models.DateTimeField(default=django.utils.timezone.now)
-    is_active = models.BooleanField(default=True)
+    assigned_batches = models.ManyToManyField('Batch', related_name='mentors')  # Ensure correct field type
+    username = models.CharField(max_length=255, unique=True, default='')
+    date_joined = models.DateTimeField(auto_now_add=True)
     is_staff = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=True)
 
-    groups = models.ManyToManyField(
-        'auth.Group',
-        related_name='batchmentor_set',
-        blank=True,
-        help_text='The groups this user belongs to. A user will get all permissions granted to each of their groups.',
-        verbose_name='groups',
-    )
-    user_permissions = models.ManyToManyField(
-        'auth.Permission',
-        related_name='batchmentor_set',
-        blank=True,
-        help_text='Specific permissions for this user.',
-        verbose_name='user permissions',
-    )
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = ['name', 'mobile']
 
     objects = BatchMentorManager()
 
-    USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['name', 'mobile', 'assigned_batch']
+    def save(self, *args, **kwargs):
+        if not self.username:
+            self.username = self.email
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return self.name
 
-    def set_password(self, raw_password):
-        self.password = make_password(raw_password)
-        self.save()
+    class Meta:
+        app_label = 'alumni'
+        db_table = 'alumni_batchmentor'  # Ensure the table name is explicitly set
 
-    def check_password(self, raw_password):
-        return check_password(raw_password, self.password)
+class Batch(models.Model):
+    graduation_year = models.IntegerField(unique=True)
 
-    @property
-    def is_staff(self):
-        return self.is_superuser
-
-    @property
-    def is_active(self):
-        return True
+    def __str__(self):
+        return str(self.graduation_year)
 
     class Meta:
         app_label = 'alumni'
