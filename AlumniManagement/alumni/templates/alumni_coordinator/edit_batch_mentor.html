@@ -9,83 +9,31 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <style>
         body {
-            background-color: #f0f2f5;
-            font-family: 'Roboto', sans-serif;
+            background-color: #f8f9fa;
+            font-family: Arial, sans-serif;
         }
         .container {
-            max-width: 600px;
             margin-top: 50px;
-            padding: 30px;
-            background-color: #fff;
-            border-radius: 10px;
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
-        }
-        .form-group label {
-            font-weight: bold;
-            color: #333;
-        }
-        .form-group input, .form-group select {
-            width: 100%;
-            padding: 0.75rem;
-            border: 1px solid #ced4da;
-            border-radius: 5px;
-            transition: border-color 0.3s;
-        }
-        .form-group input:focus, .form-group select:focus {
-            border-color: #007bff;
-        }
-        .btn-primary {
-            background-color: #007bff;
-            border: none;
-            padding: 0.75rem 1.5rem;
-            font-size: 1rem;
-            transition: background-color 0.3s;
-        }
-        .btn-primary:hover {
-            background-color: #0056b3;
-        }
-        .btn-secondary {
-            background-color: #6c757d;
-            border: none;
-            padding: 0.75rem 1.5rem;
-            font-size: 1rem;
-            transition: background-color 0.3s;
-        }
-        .btn-secondary:hover {
-            background-color: #5a6268;
-        }
-        .text-center {
-            color: #007bff;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h2 class="text-center mb-4">Edit Batch Mentor</h2>
+        <h1 class="text-center">Edit Batch Mentor</h1>
         <form method="post" action="{% url 'edit_batch_mentor' mentor.id %}">
             {% csrf_token %}
+            {{ form.as_p }}
             <div class="form-group">
-                <label for="id_name">Name</label>
-                {{ form.name }}
+                <label for="assigned_batches">Assigned Batches:</label>
+                <select name="assigned_batches" id="assigned_batches" class="form-control" multiple>
+                    {% for batch in batches %}
+                        <option value="{{ batch.id }}" {% if batch in form.initial.assigned_batches %}selected{% endif %}>{{ batch.graduation_year }}</option>
+                    {% endfor %}
+                </select>
             </div>
-            <div class="form-group">
-                <label for="id_email">Email</label>
-                {{ form.email }}
-            </div>
-            <div class="form-group">
-                <label for="id_mobile">Mobile</label>
-                {{ form.mobile }}
-            </div>
-            <div class="form-group">
-                <label for="id_assigned_batches">Assigned Batches</label>
-                {{ form.assigned_batches }}
-            </div>
-            <button type="submit" class="btn btn-primary">Save</button>
-            <a href="{% url 'view_batch_mentors' %}" class="btn btn-secondary">Back to Batch Mentors</a>
+            <button type="submit" class="btn btn-primary">Save Changes</button>
+            <a href="{% url 'view_batch_mentors' %}" class="btn btn-secondary">Cancel</a>
         </form>
     </div>
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
 </html>

@@ -20,31 +20,27 @@
             box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
             border-radius: 10px;
         }
+        .logo {
+            display: block;
+            margin: 0 auto 20px;
+            width: 100px;
+        }
         h2 {
             margin-bottom: 25px;
             color: #343a40;
             text-align: center;
         }
-        form {
-            display: flex;
-            flex-direction: column;
-        }
         .form-group {
-            position: relative;
             margin-bottom: 20px;
+        }
+        .form-group label {
+            font-weight: bold;
         }
         .form-group input {
             width: 100%;
-            padding: 10px 40px 10px 10px;
+            padding: 10px;
             border: 1px solid #ced4da;
             border-radius: 5px;
-        }
-        .form-group .fa {
-            position: absolute;
-            right: 10px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #6c757d;
         }
         button {
             padding: 10px;
@@ -70,26 +66,159 @@
         p a:hover {
             text-decoration: underline;
         }
+        #resetPasswordForm {
+            display: none;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <h2><i class="fa fa-user-graduate"></i> Alumni Login</h2>
-        <form method="post" action="{% url 'alumni_login' %}">
+        <form method="post" action="{% url 'alumni_login' %}" id="loginForm">
             {% csrf_token %}
-            <div class="form-group">
-                <input type="text" name="username" placeholder="Email" required>
-                <i class="fa fa-envelope"></i>
-            </div>
-            <div class="form-group">
-                <input type="password" name="password" placeholder="Password" required>
-                <i class="fa fa-lock"></i>
-            </div>
-            <button type="submit">Login</button>
+            {{ form.as_p }}
+            <button type="submit" class="btn btn-primary btn-block">Login</button>
         </form>
         <p>Don't have an account? <a href="{% url 'alumni_registration' %}">Register here</a></p>
-        <p class="home-link"><a href="{% url 'home' %}">Home</a></p>
+        <p><a href="{% url 'home' %}">Home</a></p>
+        <p><a href="#" data-toggle="modal" data-target="#forgotPasswordModal">Forgot Password?</a></p>
     </div>
+
+    <!-- Forgot Password Modal -->
+    <div class="modal fade" id="forgotPasswordModal" tabindex="-1" role="dialog" aria-labelledby="forgotPasswordModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="forgotPasswordModalLabel">Forgot Password</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="forgotPasswordForm" method="post">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <label for="email">Email</label>
+                            <input type="email" class="form-control" id="email" name="email" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="mobile">Mobile</label>
+                            <input type="text" class="form-control" id="mobile" name="mobile" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Verify</button>
+                    </form>
+                    <form id="resetPasswordForm" method="post" action="{% url 'alumni_reset_password' %}" style="display:none;">
+                        {% csrf_token %}
+                        <input type="hidden" name="email" id="resetEmail">
+                        <div class="form-group">
+                            <label for="password1">New Password</label>
+                            <input type="password" class="form-control" id="password1" name="password1" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="password2">Confirm New Password</label>
+                            <input type="password" class="form-control" id="password2" name="password2" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Reset Password</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success and Error Modals -->
+    <div class="modal fade" id="successModal" tabindex="-1" role="dialog" aria-labelledby="successModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="successModalLabel">Login Successful</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    You have successfully logged in.
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="errorModal" tabindex="-1" role="dialog" aria-labelledby="errorModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="errorModalLabel">Login Failed</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    Invalid username or password. Please try again.
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            var form = this;
+            fetch(form.action, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify({
+                    username: form.username.value,
+                    password: form.password.value
+                })
+            }).then(response => response.json()).then(data => {
+                if (data.success) {
+                    $('#successModal').modal('show');
+                } else {
+                    $('#errorModal').modal('show');
+                }
+            });
+        });
+
+        document.getElementById('forgotPasswordForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            var email = document.getElementById('email').value;
+            var mobile = document.getElementById('mobile').value;
+            fetch("{% url 'alumni_forgot_password' %}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify({ email: email, mobile: mobile })
+            }).then(response => response.json()).then(data => {
+                if (data.success) {
+                    document.getElementById('forgotPasswordForm').style.display = 'none';
+                    document.getElementById('resetEmail').value = email;
+                    document.getElementById('resetPasswordForm').style.display = 'block';
+                } else {
+                    alert(data.message);
+                }
+            });
+        });
+
+        document.getElementById('resetPasswordForm').addEventListener('submit', function(event) {
+            var password1 = document.getElementById('password1').value;
+            var password2 = document.getElementById('password2').value;
+            if (password1 !== password2) {
+                event.preventDefault();
+                alert('Passwords do not match.');
+            }
+        });
+    </script>
+
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>

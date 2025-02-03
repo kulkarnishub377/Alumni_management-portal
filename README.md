@@ -1,7 +1,5 @@
 # Alumni Management Portal
 
-
-
 Welcome to the Alumni Management Portal! This project is designed to help manage alumni information efficiently and effectively.
 
 ## Features
@@ -12,6 +10,7 @@ Welcome to the Alumni Management Portal! This project is designed to help manage
 - User authentication and authorization
 - Responsive design
 - Batch Mentor management
+- Assign batches to Batch Mentors based on graduation year
 
 ## Technology Stack
 

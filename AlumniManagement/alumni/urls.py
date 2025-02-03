@@ -11,6 +11,8 @@ urlpatterns = [
     path('alumni/profile/', views.alumni_profile, name='alumni_profile'),
     path('alumni/edit-profile/', views.alumni_edit_profile, name='alumni_edit_profile'),
     path('alumni/share/<int:id>/', views.share_alumni_profile, name='share_alumni_profile'),
+    path('alumni/forgot-password/', views.alumni_forgot_password, name='alumni_forgot_password'),
+    path('alumni/reset-password/', views.alumni_reset_password, name='alumni_reset_password'),
     path('alumni_coordinator/login/', views.alumni_coordinator_login, name='alumni_coordinator_login'),
     path('alumni_coordinator/register/', views.alumni_coordinator_registration, name='alumni_coordinator_registration'),
     path('alumni_coordinator/dashboard/', views.alumni_coordinator_dashboard, name='alumni_coordinator_dashboard'),
@@ -37,4 +39,7 @@ urlpatterns = [
     path('batch-mentor/edit/<int:id>/', views.edit_batch_mentor, name='edit_batch_mentor'),
     path('batch-mentor/delete/<int:id>/', views.delete_batch_mentor, name='delete_batch_mentor'),
     path('batch-mentor/export/', views.export_batch_mentor_to_excel, name='export_batch_mentor_to_excel'),
+    path('batch-mentor/assign-batch/', views.assign_batch_to_mentor, name='assign_batch_to_mentor'),
+    path('batch-mentor/view-alumni/<int:mentor_id>/', views.view_alumni_in_batches, name='view_alumni_in_batches'),
+    path('batch-mentor/available/', views.view_available_batch_mentors, name='view_available_batch_mentors'),
 ]

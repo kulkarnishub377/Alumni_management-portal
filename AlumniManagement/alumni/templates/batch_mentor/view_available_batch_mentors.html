@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Available Batch Mentors</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            margin-top: 50px;
+        }
+        .table {
+            margin-top: 20px;
+        }
+        .table th, .table td {
+            text-align: center;
+        }
+        .actions {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+        .buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="buttons">
+            <a href="{% url 'alumni_coordinator_dashboard' %}" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Back to Dashboard</a>
+            <a href="{% url 'batch_mentor_registration' %}" class="btn btn-primary"><i class="fas fa-user-plus"></i> Register Batch Mentor</a>
+        </div>
+        <h1 class="text-center">Available Batch Mentors</h1>
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Mobile</th>
+                    <th>Assigned Batches</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for mentor in available_mentors %}
+                <tr>
+                    <td>{{ mentor.name }}</td>
+                    <td>{{ mentor.email }}</td>
+                    <td>{{ mentor.mobile }}</td>
+                    <td>
+                        {% for batch in mentor.assigned_batches.all %}
+                            {{ batch.graduation_year }}{% if not forloop.last %}, {% endif %}
+                        {% endfor %}
+                    </td>
+                    <td class="actions">
+                        <a href="{% url 'edit_batch_mentor' mentor.id %}" class="btn btn-warning btn-sm"><i class="fas fa-edit"></i> Edit</a>
+                        <a href="{% url 'delete_batch_mentor' mentor.id %}" class="btn btn-danger btn-sm"><i class="fas fa-trash"></i> Delete</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>

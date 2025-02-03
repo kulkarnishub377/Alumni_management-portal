@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Assign Batch to Mentor</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            margin-top: 50px;
+        }
+        .card {
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .btn-primary {
+            background-color: #007bff;
+            border-color: #007bff;
+        }
+        .btn-primary:hover {
+            background-color: #0056b3;
+            border-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <h1 class="text-center">Assign Batch to Mentor</h1>
+            <form method="post">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="mentor">Select Mentor:</label>
+                    <select name="mentor_id" id="mentor" class="form-control">
+                        {% for mentor in mentors %}
+                            <option value="{{ mentor.id }}">{{ mentor.username }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="batch">Select Batch:</label>
+                    <select name="batch_id" id="batch" class="form-control">
+                        {% for batch in batches %}
+                            <option value="{{ batch.id }}">{{ batch.graduation_year }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">Assign</button>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

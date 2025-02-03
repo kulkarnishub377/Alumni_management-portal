@@ -27,7 +27,7 @@
         .form-group label {
             font-weight: bold;
         }
-        .form-group input {
+        .form-group input, .form-group select {
             width: 100%;
             padding: 0.5rem 2.5rem 0.5rem 1rem;
             border: 1px solid #ced4da;
@@ -51,12 +51,16 @@
             text-align: center;
             margin-top: 20px;
         }
+        .form-group select {
+            appearance: none;
+            background: url('data:image/svg+xml;charset=US-ASCII,<svg xmlns="http://www.w3.org/2000/svg" width="4" height="5"><path fill="%23ced4da" d="M2 0L0 2h4z"/></svg>') no-repeat right 0.75rem center/8px 10px;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <h2 class="text-center mb-4">Register Batch Mentor</h2>
-        <form method="post" action="{% url 'batch_mentor_registration' %}">
+        <form method="post" action="{% url 'batch_mentor_registration' %}" id="registrationForm">
             {% csrf_token %}
             <div class="form-group">
                 <label for="id_name">Name</label>
@@ -84,22 +88,54 @@
                 {{ form.mobile }}
             </div>
             <div class="form-group">
-                <label for="id_assigned_batch">Assigned Batch</label>
-                <i class="fas fa-users"></i>
-                {{ form.assigned_batch }}
+                <label for="assigned_batches">Assigned Batches:</label>
+                <i class="fas fa-graduation-cap"></i>
+                <select name="assigned_batches" id="assigned_batches" class="form-control" multiple>
+                    {% for batch in form.fields.assigned_batches.queryset %}
+                        <option value="{{ batch.id }}" {% if batch in form.initial.assigned_batches %}selected{% endif %}>{{ batch.graduation_year }}</option>
+                    {% endfor %}
+                </select>
             </div>
             <div class="btn-group">
                 <button type="submit" class="btn btn-primary">Register</button>
                 <a href="javascript:history.back()" class="btn btn-secondary">Back</a>
             </div>
         </form>
-        <div class="login-link">
+        <div class="login-link"></div>
             <a href="{% url 'batch_mentor_login' %}">Already have an account? Login here</a>
         </div>
     </div>
+
+    <!-- Success Modal -->
+    <div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="successModalLabel">Registration Successful</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    You have successfully registered as a Batch Mentor.
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script src="https://kit.fontawesome.com/a076d05399.js"></script>
+    <script>
+        document.getElementById('registrationForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            // Assuming the registration is successful
+            $('#successModal').modal('show');
+        });
+    </script>
 </body>
 </html>

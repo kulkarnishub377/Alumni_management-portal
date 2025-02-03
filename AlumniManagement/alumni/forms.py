@@ -1,6 +1,20 @@
 from django import forms
-from django.contrib.auth.forms import UserCreationForm, UserChangeForm
-from .models import Alumni, Admin, AlumniCoordinator, GalleryPhoto, Comment, BatchMentor
+from django.contrib.auth.forms import UserCreationForm, UserChangeForm, AuthenticationForm
+from .models import Alumni, Admin, AlumniCoordinator, GalleryPhoto, Comment, BatchMentor, Batch
+
+from django.contrib.auth import authenticate
+
+class AlumniLoginForm(forms.Form):
+    email = forms.EmailField(widget=forms.EmailInput(attrs={'placeholder': 'Email', 'class': 'form-control'}))
+    password = forms.CharField(widget=forms.PasswordInput(attrs={'placeholder': 'Password', 'class': 'form-control'}))
+
+    def clean(self):
+        email = self.cleaned_data.get('email')
+        password = self.cleaned_data.get('password')
+        user = authenticate(username=email, password=password)
+        if not user:
+            raise forms.ValidationError("Invalid login credentials")
+        return self.cleaned_data
 
 class AlumniRegistrationForm(UserCreationForm):
     class Meta:
@@ -21,10 +35,6 @@ class AlumniEditForm(UserChangeForm):
             'state', 'pincode', 'is_international', 'country', 'full_address', 'graduation_year',
             'experience', 'facebook', 'github', 'instagram', 'linkedin', 'sector'
         ]
-
-class AlumniLoginForm(forms.Form):
-    email = forms.EmailField()
-    password = forms.CharField(widget=forms.PasswordInput())
 
 class AdminRegistrationForm(forms.ModelForm):
     class Meta:
@@ -65,30 +75,29 @@ class CommentForm(forms.ModelForm):
         model = Comment
         fields = ['text']
 
-class BatchMentorRegistrationForm(forms.ModelForm):
-    password1 = forms.CharField(label='Password', widget=forms.PasswordInput, required=False)
-    password2 = forms.CharField(label='Confirm Password', widget=forms.PasswordInput, required=False)
+class BatchMentorRegistrationForm(UserCreationForm):
+    assigned_batches = forms.ModelMultipleChoiceField(
+        queryset=Batch.objects.all(),
+        widget=forms.CheckboxSelectMultiple,
+        required=False
+    )
+
+    class Meta:
+        model = BatchMentor
+        fields = ['name', 'email', 'mobile', 'password1', 'password2', 'assigned_batches']
+
+class BatchMentorLoginForm(AuthenticationForm):
+    class Meta:
+        model = BatchMentor
+        fields = ['email', 'password']
+
+class BatchMentorForm(forms.ModelForm):
+    assigned_batches = forms.ModelMultipleChoiceField(
+        queryset=Batch.objects.all(),
+        widget=forms.CheckboxSelectMultiple,
+        required=False
+    )
 
     class Meta:
         model = BatchMentor
         fields = ['name', 'email', 'mobile', 'assigned_batches']
-
-    def clean_password2(self):
-        password1 = self.cleaned_data.get('password1')
-        password2 = self.cleaned_data.get('password2')
-        if password1 and password2 and password1 != password2:
-            raise forms.ValidationError("Passwords don't match")
-        return password2
-
-    def save(self, commit=True):
-        user = super().save(commit=False)
-        if self.cleaned_data["password1"]:
-            user.set_password(self.cleaned_data["password1"])
-        if commit:
-            user.save()
-            self.save_m2m()  # Save the many-to-many data for the form
-        return user
-
-class BatchMentorLoginForm(forms.Form):
-    email = forms.EmailField()
-    password = forms.CharField(widget=forms.PasswordInput())

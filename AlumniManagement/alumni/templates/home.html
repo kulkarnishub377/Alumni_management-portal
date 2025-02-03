@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Alumni Portal</title>
     {% load static %}
-    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <style>
@@ -154,15 +153,7 @@
     
     <div class="overlay"></div>
 
-    <!-- Admin Login Form -->
-    <form method="post" action="{% url 'admin_login' %}">
-        {% csrf_token %}
-        <!-- form fields -->
-        <input type="email" name="email" placeholder="Email" required>
-        <input type="password" name="password" placeholder="Password" required>
-        <button type="submit">Login</button>
-    </form>
-
+   
     <!-- Footer Section -->
     <footer>
         <p>&copy; 2023 DR. VITHALRAO VIKHE PATIL COLLEGE OF ENGINEERING AHMEDNAGAR. All rights reserved.</p>

@@ -1,19 +1,20 @@
 import sys
 import csv
 import xlwt
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 sys.setrecursionlimit(1000)
 
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
-from .models import Admin, Alumni, AlumniCoordinator, Comment, GalleryPhoto, BatchMentor, Batch
+from .models import Admin, Alumni, AlumniCoordinator, Comment, GalleryPhoto, BatchMentor, Batch  # Add Batch
 from .forms import (
     AdminRegistrationForm, AlumniRegistrationForm, AlumniCoordinatorRegistrationForm,
-    AlumniEditForm, GalleryPhotoForm, CommentForm, AlumniCoordinatorEditForm, BatchMentorRegistrationForm, BatchMentorLoginForm
+    AlumniEditForm, GalleryPhotoForm, CommentForm, AlumniCoordinatorEditForm, BatchMentorRegistrationForm, BatchMentorLoginForm, BatchMentorForm, AlumniLoginForm
 )
 from django.contrib.auth.forms import AuthenticationForm
 from django.urls import path
+from django import forms
 from . import views
 from django.template.loader import render_to_string
 from django.core.mail import send_mail, EmailMessage
@@ -21,6 +22,8 @@ from io import BytesIO
 from PIL import Image, ImageDraw, ImageFont
 import requests
 import os
+import json
+from django.contrib.auth.tokens import default_token_generator
 
 # Home Page
 def home(request):
@@ -139,28 +142,31 @@ def alumni_registration(request):
 # Alumni Login
 def alumni_login(request):
     if request.method == 'POST':
-        form = AuthenticationForm(request, data=request.POST)
+        form = AlumniLoginForm(request.POST)
         if form.is_valid():
-            email = form.cleaned_data.get('username')
+            email = form.cleaned_data.get('email')
             password = form.cleaned_data.get('password')
             user = authenticate(request, username=email, password=password)
-            if user is not None:
+            if user is not None and isinstance(user, Alumni):
                 login(request, user)
-                request.session['alumni_id'] = user.id
                 return redirect('alumni_profile')
             else:
                 messages.error(request, 'Invalid email or password')
         else:
-            messages.error(request, 'Invalid email or password')
+            messages.error(request, 'Please correct the error below.')
     else:
-        form = AuthenticationForm()
+        form = AlumniLoginForm()
     return render(request, 'alumni/alumni_login.html', {'form': form})
 
 # Alumni Profile
 def alumni_profile(request):
     if not request.user.is_authenticated:
         return redirect('alumni_login')
-    alumni = Alumni.objects.get(email=request.user.email)
+    try:
+        alumni = Alumni.objects.get(email=request.user.email)
+    except Alumni.DoesNotExist:
+        messages.error(request, 'Alumni profile not found.')
+        return redirect('alumni_login')
     return render(request, 'alumni/alumni_profile.html', {'alumni': alumni})
 
 # Alumni Edit Profile
@@ -251,6 +257,9 @@ def export_alumni_to_excel(request):
 
     wb.save(response)
     return response
+
+def new_func():
+    header_style = xlwt.easyxf('font: bold 1')
 
 # Share Alumni Profile
 def share_alumni_profile(request, id):
@@ -404,7 +413,8 @@ def batch_mentor_registration(request):
             mentor = form.save(commit=False)
             mentor.set_password(form.cleaned_data['password1'])
             mentor.save()
-            return redirect(request.META.get('HTTP_REFERER', 'batch_mentor_login'))
+            form.save_m2m()  # Save the many-to-many relationships
+            return redirect('batch_mentor_login')
     else:
         form = BatchMentorRegistrationForm()
     return render(request, 'alumni_coordinator/batch_mentor_registration.html', {'form': form})
@@ -434,10 +444,12 @@ def batch_mentor_dashboard(request):
     if 'mentor_id' not in request.session:
         return redirect('batch_mentor_login')
     mentor = BatchMentor.objects.get(pk=request.session['mentor_id'])
-    alumni_list = Alumni.objects.filter(graduation_year__in=mentor.assigned_batches.values_list('graduation_year', flat=True))
+    assigned_batches = mentor.assigned_batches.all()
+    alumni_list = Alumni.objects.filter(graduation_year__in=assigned_batches.values_list('graduation_year', flat=True))
     return render(request, 'batch_mentor/batch_mentor_dashboard.html', {
         'mentor': mentor,
-        'alumni_list': alumni_list
+        'alumni_list': alumni_list,
+        'assigned_batches': assigned_batches
     })
 
 # View Batch Mentors
@@ -451,31 +463,28 @@ def view_batch_mentors(request):
 def edit_batch_mentor(request, id):
     if 'coordinator_id' not in request.session:
         return redirect('alumni_coordinator_login')
-    mentor = BatchMentor.objects.get(pk=id)
+    mentor = get_object_or_404(BatchMentor, pk=id)
     if request.method == 'POST':
-        form = BatchMentorRegistrationForm(request.POST, instance=mentor)
+        form = BatchMentorForm(request.POST, instance=mentor)
         if form.is_valid():
             form.save()
+            form.save_m2m()  # Save the many-to-many relationships
             messages.success(request, 'Batch Mentor updated successfully.')
             return redirect('view_batch_mentors')
-        else:
-            messages.error(request, 'Please correct the error below.')
     else:
-        form = BatchMentorRegistrationForm(instance=mentor)
-    form.fields['assigned_batches'].queryset = Batch.objects.all()
-    return render(request, 'alumni_coordinator/edit_batch_mentor.html', {'form': form, 'mentor': mentor})
+        form = BatchMentorForm(instance=mentor)
+    batches = Batch.objects.all()
+    return render(request, 'alumni_coordinator/edit_batch_mentor.html', {'form': form, 'mentor': mentor, 'batches': batches})
 
-def view_batch_mentors(request):
-
-    batch_mentors = BatchMentor.objects.all()  # Fetch all batch mentors from the database
-
-    context = {
-
-        'BatchMentor': batch_mentors
-
-    }
-
-    return render(request, 'alumni_coordinator/view_batch_mentors.html', context)
+def view_alumni_in_batches(request, mentor_id):
+    mentor = get_object_or_404(BatchMentor, pk=mentor_id)
+    assigned_batches = mentor.assigned_batches.all()
+    alumni_list = Alumni.objects.filter(graduation_year__in=assigned_batches.values_list('graduation_year', flat=True))
+    return render(request, 'view_alumni_in_batches.html', {
+        'mentor': mentor,
+        'alumni_list': alumni_list,
+        'assigned_batches': assigned_batches
+    })
 
 # Delete Batch Mentor
 def delete_batch_mentor(request, id):
@@ -485,6 +494,24 @@ def delete_batch_mentor(request, id):
     mentor.delete()
     messages.success(request, 'Batch Mentor deleted successfully.')
     return redirect('view_batch_mentors')
+
+
+def edit_batch_mentor(request, id):
+
+    mentor = get_object_or_404(BatchMentor, id=id)
+
+    form = BatchMentorForm(request.POST or None, instance=mentor)
+
+    if form.is_valid():
+
+        form.save()
+
+        return redirect('view_batch_mentors')
+
+    batches = Batch.objects.all()
+
+    return render(request, 'alumni_coordinator/edit_batch_mentor.html', {'form': form, 'batches': batches, 'mentor': mentor})
+
 
 # Export Batch Mentor Data to Excel
 def export_batch_mentor_to_excel(request):
@@ -526,3 +553,89 @@ def export_batch_mentor_to_excel(request):
 
     wb.save(response)
     return response
+
+def assign_batch_to_mentor(request):
+    if request.method == 'POST':
+        mentor_id = request.POST.get('mentor_id')
+        batch_id = request.POST.get('batch_id')
+        mentor = BatchMentor.objects.get(id=mentor_id)
+        batch = Batch.objects.get(id=batch_id)
+        mentor.assigned_batches.add(batch)
+        return redirect('view_batch_mentors')
+    mentors = BatchMentor.objects.all()
+    batches = Batch.objects.all()
+    return render(request, 'assign_batch.html', {'mentors': mentors, 'batches': batches})
+
+def view_alumni_in_batches(request, mentor_id):
+    mentor = get_object_or_404(BatchMentor, pk=mentor_id)
+    assigned_batches = mentor.assigned_batches.all()
+    alumni_list = Alumni.objects.filter(graduation_year__in=assigned_batches.values_list('graduation_year', flat=True))
+    return render(request, 'view_alumni_in_batches.html', {
+        'mentor': mentor,
+        'alumni_list': alumni_list,
+        'assigned_batches': assigned_batches
+    })
+
+from django.shortcuts import render, get_object_or_404
+from .models import BatchMentor, Alumni
+
+def view_available_batch_mentors(request):
+    available_mentors = BatchMentor.objects.get_available_mentors()
+    return render(request, 'batch_mentor/view_available_batch_mentors.html', {'available_mentors': available_mentors})
+
+def view_alumni_in_batches(request, mentor_id):
+    mentor = get_object_or_404(BatchMentor, id=mentor_id)
+    assigned_batches = mentor.assigned_batches.all()
+    alumni_list = Alumni.objects.filter(graduation_year__in=[batch.graduation_year for batch in assigned_batches])
+    return render(request, 'batch_mentor/view_alumni_in_batches.html', {'mentor': mentor, 'assigned_batches': assigned_batches, 'alumni_list': alumni_list})
+
+def edit_batch_mentor(request, id):
+    mentor = get_object_or_404(BatchMentor, id=id)
+    if request.method == 'POST':
+        form = BatchMentorForm(request.POST, instance=mentor)
+        if form.is_valid():
+            form.save()
+            form.save_m2m()  # Save the many-to-many relationships
+            messages.success(request, 'Batch Mentor updated successfully.')
+            return redirect('view_batch_mentors')
+    else:
+        form = BatchMentorForm(instance=mentor)
+    return render(request, 'alumni_coordinator/edit_batch_mentor.html', {'form': form, 'mentor': mentor})
+
+def delete_batch_mentor(request, id):
+    mentor = get_object_or_404(BatchMentor, id=id)
+    if request.method == 'POST':
+        mentor.delete()
+        messages.success(request, 'Batch Mentor deleted successfully.')
+        return redirect('view_batch_mentors')
+    return render(request, 'alumni_coordinator/delete_batch_mentor.html', {'mentor': mentor})
+
+def alumni_forgot_password(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        email = data.get('email')
+        mobile = data.get('mobile')
+        try:
+            alumni = Alumni.objects.get(email=email, mobile=mobile)
+            return JsonResponse({'success': True})
+        except Alumni.DoesNotExist:
+            return JsonResponse({'success': False, 'message': 'Invalid email or mobile number.'})
+    return JsonResponse({'success': False, 'message': 'Invalid request method.'})
+
+def alumni_reset_password(request):
+    if request.method == 'POST':
+        email = request.POST.get('email')
+        password1 = request.POST.get('password1')
+        password2 = request.POST.get('password2')
+        if password1 != password2:
+            messages.error(request, 'Passwords do not match.')
+            return redirect('alumni_login')
+        try:
+            alumni = Alumni.objects.get(email=email)
+            alumni.set_password(password1)
+            alumni.save()
+            messages.success(request, 'Password reset successfully.')
+            return redirect('alumni_login')
+        except Alumni.DoesNotExist:
+            messages.error(request, 'Invalid email.')
+    return redirect('alumni_login')
