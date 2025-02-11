@@ -198,6 +198,16 @@
                 {{ form.linkedin }}
                 <div class="text-danger">{{ form.linkedin.errors }}</div>
             </div>
+            <div class="form-group">
+                <label for="password1"><i class="fas fa-lock"></i> New Password</label>
+                {{ form.password1 }}
+                <div class="text-danger">{{ form.password1.errors }}</div>
+            </div>
+            <div class="form-group">
+                <label for="password2"><i class="fas fa-lock"></i> Confirm New Password</label>
+                {{ form.password2 }}
+                <div class="text-danger">{{ form.password2.errors }}</div>
+            </div>
             <button type="submit" class="btn btn-primary btn-block">Save Changes</button>
             <a href="javascript:history.back()" class="btn btn-secondary back-button"><i class="fas fa-arrow-left"></i> Back</a>
         </form>
@@ -233,6 +243,13 @@
                 const preview = document.getElementById('profilePhotoPreview');
                 preview.src = URL.createObjectURL(file);
                 preview.style.display = 'block';
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', function() {
+            var success = "{{ success|yesno:'true,false' }}" === 'true';
+            if (success) {
+                $('#successModal').modal('show');
             }
         });
     </script>

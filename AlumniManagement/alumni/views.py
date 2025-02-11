@@ -1,29 +1,34 @@
 import sys
-import csv
 import xlwt
 from django.http import HttpResponse, JsonResponse
 sys.setrecursionlimit(1000)
 
 from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth import authenticate, login, logout, get_user_model
+from django.contrib.auth.models import User
 from django.contrib import messages
 from .models import Admin, Alumni, AlumniCoordinator, Comment, GalleryPhoto, BatchMentor, Batch  # Add Batch
 from .forms import (
     AdminRegistrationForm, AlumniRegistrationForm, AlumniCoordinatorRegistrationForm,
-    AlumniEditForm, GalleryPhotoForm, CommentForm, AlumniCoordinatorEditForm, BatchMentorRegistrationForm, BatchMentorLoginForm, BatchMentorForm, AlumniLoginForm
+    AlumniEditForm, GalleryPhotoForm, CommentForm, AlumniCoordinatorEditForm, BatchMentorRegistrationForm, BatchMentorLoginForm, BatchMentorForm, AlumniLoginForm, ForgotPasswordForm, ResetPasswordForm
 )
 from django.contrib.auth.forms import AuthenticationForm
 from django.urls import path
 from django import forms
 from . import views
 from django.template.loader import render_to_string
-from django.core.mail import send_mail, EmailMessage
 from io import BytesIO
 from PIL import Image, ImageDraw, ImageFont
 import requests
 import os
 import json
 from django.contrib.auth.tokens import default_token_generator
+from django.contrib.auth.hashers import check_password, make_password
+from django.core.mail import send_mail
+import random
+
+# Temporary storage for OTP verification
+otp_storage = {}
 
 # Home Page
 def home(request):
@@ -139,25 +144,6 @@ def alumni_registration(request):
         form = AlumniRegistrationForm(initial={'is_international': False})
     return render(request, 'alumni/alumni_registration.html', {'form': form})
 
-# Alumni Login
-def alumni_login(request):
-    if request.method == 'POST':
-        form = AlumniLoginForm(request.POST)
-        if form.is_valid():
-            email = form.cleaned_data.get('email')
-            password = form.cleaned_data.get('password')
-            user = authenticate(request, username=email, password=password)
-            if user is not None and isinstance(user, Alumni):
-                login(request, user)
-                return redirect('alumni_profile')
-            else:
-                messages.error(request, 'Invalid email or password')
-        else:
-            messages.error(request, 'Please correct the error below.')
-    else:
-        form = AlumniLoginForm()
-    return render(request, 'alumni/alumni_login.html', {'form': form})
-
 # Alumni Profile
 def alumni_profile(request):
     if not request.user.is_authenticated:
@@ -177,9 +163,13 @@ def alumni_edit_profile(request):
     if request.method == 'POST':
         form = AlumniEditForm(request.POST, request.FILES, instance=alumni)
         if form.is_valid():
-            form.save()
+            alumni = form.save(commit=False)
+            password1 = form.cleaned_data.get('password1')
+            if password1:
+                alumni.set_password(password1)
+            alumni.save()
             messages.success(request, 'Profile updated successfully.')
-            return redirect('alumni_edit_profile')  # Redirect to the same page
+            return render(request, 'alumni/alumni_edit_profile.html', {'form': form, 'success': True})
         else:
             messages.error(request, 'Please correct the error below.')
     else:
@@ -194,7 +184,7 @@ def edit_alumni(request, id):
         if form.is_valid():
             form.save()
             messages.success(request, 'Profile updated successfully.')
-            return redirect('alumni_profile')
+            return redirect('edit_profile')
         else:
             messages.error(request, 'Please correct the error below.')
     else:
@@ -262,64 +252,92 @@ def new_func():
     header_style = xlwt.easyxf('font: bold 1')
 
 # Share Alumni Profile
+import os
+from django.http import HttpResponse
+from PIL import Image, ImageDraw, ImageFont
+from .models import Alumni
+
 def share_alumni_profile(request, id):
     try:
         alumni = Alumni.objects.get(pk=id)
-        header_image_path = os.path.join(os.path.dirname(__file__), 'static', 'images', 'header-2.jpg')
         
-        # Create a blank image
-        image = Image.new('RGB', (800, 1200), color='white')
-        draw = ImageDraw.Draw(image)
-        font = ImageFont.truetype("arial.ttf", 20)
-        font_bold = ImageFont.truetype("arialbd.ttf", 24)
+        # Load header image
+        header_image_path = os.path.join(os.path.dirname(__file__), 'static', 'images', 'header-2.jpg')
 
-        # Draw the header image
+        # Create a blank image
+        image = Image.new('RGB', (900, 1300), color=(245, 245, 245))  # Light gray background
+        draw = ImageDraw.Draw(image)
+
+        # Load fonts
+        font_regular = ImageFont.truetype("arial.ttf", 24)
+        font_bold = ImageFont.truetype("arialbd.ttf", 28)
+        font_title = ImageFont.truetype("arialbd.ttf", 32)
+
+        # Draw a stylish header
         try:
-            header_image = Image.open(header_image_path)
-            header_image = header_image.resize((800, 200))
+            header_image = Image.open(header_image_path).resize((900, 180))
             image.paste(header_image, (0, 0))
         except FileNotFoundError:
-            draw.text((20, 20), "Header Image Not Found", fill="red", font=font_bold)
+            draw.rectangle([(0, 0), (900, 180)], fill=(30, 144, 255))  # Blue header fallback
+            draw.text((300, 70), "ALUMNI PROFILE", fill="white", font=font_title)
 
-        # Draw the profile photo
+        # Draw a rounded profile picture
         try:
-            profile_photo = Image.open(alumni.profile_photo.path)
-            profile_photo = profile_photo.resize((150, 150))
-            image.paste(profile_photo, (325, 220))
+            profile_photo = Image.open(alumni.profile_photo.path).resize((180, 180))
+            mask = Image.new('L', (180, 180), 0)
+            mask_draw = ImageDraw.Draw(mask)
+            mask_draw.ellipse((0, 0, 180, 180), fill=255)
+
+            # Create a circular border
+            border = Image.new('RGB', (190, 190), (255, 255, 255))
+            border_draw = ImageDraw.Draw(border)
+            border_draw.ellipse((0, 0, 190, 190), fill=(255, 255, 255), outline=(0, 0, 0), width=5)
+
+            image.paste(border, (360, 190))
+            image.paste(profile_photo, (365, 195), mask)
         except FileNotFoundError:
-            draw.text((325, 220), "Profile Photo Not Found", fill="red", font=font_bold)
+            draw.text((390, 220), "No Photo", fill="red", font=font_bold)
 
-        # Draw the profile details
-        def draw_text(draw, position, label, value, font, label_font):
-            if value:
-                draw.text(position, f"{label}: {value}", fill="black", font=font)
-            else:
-                draw.text(position, f"{label}: N/A", fill="black", font=font)
+        # Draw profile details with spacing
+        y_offset = 420
+        spacing = 40
+        text_color = (50, 50, 50)  # Dark gray for readability
 
-        draw_text(draw, (20, 400), "• Full Name", alumni.full_name, font, font_bold)
-        draw_text(draw, (20, 440), "• Email", alumni.email, font, font_bold)
-        draw_text(draw, (20, 480), "• Mobile", alumni.mobile, font, font_bold)
-        draw_text(draw, (20, 520), "• Current Job Profile", alumni.current_job_profile, font, font_bold)
-        draw_text(draw, (20, 560), "• Current Company", alumni.current_company, font, font_bold)
-        draw_text(draw, (20, 600), "• Current Job Location", alumni.current_job_location, font, font_bold)
-        draw_text(draw, (20, 640), "• Sector", alumni.sector, font, font_bold)
-        draw_text(draw, (20, 680), "• City", alumni.city, font, font_bold)
-        draw_text(draw, (20, 720), "• Sub District", alumni.sub_district, font, font_bold)
-        draw_text(draw, (20, 760), "• District", alumni.district, font, font_bold)
-        draw_text(draw, (20, 800), "• State", alumni.state, font, font_bold)
-        draw_text(draw, (20, 840), "• Pincode", alumni.pincode, font, font_bold)
-        draw_text(draw, (20, 880), "• Country", alumni.country, font, font_bold)
-        draw_text(draw, (20, 920), "• Full Address", alumni.full_address, font, font_bold)
-        draw_text(draw, (20, 960), "• Graduation Year", alumni.graduation_year, font, font_bold)
-        draw_text(draw, (20, 1000), "• Experience", alumni.experience, font, font_bold)
-        draw_text(draw, (20, 1040), "• LinkedIn", alumni.linkedin, font, font_bold)
-        draw_text(draw, (20, 1080), "• Facebook", alumni.facebook, font, font_bold)
-        draw_text(draw, (20, 1120), "• Instagram", alumni.instagram, font, font_bold)
-        draw_text(draw, (20, 1160), "• GitHub", alumni.github, font, font_bold)
+        def draw_label(draw, position, label, value):
+            draw.text(position, f"{label}:", fill=(30, 144, 255), font=font_bold)  # Blue Labels
+            draw.text((position[0] + 200, position[1]), value if value else "N/A", fill=text_color, font=font_regular)
 
+        draw_label(draw, (50, y_offset), "Full Name", alumni.full_name)
+        draw_label(draw, (50, y_offset + spacing), "Email", alumni.email)
+        draw_label(draw, (50, y_offset + spacing * 2), "Mobile", alumni.mobile)
+        draw_label(draw, (50, y_offset + spacing * 3), "Job Profile", alumni.current_job_profile)
+        draw_label(draw, (50, y_offset + spacing * 4), "Company", alumni.current_company)
+        draw_label(draw, (50, y_offset + spacing * 5), "Location", alumni.current_job_location)
+        draw_label(draw, (50, y_offset + spacing * 6), "Sector", alumni.sector)
+        draw_label(draw, (50, y_offset + spacing * 7), "City", alumni.city)
+        draw_label(draw, (50, y_offset + spacing * 8), "State", alumni.state)
+        draw_label(draw, (50, y_offset + spacing * 9), "Graduation Year", str(alumni.graduation_year))
+        draw_label(draw, (50, y_offset + spacing * 10), "Experience", str(alumni.experience) + " years")
+
+        # Social Media Links
+        social_links = [
+            ("LinkedIn", alumni.linkedin),
+            ("Facebook", alumni.facebook),
+            ("Instagram", alumni.instagram),
+            ("GitHub", alumni.github),
+        ]
+
+        y_offset += spacing * 11
+        for platform, link in social_links:
+            if link:
+                draw_label(draw, (50, y_offset), platform, link)
+                y_offset += spacing
+
+        # Convert to JPEG response
         response = HttpResponse(content_type="image/jpeg")
         image.save(response, "JPEG")
         return response
+
     except Alumni.DoesNotExist:
         return HttpResponse("Alumni not found", status=404)
 
@@ -397,7 +415,7 @@ def delete_comment(request, id):
 # Logout
 def logout_view(request):
     logout(request)
-    return redirect('home')
+    return redirect('alumni_login')
 
 # Register
 def register(request):
@@ -476,16 +494,6 @@ def edit_batch_mentor(request, id):
     batches = Batch.objects.all()
     return render(request, 'alumni_coordinator/edit_batch_mentor.html', {'form': form, 'mentor': mentor, 'batches': batches})
 
-def view_alumni_in_batches(request, mentor_id):
-    mentor = get_object_or_404(BatchMentor, pk=mentor_id)
-    assigned_batches = mentor.assigned_batches.all()
-    alumni_list = Alumni.objects.filter(graduation_year__in=assigned_batches.values_list('graduation_year', flat=True))
-    return render(request, 'view_alumni_in_batches.html', {
-        'mentor': mentor,
-        'alumni_list': alumni_list,
-        'assigned_batches': assigned_batches
-    })
-
 # Delete Batch Mentor
 def delete_batch_mentor(request, id):
     if 'coordinator_id' not in request.session:
@@ -495,6 +503,29 @@ def delete_batch_mentor(request, id):
     messages.success(request, 'Batch Mentor deleted successfully.')
     return redirect('view_batch_mentors')
 
+# Assign Batch to Mentor
+def assign_batch_to_mentor(request):
+    if request.method == 'POST':
+        mentor_id = request.POST.get('mentor_id')
+        batch_id = request.POST.get('batch_id')
+        mentor = BatchMentor.objects.get(id=mentor_id)
+        batch = Batch.objects.get(id=batch_id)
+        mentor.assigned_batches.add(batch)
+        return redirect('view_batch_mentors')
+    mentors = BatchMentor.objects.all()
+    batches = Batch.objects.all()
+    return render(request, 'assign_batch.html', {'mentors': mentors, 'batches': batches})
+
+# View Alumni in Batches
+def view_alumni_in_batches(request, mentor_id):
+    mentor = get_object_or_404(BatchMentor, pk=mentor_id)
+    assigned_batches = mentor.assigned_batches.all()
+    alumni_list = Alumni.objects.filter(graduation_year__in=assigned_batches.values_list('graduation_year', flat=True))
+    return render(request, 'view_alumni_in_batches.html', {
+        'mentor': mentor,
+        'alumni_list': alumni_list,
+        'assigned_batches': assigned_batches
+    })
 
 def edit_batch_mentor(request, id):
 
@@ -610,68 +641,100 @@ def delete_batch_mentor(request, id):
         return redirect('view_batch_mentors')
     return render(request, 'alumni_coordinator/delete_batch_mentor.html', {'mentor': mentor})
 
-def alumni_forgot_password(request):
-    if request.method == 'POST':
-        data = json.loads(request.body)
-        email = data.get('email')
-        mobile = data.get('mobile')
-        try:
-            alumni = Alumni.objects.get(email=email, mobile=mobile)
-            return JsonResponse({'success': True})
-        except Alumni.DoesNotExist:
-            return JsonResponse({'success': False, 'message': 'Invalid email or mobile number.'})
-    return JsonResponse({'success': False, 'message': 'Invalid request method.'})
-
-def alumni_reset_password(request):
+# Alumni Login
+def alumni_login(request):
     if request.method == 'POST':
         email = request.POST.get('email')
-        password1 = request.POST.get('password1')
-        password2 = request.POST.get('password2')
-        if password1 != password2:
-            messages.error(request, 'Passwords do not match.')
-            return redirect('alumni_reset_password')
-        try:
-            alumni = Alumni.objects.get(email=email)
-            alumni.set_password(password1)
-            alumni.save()
-            messages.success(request, 'Password reset successfully.')
-            return redirect('alumni_login')
-        except Alumni.DoesNotExist:
-            messages.error(request, 'Invalid email.')
-    return redirect('alumni_reset_password')
-# Alumni Forgot Password
+        password = request.POST.get('password')
+        user = authenticate(request, username=email, password=password)
+        if user is not None and isinstance(user, Alumni):
+            login(request, user)
+            return redirect('alumni_profile')
+        else:
+            messages.error(request, 'Invalid email or password')
+    return render(request, 'alumni/alumni_login.html')
 
-def alumni_forgot_password(request):    
+# Forgot Password
+def alumni_forgot_password(request):
     if request.method == 'POST':
         email = request.POST.get('email')
         mobile = request.POST.get('mobile')
+
+        # Debugging: Print received email and mobile
+        print(f"Received email: {email}, mobile: {mobile}")
+
         try:
-            alumni = Alumni.objects.get(email=email, mobile=mobile)
-            # Add your logic here if alumni is found
-            messages.success(request, 'Alumni found. Proceed to reset password.')
-            return redirect('alumni_reset_password')
-            # Add your logic here if alumni is found
+            Alumni.objects.get(email=email, mobile=mobile)  # Use Alumni model
+            otp = random.randint(100000, 999999)  # Generate OTP
+            otp_storage[email] = otp
+
+            # Debugging: Print statements
+            print(f"Generated OTP: {otp} for email: {email}")
+
+            # Send OTP via email
+            send_mail(
+                'Password Reset OTP',
+                f'Your OTP for password reset is {otp}.',
+                os.getenv('361shubhamkuklarni@gmial.com'),  # Use environment variable
+                [email],
+                fail_silently=False,
+            )
+
+            print("OTP email sent successfully")
+
+            return JsonResponse({"success": True, "message": "OTP sent to registered email!"})
+
         except Alumni.DoesNotExist:
-            messages.error(request, 'Invalid email or mobile number.')
-    return render(request, 'alumni/alumni_forgot_password.html')    
+            print(f"User does not exist: email={email}, mobile={mobile}")  # Debugging: Print email and mobile
+            return JsonResponse({"success": False, "message": "Invalid email or mobile number!"})
 
+    return render(request, 'alumni/alumni_forgot_password.html')
 
-# Alumni Reset Password 
-
-def alumni_reset_password(request):
+def verify_otp(request):
     if request.method == 'POST':
-        email = request.POST.get('email')
-        password1 = request.POST.get('password1')
-        password2 = request.POST.get('password2')
-        if password1 != password2:
-            messages.error(request, 'Passwords do not match.')
-            return redirect('alumni_reset_password')
+        email = request.POST['email']
+        entered_otp = request.POST['otp']
+
+        if email in otp_storage and otp_storage[email] == int(entered_otp):
+            return JsonResponse({"success": True, "message": "OTP verified successfully!"})
+        else:
+            return JsonResponse({"success": False, "message": "Invalid OTP!"})
+
+def alumni_reset_password (request):
+    if request.method == 'POST':
+        email = request.POST['email']
+        new_password = request.POST['new_password']
+        confirm_password = request.POST['confirm_password']
+
+        if new_password != confirm_password:
+            return JsonResponse({"success": False, "message": "Passwords do not match!"})
+
         try:
-            alumni = Alumni.objects.get(email=email)
-            alumni.set_password(password1)
-            alumni.save()
-            messages.success(request, 'Password reset successfully.')
-            return redirect('alumni_login')
-        except Alumni.DoesNotExist:
-            messages.error(request, 'Invalid email.')
+            user = User.objects.get(email=email)
+            user.set_password(new_password)
+            user.save()
+            del otp_storage[email]  # Remove OTP after successful reset
+            return JsonResponse({"success": True, "message": "Password updated successfully! Please login with your new password."})
+        except User.DoesNotExist:
+            return JsonResponse({"success": False, "message": "User not found!"})
+
     return redirect('alumni_login')
+
+def login_alumni(request):
+    if request.method == 'POST':
+        form = AlumniLoginForm(request.POST)
+        if form.is_valid():
+            email = form.cleaned_data['email']
+            password = form.cleaned_data['password']
+            try:
+                alumni = Alumni.objects.get(email=email)
+                if check_password(password, alumni.password):
+                    request.session['alumni_id'] = alumni.id
+                    return redirect('alumni_profile')
+                else:
+                    messages.error(request, "Invalid password.")
+            except Alumni.DoesNotExist:
+                messages.error(request, "Alumni not found.")
+    else:
+        form = AlumniLoginForm()
+    return render(request, 'alumni/alumni_login.html', {'form': form})

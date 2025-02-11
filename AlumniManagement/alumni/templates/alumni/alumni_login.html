@@ -4,14 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Alumni Login</title>
+    
     {% load static %}
-    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+
     <style>
         body {
             background-color: #f8f9fa;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: Arial, sans-serif;
         }
+
         .container {
             max-width: 400px;
             margin: 50px auto;
@@ -20,207 +23,247 @@
             box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
             border-radius: 10px;
         }
-        .logo {
-            display: block;
-            margin: 0 auto 20px;
-            width: 100px;
-        }
-        h2 {
-            margin-bottom: 25px;
-            color: #343a40;
-            text-align: center;
-        }
+
         .form-group {
+            position: relative;
             margin-bottom: 20px;
         }
+
         .form-group label {
             font-weight: bold;
         }
+
         .form-group input {
             width: 100%;
             padding: 10px;
+            padding-left: 35px;
             border: 1px solid #ced4da;
             border-radius: 5px;
         }
-        button {
-            padding: 10px;
-            background-color: #007bff;
-            color: #ffffff;
-            border: none;
-            border-radius: 5px;
+
+        .form-group .fa {
+            position: absolute;
+            top: 50%;
+            left: 10px;
+            transform: translateY(-50%);
+            color: #ced4da;
+        }
+
+        .password-toggle {
+            position: absolute;
+            top: 50%;
+            right: 10px;
+            transform: translateY(-50%);
             cursor: pointer;
+            color: #ced4da;
+        }
+
+        .btn-primary {
+            width: 100%;
+            border-radius: 5px;
             transition: background-color 0.3s;
         }
-        button:hover {
+
+        .btn-primary:hover {
             background-color: #0056b3;
         }
-        p {
-            margin-top: 20px;
-            color: #6c757d;
+
+        .forgot-password {
+            display: block;
             text-align: center;
-        }
-        p a {
+            margin-top: 10px;
             color: #007bff;
-            text-decoration: none;
+            cursor: pointer;
         }
-        p a:hover {
+
+        .forgot-password:hover {
             text-decoration: underline;
         }
-        #resetPasswordForm {
-            display: none;
+
+        .modal-header {
+            background: #007bff;
+            color: white;
+        }
+
+        .btn-danger {
+            width: 100%;
+            border-radius: 5px;
         }
     </style>
 </head>
 <body>
+
     <div class="container">
-        <h2><i class="fa fa-user-graduate"></i> Alumni Login</h2>
-        <form method="post" action="{% url 'alumni_login' %}" id="loginForm">
+        <h2 class="text-center"><i class="fas fa-user-graduate"></i> Alumni Login</h2>
+
+        {% if messages %}
+            <div class="alert alert-danger">
+                {% for message in messages %}
+                    {{ message }}
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <form method="post" action="{% url 'alumni_login' %}">
             {% csrf_token %}
-            {{ form.as_p }}
-            <button type="submit" class="btn btn-primary btn-block">Login</button>
+            <div class="form-group">
+                <label for="email"><i class="fas fa-envelope"></i> Email</label>
+                <input type="email" id="email" name="email" class="form-control" placeholder="Email" required>
+            </div>
+
+            <div class="form-group">
+                <label for="password"><i class="fas fa-lock"></i> Password</label>
+                <input type="password" id="password" name="password" class="form-control" placeholder="Password" required>
+                <span class="password-toggle" onclick="togglePasswordVisibility()"><i class="fas fa-eye"></i></span>
+            </div>
+
+            <button type="submit" class="btn btn-primary"><i class="fas fa-sign-in-alt"></i> Login</button>
         </form>
-        <p>Don't have an account? <a href="{% url 'alumni_registration' %}">Register here</a></p>
-        <p><a href="{% url 'home' %}">Home</a></p>
-        <p><a href="#" data-toggle="modal" data-target="#forgotPasswordModal">Forgot Password?</a></p>
+
+        <p>
+            <a href="#" class="forgot-password" data-bs-toggle="modal" data-bs-target="#forgotPasswordModal">
+                <i class="fas fa-question-circle"></i> Forgot Password?
+            </a>
+        </p>
     </div>
 
     <!-- Forgot Password Modal -->
-    <div class="modal fade" id="forgotPasswordModal" tabindex="-1" role="dialog" aria-labelledby="forgotPasswordModalLabel" aria-hidden="true">
-        <div class="modal-dialog" role="document">
+    <div class="modal fade" id="forgotPasswordModal" tabindex="-1" aria-labelledby="forgotPasswordLabel" aria-hidden="true">
+        <div class="modal-dialog">
             <div class="modal-content">
+
                 <div class="modal-header">
-                    <h5 class="modal-title" id="forgotPasswordModalLabel">Forgot Password</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
+                    <h5 class="modal-title" id="forgotPasswordLabel"><i class="fas fa-unlock-alt"></i> Forgot Password</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
+
                 <div class="modal-body">
-                    <form id="forgotPasswordForm" method="post">
+                    <!-- Step 1: Verify Email & Mobile -->
+                    <form id="forgotPasswordForm">
                         {% csrf_token %}
                         <div class="form-group">
-                            <label for="email">Email</label>
-                            <input type="email" class="form-control" id="email" name="email" required>
+                            <label for="forgot-email">Registered Email</label>
+                            <input type="email" id="forgot-email" name="email" class="form-control" required>
                         </div>
+
                         <div class="form-group">
-                            <label for="mobile">Mobile</label>
-                            <input type="text" class="form-control" id="mobile" name="mobile" required>
+                            <label for="forgot-mobile">Registered Mobile</label>
+                            <input type="text" id="forgot-mobile" name="mobile" class="form-control" required>
                         </div>
-                        <button type="submit" class="btn btn-primary">Verify</button>
+
+                        <button type="button" class="btn btn-danger" onclick="sendOTP()">Send OTP</button>
                     </form>
-                    <form id="resetPasswordForm" method="post" action="{% url 'alumni_reset_password' %}" style="display:none;">
-                        {% csrf_token %}
-                        <input type="hidden" name="email" id="resetEmail">
+
+                    <!-- Step 2: Enter OTP -->
+                    <div id="otpSection" style="display: none;">
                         <div class="form-group">
-                            <label for="password1">New Password</label>
-                            <input type="password" class="form-control" id="password1" name="password1" required>
+                            <label for="otp">Enter OTP</label>
+                            <input type="text" id="otp" class="form-control" required>
                         </div>
-                        <div class="form-group">
-                            <label for="password2">Confirm New Password</label>
-                            <input type="password" class="form-control" id="password2" name="password2" required>
-                        </div>
-                        <button type="submit" class="btn btn-primary">Reset Password</button>
-                    </form>
+                        <button type="button" class="btn btn-primary" onclick="verifyOTP()">Verify OTP</button>
+                    </div>
+
+                    <!-- Step 3: Reset Password -->
+                    <div id="resetPasswordSection" style="display: none;">
+                        <form id="resetPasswordForm">
+                            {% csrf_token %}
+                            <input type="hidden" id="reset-email" name="email">
+                            <div class="form-group">
+                                <label for="new-password">New Password</label>
+                                <input type="password" id="new-password" name="new_password" class="form-control" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="confirm-password">Confirm Password</label>
+                                <input type="password" id="confirm-password" name="confirm_password" class="form-control" required>
+                            </div>
+                            <button type="button" class="btn btn-success" onclick="resetPassword()">Reset Password</button>
+                        </form>
+                    </div>
+
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Success and Error Modals -->
-    <div class="modal fade" id="successModal" tabindex="-1" role="dialog" aria-labelledby="successModalLabel" aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="successModalLabel">Login Successful</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    You have successfully logged in.
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="modal fade" id="errorModal" tabindex="-1" role="dialog" aria-labelledby="errorModalLabel" aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="errorModalLabel">Login Failed</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    Invalid username or password. Please try again.
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
-                </div>
-            </div>
-        </div>
-    </div>
+    <!-- Bootstrap & JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
     <script>
-        document.getElementById('loginForm').addEventListener('submit', function(event) {
-            event.preventDefault();
-            var form = this;
-            fetch(form.action, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': '{{ csrf_token }}'
-                },
-                body: JSON.stringify({
-                    username: form.username.value,
-                    password: form.password.value
-                })
-            }).then(response => response.json()).then(data => {
-                if (data.success) {
-                    $('#successModal').modal('show');
-                } else {
-                    $('#errorModal').modal('show');
-                }
-            });
-        });
+        function togglePasswordVisibility() {
+            var passwordInput = document.getElementById('password');
+            var eyeIcon = document.querySelector('.password-toggle i');
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                eyeIcon.classList.remove('fa-eye');
+                eyeIcon.classList.add('fa-eye-slash');
+            } else {
+                passwordInput.type = 'password';
+                eyeIcon.classList.remove('fa-eye-slash');
+                eyeIcon.classList.add('fa-eye');
+            }
+        }
 
-        document.getElementById('forgotPasswordForm').addEventListener('submit', function(event) {
-            event.preventDefault();
-            var email = document.getElementById('email').value;
-            var mobile = document.getElementById('mobile').value;
-            fetch("{% url 'alumni_forgot_password' %}", {
-                method: 'POST',
+        function sendOTP() {
+            let email = document.getElementById("forgot-email").value;
+            let mobile = document.getElementById("forgot-mobile").value;
+            fetch("{% url 'forgot_password' %}", {
+                method: "POST",
                 headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': '{{ csrf_token }}'
+                    "X-CSRFToken": document.querySelector("[name=csrfmiddlewaretoken]").value,
+                    "Content-Type": "application/json",
                 },
                 body: JSON.stringify({ email: email, mobile: mobile })
-            }).then(response => response.json()).then(data => {
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log(data);  // Debugging: Log response
                 if (data.success) {
-                    document.getElementById('forgotPasswordForm').style.display = 'none';
-                    document.getElementById('resetEmail').value = email;
-                    document.getElementById('resetPasswordForm').style.display = 'block';
+                    alert(data.message);
+                    document.getElementById("otpSection").style.display = "block";
                 } else {
                     alert(data.message);
                 }
             });
-        });
+        }
 
-        document.getElementById('resetPasswordForm').addEventListener('submit', function(event) {
-            var password1 = document.getElementById('password1').value;
-            var password2 = document.getElementById('password2').value;
-            if (password1 !== password2) {
-                event.preventDefault();
-                alert('Passwords do not match.');
-            }
-        });
+        function verifyOTP() {
+            let email = document.getElementById("forgot-email").value;
+            let otp = document.getElementById("otp").value;
+            fetch("{% url 'verify_otp' %}", {
+                method: "POST",
+                headers: {
+                    "X-CSRFToken": document.querySelector("[name=csrfmiddlewaretoken]").value,
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ email: email, otp: otp })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(data.message);
+                    document.getElementById("resetPasswordSection").style.display = "block";
+                    document.getElementById("reset-email").value = email;
+                } else {
+                    alert(data.message);
+                }
+            });
+        }
+
+        function resetPassword() {
+            let form = document.getElementById("resetPasswordForm");
+            fetch("{% url 'reset_password' %}", {
+                method: "POST",
+                body: new FormData(form)
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.message);
+                if (data.success) {
+                    window.location.reload();
+                }
+            });
+        }
     </script>
 
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
 </html>

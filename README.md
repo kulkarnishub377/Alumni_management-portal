@@ -11,6 +11,7 @@ Welcome to the Alumni Management Portal! This project is designed to help manage
 - Responsive design
 - Batch Mentor management
 - Assign batches to Batch Mentors based on graduation year
+- Forgot Password functionality
 
 ## Technology Stack
 
@@ -38,6 +39,8 @@ Welcome to the Alumni Management Portal! This project is designed to help manage
 
 To get started with the project, follow these steps:
 
+### Frontend
+
 1. Clone the repository:
     ```bash
     git clone https://github.com/yourusername/alumni-management-portal.git
@@ -53,6 +56,42 @@ To get started with the project, follow these steps:
 4. Start the development server:
     ```bash
     npm start
+    ```
+
+### Backend
+
+1. Navigate to the backend directory:
+    ```bash
+    cd backend
+    ```
+2. Create a virtual environment:
+    ```bash
+    python -m venv venv
+    ```
+3. Activate the virtual environment:
+    - On Windows:
+        ```bash
+        venv\Scripts\activate
+        ```
+    - On macOS/Linux:
+        ```bash
+        source venv/bin/activate
+        ```
+4. Install dependencies:
+    ```bash
+    pip install -r requirements.txt
+    ```
+5. Apply migrations:
+    ```bash
+    python manage.py migrate
+    ```
+6. Create a superuser:
+    ```bash
+    python manage.py createsuperuser
+    ```
+7. Start the development server:
+    ```bash
+    python manage.py runserver
     ```
 
 ## Usage

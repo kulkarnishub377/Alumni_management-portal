@@ -7,7 +7,7 @@ from alumni import views
 urlpatterns = [
     path('', include('alumni.urls')),  # Include your app's URLs first
     path('admin/', admin.site.urls),  # Admin URLs
-]
+  ]
 
 if settings.DEBUG:
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
