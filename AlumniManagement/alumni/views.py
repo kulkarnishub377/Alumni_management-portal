@@ -629,7 +629,43 @@ def alumni_reset_password(request):
         password2 = request.POST.get('password2')
         if password1 != password2:
             messages.error(request, 'Passwords do not match.')
+            return redirect('alumni_reset_password')
+        try:
+            alumni = Alumni.objects.get(email=email)
+            alumni.set_password(password1)
+            alumni.save()
+            messages.success(request, 'Password reset successfully.')
             return redirect('alumni_login')
+        except Alumni.DoesNotExist:
+            messages.error(request, 'Invalid email.')
+    return redirect('alumni_reset_password')
+# Alumni Forgot Password
+
+def alumni_forgot_password(request):    
+    if request.method == 'POST':
+        email = request.POST.get('email')
+        mobile = request.POST.get('mobile')
+        try:
+            alumni = Alumni.objects.get(email=email, mobile=mobile)
+            # Add your logic here if alumni is found
+            messages.success(request, 'Alumni found. Proceed to reset password.')
+            return redirect('alumni_reset_password')
+            # Add your logic here if alumni is found
+        except Alumni.DoesNotExist:
+            messages.error(request, 'Invalid email or mobile number.')
+    return render(request, 'alumni/alumni_forgot_password.html')    
+
+
+# Alumni Reset Password 
+
+def alumni_reset_password(request):
+    if request.method == 'POST':
+        email = request.POST.get('email')
+        password1 = request.POST.get('password1')
+        password2 = request.POST.get('password2')
+        if password1 != password2:
+            messages.error(request, 'Passwords do not match.')
+            return redirect('alumni_reset_password')
         try:
             alumni = Alumni.objects.get(email=email)
             alumni.set_password(password1)
