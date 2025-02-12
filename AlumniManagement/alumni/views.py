@@ -7,7 +7,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout, get_user_model
 from django.contrib.auth.models import User
 from django.contrib import messages
-from .models import Admin, Alumni, AlumniCoordinator, Comment, GalleryPhoto, BatchMentor, Batch  # Add Batch
+from .models import Admin, Alumni, AlumniCoordinator, Comment, GalleryPhoto, BatchMentor, Batch, AlumniOTP  # Add Batch
 from .forms import (
     AdminRegistrationForm, AlumniRegistrationForm, AlumniCoordinatorRegistrationForm,
     AlumniEditForm, GalleryPhotoForm, CommentForm, AlumniCoordinatorEditForm, BatchMentorRegistrationForm, BatchMentorLoginForm, BatchMentorForm, AlumniLoginForm, ForgotPasswordForm, ResetPasswordForm
@@ -26,13 +26,14 @@ from django.contrib.auth.tokens import default_token_generator
 from django.contrib.auth.hashers import check_password, make_password
 from django.core.mail import send_mail
 import random
-
-# Temporary storage for OTP verification
-otp_storage = {}
+import string
+from django.views.decorators.csrf import csrf_exempt
+from django.utils.timezone import now
 
 # Home Page
 def home(request):
     return render(request, 'home.html')
+
 
 # Admin Login
 def admin_login(request):  
@@ -654,71 +655,106 @@ def alumni_login(request):
             messages.error(request, 'Invalid email or password')
     return render(request, 'alumni/alumni_login.html')
 
-# Forgot Password
+import random
+import datetime
+from django.shortcuts import render, redirect
+from django.http import JsonResponse
+from django.contrib.auth.models import User
+from django.contrib import messages
+from django.core.mail import send_mail
+from django.utils.timezone import now
+from .models import AlumniOTP
+
+# Temporary storage for OTP verification
+otp_storage = {}
+
+def generate_otp():
+    return str(random.randint(100000, 999999))
+
+@csrf_exempt
 def alumni_forgot_password(request):
-    if request.method == 'POST':
-        email = request.POST.get('email')
-        mobile = request.POST.get('mobile')
-
-        # Debugging: Print received email and mobile
-        print(f"Received email: {email}, mobile: {mobile}")
-
+    if request.method == "POST":
+        data = json.loads(request.body)
+        email = data.get("email")
+        mobile = data.get("mobile")
         try:
-            Alumni.objects.get(email=email, mobile=mobile)  # Use Alumni model
-            otp = random.randint(100000, 999999)  # Generate OTP
-            otp_storage[email] = otp
-
-            # Debugging: Print statements
-            print(f"Generated OTP: {otp} for email: {email}")
-
-            # Send OTP via email
-            send_mail(
-                'Password Reset OTP',
-                f'Your OTP for password reset is {otp}.',
-                os.getenv('361shubhamkuklarni@gmial.com'),  # Use environment variable
-                [email],
-                fail_silently=False,
+            user = Alumni.objects.get(email=email, mobile=mobile)
+            otp = generate_otp()
+            expiry_time = now() + datetime.timedelta(minutes=5)
+            AlumniOTP.objects.update_or_create(
+                user=user,
+                defaults={"otp": otp, "expires_at": expiry_time}
             )
-
-            print("OTP email sent successfully")
-
-            return JsonResponse({"success": True, "message": "OTP sent to registered email!"})
-
+            send_mail(
+                "Your OTP for Password Reset",
+                f"Your OTP is {otp}. It is valid for 5 minutes.",
+                "noreply@alumnisystem.com",
+                [email]
+            )
+            return JsonResponse({"success": True, "message": "OTP sent successfully!"})
         except Alumni.DoesNotExist:
-            print(f"User does not exist: email={email}, mobile={mobile}")  # Debugging: Print email and mobile
-            return JsonResponse({"success": False, "message": "Invalid email or mobile number!"})
-
-    return render(request, 'alumni/alumni_forgot_password.html')
-
-def verify_otp(request):
-    if request.method == 'POST':
-        email = request.POST['email']
-        entered_otp = request.POST['otp']
-
-        if email in otp_storage and otp_storage[email] == int(entered_otp):
-            return JsonResponse({"success": True, "message": "OTP verified successfully!"})
-        else:
-            return JsonResponse({"success": False, "message": "Invalid OTP!"})
-
-def alumni_reset_password (request):
-    if request.method == 'POST':
-        email = request.POST['email']
-        new_password = request.POST['new_password']
-        confirm_password = request.POST['confirm_password']
-
-        if new_password != confirm_password:
-            return JsonResponse({"success": False, "message": "Passwords do not match!"})
-
-        try:
-            user = User.objects.get(email=email)
-            user.set_password(new_password)
-            user.save()
-            del otp_storage[email]  # Remove OTP after successful reset
-            return JsonResponse({"success": True, "message": "Password updated successfully! Please login with your new password."})
-        except User.DoesNotExist:
             return JsonResponse({"success": False, "message": "User not found!"})
+    else:
+        return JsonResponse({"success": False, "message": "Invalid request method!"})
 
-    return redirect('alumni_login')
+@csrf_exempt
+def alumni_verify_otp(request):
+    if request.method == "POST":
+        data = json.loads(request.body)
+        email = data.get("email")
+        otp = data.get("otp")
+        try:
+            user = Alumni.objects.get(email=email)
+            record = AlumniOTP.objects.get(user=user, otp=otp)
+            if now() > record.expires_at:
+                return JsonResponse({"success": False, "message": "OTP has expired!"})
+            request.session["reset_email"] = email
+            return JsonResponse({"success": True, "message": "OTP verified!"})
+        except AlumniOTP.DoesNotExist:
+            return JsonResponse({"success": False, "message": "Invalid OTP!"})
+    else:
+        return JsonResponse({"success": False, "message": "Invalid request method!"})
+
+@csrf_exempt
+def alumni_reset_password(request):
+    if request.method == "POST":
+        form = ResetPasswordForm(request.POST)
+        if form.is_valid():
+            email = form.cleaned_data.get("email")
+            new_password = form.cleaned_data.get("new_password")
+            alumni = get_object_or_404(Alumni, email=email)
+            alumni.set_password(new_password)
+            alumni.save()
+            messages.success(request, "Password reset successfully!")
+            return redirect('alumni_login')
+        else:
+            messages.error(request, "Please correct the error below.")
+    else:
+        form = ResetPasswordForm()
+    return render(request, 'alumni/reset_password.html', {'form': form})
+
+def resend_otp(request):
+    if request.method == "POST":
+        email = request.POST.get("email")
+        try:
+            user = Alumni.objects.get(email=email)
+            otp = generate_otp()
+            expiry_time = now() + datetime.timedelta(minutes=5)
+            AlumniOTP.objects.update_or_create(
+                user=user,
+                defaults={"otp": otp, "expires_at": expiry_time}
+            )
+            send_mail(
+                "Your OTP for Password Reset",
+                f"Your OTP is {otp}. It is valid for 5 minutes.",
+                "noreply@alumnisystem.com",
+                [email]
+            )
+            return JsonResponse({"success": True, "message": "OTP resent successfully!"})
+        except Alumni.DoesNotExist:
+            return JsonResponse({"success": False, "message": "User not found!"})
+    else:
+        return JsonResponse({"success": False, "message": "Invalid request method!"})
 
 def login_alumni(request):
     if request.method == 'POST':

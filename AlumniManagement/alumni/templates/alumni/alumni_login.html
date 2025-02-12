@@ -16,7 +16,7 @@
         }
 
         .container {
-            max-width: 400px;
+            max-width: 400px; 
             margin: 50px auto;
             padding: 30px;
             background-color: #ffffff;
@@ -89,10 +89,18 @@
             width: 100%;
             border-radius: 5px;
         }
+
+        .hidden {
+            display: none;
+        }
+
+        #otpSection,
+        #resetPasswordSection {
+            display: none;
+        }
     </style>
 </head>
 <body>
-
     <div class="container">
         <h2 class="text-center"><i class="fas fa-user-graduate"></i> Alumni Login</h2>
 
@@ -131,55 +139,48 @@
     <div class="modal fade" id="forgotPasswordModal" tabindex="-1" aria-labelledby="forgotPasswordLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
-
                 <div class="modal-header">
                     <h5 class="modal-title" id="forgotPasswordLabel"><i class="fas fa-unlock-alt"></i> Forgot Password</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-
                 <div class="modal-body">
-                    <!-- Step 1: Verify Email & Mobile -->
                     <form id="forgotPasswordForm">
                         {% csrf_token %}
                         <div class="form-group">
-                            <label for="forgot-email">Registered Email</label>
+                            <label for="forgot-email"><i class="fas fa-envelope"></i> Registered Email</label>
                             <input type="email" id="forgot-email" name="email" class="form-control" required>
                         </div>
-
                         <div class="form-group">
-                            <label for="forgot-mobile">Registered Mobile</label>
+                            <label for="forgot-mobile"><i class="fas fa-mobile-alt"></i> Registered Mobile</label>
                             <input type="text" id="forgot-mobile" name="mobile" class="form-control" required>
                         </div>
 
-                        <button type="button" class="btn btn-danger" onclick="sendOTP()">Send OTP</button>
-                    </form>
+                        <button type="button" class="btn btn-danger" onclick="sendOTP()"><i class="fas fa-paper-plane"></i> Send OTP</button>
 
-                    <!-- Step 2: Enter OTP -->
-                    <div id="otpSection" style="display: none;">
-                        <div class="form-group">
-                            <label for="otp">Enter OTP</label>
+                        <div id="otpSection" class="hidden mt-3">
+                            <label for="otp"><i class="fas fa-key"></i> Enter OTP</label>
                             <input type="text" id="otp" class="form-control" required>
+                            <button type="button" class="btn btn-primary mt-2" onclick="verifyOTP()"><i class="fas fa-check"></i> Verify OTP</button>
+                            <p id="otpTimer" class="text-danger mt-2"></p>
+                            <button type="button" class="btn btn-secondary mt-2" onclick="resendOTP()"><i class="fas fa-redo"></i> Resend OTP</button>
                         </div>
-                        <button type="button" class="btn btn-primary" onclick="verifyOTP()">Verify OTP</button>
-                    </div>
 
-                    <!-- Step 3: Reset Password -->
-                    <div id="resetPasswordSection" style="display: none;">
-                        <form id="resetPasswordForm">
-                            {% csrf_token %}
-                            <input type="hidden" id="reset-email" name="email">
-                            <div class="form-group">
-                                <label for="new-password">New Password</label>
-                                <input type="password" id="new-password" name="new_password" class="form-control" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="confirm-password">Confirm Password</label>
-                                <input type="password" id="confirm-password" name="confirm_password" class="form-control" required>
-                            </div>
-                            <button type="button" class="btn btn-success" onclick="resetPassword()">Reset Password</button>
-                        </form>
-                    </div>
-
+                        <div id="resetPasswordSection" class="hidden mt-3">
+                            <form id="resetPasswordForm" method="post" action="{% url 'alumni_reset_password' %}">
+                                {% csrf_token %}
+                                <input type="hidden" id="reset-email" name="email">
+                                <div class="form-group">
+                                    <label for="new-password"><i class="fas fa-lock"></i> New Password</label>
+                                    <input type="password" id="new-password" name="new_password" class="form-control" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="confirm-password"><i class="fas fa-lock"></i> Confirm Password</label>
+                                    <input type="password" id="confirm-password" name="confirm_password" class="form-control" required>
+                                </div>
+                                <button type="submit" class="btn btn-success mt-2"><i class="fas fa-redo"></i> Reset Password</button>
+                            </form>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
@@ -190,80 +191,105 @@
 
     <script>
         function togglePasswordVisibility() {
-            var passwordInput = document.getElementById('password');
-            var eyeIcon = document.querySelector('.password-toggle i');
+            const passwordInput = document.getElementById('password');
+            const eyeIcon = document.querySelector('.password-toggle i');
             if (passwordInput.type === 'password') {
                 passwordInput.type = 'text';
-                eyeIcon.classList.remove('fa-eye');
-                eyeIcon.classList.add('fa-eye-slash');
+                eyeIcon.classList.replace('fa-eye', 'fa-eye-slash');
             } else {
                 passwordInput.type = 'password';
-                eyeIcon.classList.remove('fa-eye-slash');
-                eyeIcon.classList.add('fa-eye');
+                eyeIcon.classList.replace('fa-eye-slash', 'fa-eye');
             }
         }
 
         function sendOTP() {
-            let email = document.getElementById("forgot-email").value;
-            let mobile = document.getElementById("forgot-mobile").value;
-            fetch("{% url 'forgot_password' %}", {
+            const email = document.getElementById("forgot-email").value;
+            const mobile = document.getElementById("forgot-mobile").value;
+            fetch("{% url 'alumni_forgot_password' %}", {
                 method: "POST",
                 headers: {
                     "X-CSRFToken": document.querySelector("[name=csrfmiddlewaretoken]").value,
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify({ email: email, mobile: mobile })
-            })
-            .then(response => response.json())
-            .then(data => {
-                console.log(data);  // Debugging: Log response
-                if (data.success) {
-                    alert(data.message);
-                    document.getElementById("otpSection").style.display = "block";
-                } else {
-                    alert(data.message);
-                }
-            });
-        }
-
-        function verifyOTP() {
-            let email = document.getElementById("forgot-email").value;
-            let otp = document.getElementById("otp").value;
-            fetch("{% url 'verify_otp' %}", {
-                method: "POST",
-                headers: {
-                    "X-CSRFToken": document.querySelector("[name=csrfmiddlewaretoken]").value,
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({ email: email, otp: otp })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert(data.message);
-                    document.getElementById("resetPasswordSection").style.display = "block";
-                    document.getElementById("reset-email").value = email;
-                } else {
-                    alert(data.message);
-                }
-            });
-        }
-
-        function resetPassword() {
-            let form = document.getElementById("resetPasswordForm");
-            fetch("{% url 'reset_password' %}", {
-                method: "POST",
-                body: new FormData(form)
+                body: JSON.stringify({ email, mobile })
             })
             .then(response => response.json())
             .then(data => {
                 alert(data.message);
                 if (data.success) {
-                    window.location.reload();
+                    document.getElementById("otpSection").classList.remove("hidden");
+                    startOTPTimer();
+                    // Open the OTP modal
+                    var otpModal = new bootstrap.Modal(document.getElementById('verifyOTPModal'));
+                    otpModal.show();
+                } else {
+                    alert("Invalid form data!");
                 }
             });
         }
-    </script>
 
+        function verifyOTP() {
+            const email = document.getElementById("forgot-email").value;
+            const otp = document.getElementById("otp").value;
+            fetch("{% url 'alumni_verify_otp' %}", {
+                method: "POST",
+                headers: {
+                    "X-CSRFToken": document.querySelector("[name=csrfmiddlewaretoken]").value,
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ email, otp })
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.message);
+                if (data.success) {
+                    document.getElementById("resetPasswordSection").classList.remove("hidden");
+                    document.getElementById("reset-email").value = email;
+                    // Close the OTP modal and open the reset password section
+                    var otpModal = bootstrap.Modal.getInstance(document.getElementById('verifyOTPModal'));
+                    otpModal.hide();
+                    var resetPasswordModal = new bootstrap.Modal(document.getElementById('resetPasswordModal'));
+                    resetPasswordModal.show();
+                } else {
+                    alert("Invalid OTP!");
+                }
+            });
+        }
+
+        function resendOTP() {
+            const email = document.getElementById("forgot-email").value;
+            fetch("{% url 'resend_otp' %}", {
+                method: "POST",
+                headers: {
+                    "X-CSRFToken": document.querySelector("[name=csrfmiddlewaretoken]").value,
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ email })
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.message);
+                if (data.success) {
+                    startOTPTimer();
+                } else {
+                    alert("Failed to resend OTP!");
+                }
+            });
+        }
+
+        function startOTPTimer() {
+            let timer = 300;
+            const otpTimer = document.getElementById("otpTimer");
+            const interval = setInterval(() => {
+                const minutes = Math.floor(timer / 60);
+                const seconds = timer % 60;
+                otpTimer.textContent = `Time remaining: ${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+                if (timer-- <= 0) {
+                    clearInterval(interval);
+                    otpTimer.textContent = "OTP expired. Please resend OTP.";
+                }
+            }, 1000);
+        }
+    </script>
 </body>
 </html>

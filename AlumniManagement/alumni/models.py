@@ -1,6 +1,8 @@
 from django.db import models
-from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin, AbstractUser
+from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin, AbstractUser, User
 from django.contrib.auth.hashers import make_password, check_password
+import uuid
+from django.conf import settings
 
 class Admin(models.Model):
     name = models.CharField(max_length=255)
@@ -104,6 +106,9 @@ class Alumni(AbstractBaseUser, PermissionsMixin):
     def check_password(self, raw_password):
         return check_password(raw_password, self.password)
 
+    def set_password(self, raw_password):
+        self.password = make_password(raw_password)
+
     def __str__(self):
         return self.email
 
@@ -198,3 +203,12 @@ class BatchMentor(AbstractUser):
     class Meta:
         app_label = 'alumni'
         db_table = 'alumni_batchmentor'
+
+class AlumniOTP(models.Model):
+    user = models.ForeignKey(Alumni, on_delete=models.CASCADE)
+    otp = models.CharField(max_length=6)
+    created_at = models.DateTimeField(auto_now_add=True)
+    expires_at = models.DateTimeField()
+
+    def __str__(self):
+        return f"{self.user.email} - {self.otp}"

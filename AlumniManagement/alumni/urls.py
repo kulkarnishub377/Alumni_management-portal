@@ -23,9 +23,10 @@ urlpatterns = [
     path('alumni/edit/<int:id>/', views.edit_alumni, name='edit_alumni'),
     path('alumni/delete/<int:id>/', views.delete_alumni, name='delete_alumni'),
     path('alumni/login/', views.alumni_login, name='alumni_login'),
-    path('alumni/forgot-password/', views.alumni_forgot_password, name='forgot_password'),
-    path('alumni/verify-otp/', views.verify_otp, name='verify_otp'),
-    path('alumni/reset-password/', views.alumni_reset_password, name='reset_password'),
+    path('alumni/forgot-password/', views.alumni_forgot_password, name='alumni_forgot_password'),
+    path('alumni/verify-otp/', views.alumni_verify_otp, name='alumni_verify_otp'),
+    path('alumni/reset-password/', views.alumni_reset_password, name='alumni_reset_password'),
+    path('alumni/resend-otp/', views.resend_otp, name='resend_otp'),
 
     # Alumni Coordinator URLs
     path('alumni_coordinator/login/', views.alumni_coordinator_login, name='alumni_coordinator_login'),
