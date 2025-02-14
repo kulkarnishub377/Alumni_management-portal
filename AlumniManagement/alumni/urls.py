@@ -18,15 +18,9 @@ urlpatterns = [
     path('alumni/profile/', views.alumni_profile, name='alumni_profile'),
     path('alumni/edit-profile/', views.alumni_edit_profile, name='alumni_edit_profile'),
     path('alumni/share/<int:id>/', views.share_alumni_profile, name='share_alumni_profile'),
-    path('alumni/forgot-password/', views.alumni_forgot_password, name='alumni_forgot_password'),
-    path('alumni/reset-password/', views.alumni_reset_password, name='alumni_reset_password'),
     path('alumni/edit/<int:id>/', views.edit_alumni, name='edit_alumni'),
     path('alumni/delete/<int:id>/', views.delete_alumni, name='delete_alumni'),
     path('alumni/login/', views.alumni_login, name='alumni_login'),
-    path('alumni/forgot-password/', views.alumni_forgot_password, name='alumni_forgot_password'),
-    path('alumni/verify-otp/', views.alumni_verify_otp, name='alumni_verify_otp'),
-    path('alumni/reset-password/', views.alumni_reset_password, name='alumni_reset_password'),
-    path('alumni/resend-otp/', views.resend_otp, name='resend_otp'),
 
     # Alumni Coordinator URLs
     path('alumni_coordinator/login/', views.alumni_coordinator_login, name='alumni_coordinator_login'),
@@ -61,4 +55,6 @@ urlpatterns = [
     # Miscellaneous URLs
     path('logout/', views.logout_view, name='logout'),
     path('about/', views.about_us, name='about_us'),
+
+  
 ]

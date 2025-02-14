@@ -139,25 +139,17 @@ class LoginForm(forms.Form):
     email = forms.EmailField()
     password = forms.CharField(widget=forms.PasswordInput)
 
-class ForgotPasswordForm(forms.Form):
-    email = forms.EmailField(widget=forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'Enter registered email'}))
-    mobile = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter registered mobile number'}))
-
-class ResetPasswordForm(forms.Form):
-    email = forms.EmailField(widget=forms.HiddenInput())
-    new_password = forms.CharField(widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Enter new password'}))
-    confirm_password = forms.CharField(widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Confirm new password'}))
-
-    def clean(self):
-        cleaned_data = super().clean()
-        new_password = cleaned_data.get("new_password")
-        confirm_password = cleaned_data.get("confirm_password")
-
-        if new_password and new_password != confirm_password:
-            self.add_error('confirm_password', "Passwords do not match")
-
-        return cleaned_data
-
 class AlumniLoginForm(forms.Form):
     email = forms.EmailField(widget=forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'Enter your email'}))
     password = forms.CharField(widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Enter your password'}))
+
+class ForgotPasswordForm(forms.Form):
+    email = forms.EmailField()
+    mobile = forms.CharField(max_length=15)
+
+class OTPVerificationForm(forms.Form):
+    otp = forms.CharField(max_length=6)
+
+class ResetPasswordForm(forms.Form):
+    new_password = forms.CharField(widget=forms.PasswordInput)
+    confirm_password = forms.CharField(widget=forms.PasswordInput)

@@ -3,6 +3,7 @@ from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, Permis
 from django.contrib.auth.hashers import make_password, check_password
 import uuid
 from django.conf import settings
+import datetime
 
 class Admin(models.Model):
     name = models.CharField(max_length=255)
@@ -204,11 +205,10 @@ class BatchMentor(AbstractUser):
         app_label = 'alumni'
         db_table = 'alumni_batchmentor'
 
-class AlumniOTP(models.Model):
-    user = models.ForeignKey(Alumni, on_delete=models.CASCADE)
-    otp = models.CharField(max_length=6)
+class OTP(models.Model):
+    email = models.EmailField()
+    otp_code = models.CharField(max_length=6)
     created_at = models.DateTimeField(auto_now_add=True)
-    expires_at = models.DateTimeField()
 
-    def __str__(self):
-        return f"{self.user.email} - {self.otp}"
+    def is_valid(self):
+        return (datetime.datetime.now(datetime.timezone.utc) - self.created_at).total_seconds() < 120  # 2 min expiry
