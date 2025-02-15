@@ -1,7 +1,6 @@
 from django.db import models
-from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin, AbstractUser, User
+from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from django.contrib.auth.hashers import make_password, check_password
-import uuid
 from django.conf import settings
 import datetime
 
@@ -135,80 +134,3 @@ class Comment(models.Model):
 
     def __str__(self):
         return self.text[:50]
-
-class BatchMentorManager(BaseUserManager):
-    def create_user(self, email, password=None, **extra_fields):
-        if not email:
-            raise ValueError('The Email field must be set')
-        email = self.normalize_email(email)
-        user = self.model(email=email, **extra_fields)
-        user.set_password(password)
-        user.save(using=self._db)
-        return user
-
-    def create_superuser(self, email, password=None, **extra_fields):
-        extra_fields.setdefault('is_superuser', True)
-        if extra_fields.get('is_superuser') is not True:
-            raise ValueError('Superuser must have is_superuser=True.')
-        return self.create_user(email, password, **extra_fields)
-
-    def get_available_mentors(self):
-        return self.filter(assigned_batches__isnull=True)
-
-class Batch(models.Model):
-    id = models.BigAutoField(primary_key=True)
-    graduation_year = models.IntegerField()
-
-    def __str__(self):
-        return str(self.graduation_year)
-
-class BatchMentor(AbstractUser):
-    id = models.BigAutoField(primary_key=True)
-    name = models.CharField(max_length=255)
-    email = models.EmailField(unique=True)
-    mobile = models.CharField(max_length=15)
-    assigned_batches = models.ManyToManyField(Batch, related_name='mentors')
-    username = models.CharField(max_length=255, unique=True, default='')
-    date_joined = models.DateTimeField(auto_now_add=True)
-    is_staff = models.BooleanField(default=False)
-    is_active = models.BooleanField(default=True)
-
-    groups = models.ManyToManyField(
-        'auth.Group',
-        related_name='batchmentor_set',
-        blank=True,
-        help_text='The groups this user belongs to.',
-        verbose_name='groups',
-    )
-    user_permissions = models.ManyToManyField(
-        'auth.Permission',
-        related_name='batchmentor_set',
-        blank=True,
-        help_text='Specific permissions for this user.',
-        verbose_name='user permissions',
-    )
-
-    USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['name', 'mobile']
-
-    objects = BatchMentorManager()
-
-    def save(self, *args, **kwargs):
-        if not self.username:
-            self.username = self.email
-        super().save(*args, **kwargs)
-
-    def __str__(self):
-        return self.username
-
-    class Meta:
-        app_label = 'alumni'
-        db_table = 'alumni_batchmentor'
-
-class OTP(models.Model):
-    email = models.EmailField()
-    otp_code = models.CharField(max_length=6)
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    def is_valid(self):
-        return (datetime.datetime.now(datetime.timezone.utc) - self.created_at).total_seconds() < 120  # 2 min expiry

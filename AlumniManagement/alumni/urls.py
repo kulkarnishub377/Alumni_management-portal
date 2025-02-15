@@ -31,18 +31,6 @@ urlpatterns = [
     path('coordinator/manage_gallery_photos/', views.manage_gallery_photos_coordinator, name='manage_gallery_photos_coordinator'),
     path('coordinator/manage_comments/', views.manage_comments_coordinator, name='manage_comments_coordinator'),
 
-    # Batch Mentor URLs
-    path('batch-mentor/login/', views.batch_mentor_login, name='batch_mentor_login'),
-    path('batch-mentor/register/', views.batch_mentor_registration, name='batch_mentor_registration'),
-    path('batch-mentor/dashboard/', views.batch_mentor_dashboard, name='batch_mentor_dashboard'),
-    path('batch-mentor/view/', views.view_batch_mentors, name='view_batch_mentors'),
-    path('batch-mentor/edit/<int:id>/', views.edit_batch_mentor, name='edit_batch_mentor'),
-    path('batch-mentor/delete/<int:id>/', views.delete_batch_mentor, name='delete_batch_mentor'),
-    path('batch-mentor/export/', views.export_batch_mentor_to_excel, name='export_batch_mentor_to_excel'),
-    path('batch-mentor/assign-batch/', views.assign_batch_to_mentor, name='assign_batch_to_mentor'),
-    path('batch-mentor/view-alumni/<int:mentor_id>/', views.view_alumni_in_batches, name='view_alumni_in_batches'),
-    path('batch-mentor/available/', views.view_available_batch_mentors, name='view_available_batch_mentors'),
-
     # Gallery URLs
     path('gallery/', views.gallery, name='gallery'),
     path('add_gallery_photo/', views.add_gallery_photo, name='add_gallery_photo'),
@@ -56,5 +44,4 @@ urlpatterns = [
     path('logout/', views.logout_view, name='logout'),
     path('about/', views.about_us, name='about_us'),
 
-  
 ]

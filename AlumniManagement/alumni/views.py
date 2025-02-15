@@ -7,10 +7,10 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout, get_user_model
 from django.contrib.auth.models import User
 from django.contrib import messages
-from .models import Admin, Alumni, AlumniCoordinator, Comment, GalleryPhoto, BatchMentor, Batch
+from .models import Admin, Alumni, AlumniCoordinator, Comment, GalleryPhoto
 from .forms import (
     AdminRegistrationForm, AlumniRegistrationForm, AlumniCoordinatorRegistrationForm,
-    AlumniEditForm, GalleryPhotoForm, CommentForm, AlumniCoordinatorEditForm, BatchMentorRegistrationForm, BatchMentorLoginForm, BatchMentorForm
+    AlumniEditForm, GalleryPhotoForm, CommentForm, AlumniCoordinatorEditForm
 )
 from django.contrib.auth.forms import AuthenticationForm
 from django.urls import path
@@ -19,16 +19,13 @@ from . import views
 from django.template.loader import render_to_string
 from io import BytesIO
 from PIL import Image, ImageDraw, ImageFont
-import requests
 import os
-import json
 from django.contrib.auth.tokens import default_token_generator
 from django.contrib.auth.hashers import check_password, make_password
-from django.core.mail import send_mail
-import random
-import string
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.timezone import now
+
+
 
 # Home Page
 def home(request):
@@ -421,226 +418,6 @@ def logout_view(request):
 # Register
 def register(request):
     return HttpResponse("This is the registration page.")
-
-# Batch Mentor Registration
-def batch_mentor_registration(request):
-    if 'coordinator_id' not in request.session:
-        return redirect('alumni_coordinator_login')
-    if request.method == 'POST':
-        form = BatchMentorRegistrationForm(request.POST)
-        if form.is_valid():
-            mentor = form.save(commit=False)
-            mentor.set_password(form.cleaned_data['password1'])
-            mentor.save()
-            form.save_m2m()  # Save the many-to-many relationships
-            return redirect('batch_mentor_login')
-    else:
-        form = BatchMentorRegistrationForm()
-    return render(request, 'alumni_coordinator/batch_mentor_registration.html', {'form': form})
-
-# Batch Mentor Login
-def batch_mentor_login(request):
-    if request.method == 'POST':
-        form = BatchMentorLoginForm(request.POST)
-        if form.is_valid():
-            email = form.cleaned_data.get('email')
-            password = form.cleaned_data.get('password')
-            user = authenticate(request, username=email, password=password)
-            if user is not None and isinstance(user, BatchMentor):
-                login(request, user)
-                request.session['mentor_id'] = user.id  # Set the session variable
-                return redirect('batch_mentor_dashboard')
-            else:
-                messages.error(request, 'Invalid email or password')
-        else:
-            messages.error(request, 'Invalid email or password')
-    else:
-        form = BatchMentorLoginForm()
-    return render(request, 'alumni_coordinator/batch_mentor_login.html', {'form': form})
-
-# Batch Mentor Dashboard
-def batch_mentor_dashboard(request):
-    if 'mentor_id' not in request.session:
-        return redirect('batch_mentor_login')
-    mentor = BatchMentor.objects.get(pk=request.session['mentor_id'])
-    assigned_batches = mentor.assigned_batches.all()
-    alumni_list = Alumni.objects.filter(graduation_year__in=assigned_batches.values_list('graduation_year', flat=True))
-    return render(request, 'batch_mentor/batch_mentor_dashboard.html', {
-        'mentor': mentor,
-        'alumni_list': alumni_list,
-        'assigned_batches': assigned_batches
-    })
-
-# View Batch Mentors
-def view_batch_mentors(request):
-    if 'coordinator_id' not in request.session:
-        return redirect('alumni_coordinator_login')
-    mentors = BatchMentor.objects.all()
-    return render(request, 'alumni_coordinator/view_batch_mentors.html', {'mentors': mentors})
-
-# Edit Batch Mentor
-def edit_batch_mentor(request, id):
-    if 'coordinator_id' not in request.session:
-        return redirect('alumni_coordinator_login')
-    mentor = get_object_or_404(BatchMentor, pk=id)
-    if request.method == 'POST':
-        form = BatchMentorForm(request.POST, instance=mentor)
-        if form.is_valid():
-            form.save()
-            form.save_m2m()  # Save the many-to-many relationships
-            messages.success(request, 'Batch Mentor updated successfully.')
-            return redirect('view_batch_mentors')
-    else:
-        form = BatchMentorForm(instance=mentor)
-    batches = Batch.objects.all()
-    return render(request, 'alumni_coordinator/edit_batch_mentor.html', {'form': form, 'mentor': mentor, 'batches': batches})
-
-# Delete Batch Mentor
-def delete_batch_mentor(request, id):
-    if 'coordinator_id' not in request.session:
-        return redirect('alumni_coordinator_login')
-    mentor = get_object_or_404(BatchMentor, pk=id)
-    mentor.delete()
-    messages.success(request, 'Batch Mentor deleted successfully.')
-    return redirect('view_batch_mentors')
-
-# Assign Batch to Mentor
-def assign_batch_to_mentor(request):
-    if request.method == 'POST':
-        mentor_id = request.POST.get('mentor_id')
-        batch_id = request.POST.get('batch_id')
-        mentor = BatchMentor.objects.get(id=mentor_id)
-        batch = Batch.objects.get(id=batch_id)
-        mentor.assigned_batches.add(batch)
-        return redirect('view_batch_mentors')
-    mentors = BatchMentor.objects.all()
-    batches = Batch.objects.all()
-    return render(request, 'assign_batch.html', {'mentors': mentors, 'batches': batches})
-
-# View Alumni in Batches
-def view_alumni_in_batches(request, mentor_id):
-    mentor = get_object_or_404(BatchMentor, pk=mentor_id)
-    assigned_batches = mentor.assigned_batches.all()
-    alumni_list = Alumni.objects.filter(graduation_year__in=assigned_batches.values_list('graduation_year', flat=True))
-    return render(request, 'view_alumni_in_batches.html', {
-        'mentor': mentor,
-        'alumni_list': alumni_list,
-        'assigned_batches': assigned_batches
-    })
-
-def edit_batch_mentor(request, id):
-
-    mentor = get_object_or_404(BatchMentor, id=id)
-
-    form = BatchMentorForm(request.POST or None, instance=mentor)
-
-    if form.is_valid():
-
-        form.save()
-
-        return redirect('view_batch_mentors')
-
-    batches = Batch.objects.all()
-
-    return render(request, 'alumni_coordinator/edit_batch_mentor.html', {'form': form, 'batches': batches, 'mentor': mentor})
-
-
-# Export Batch Mentor Data to Excel
-def export_batch_mentor_to_excel(request):
-    if 'mentor_id' not in request.session:
-        return redirect('batch_mentor_login')
-    
-    mentor = BatchMentor.objects.get(pk=request.session['mentor_id'])
-    alumni_list = Alumni.objects.filter(graduation_year__in=mentor.assigned_batches.values_list('graduation_year', flat=True))
-    
-    response = HttpResponse(content_type='application/ms-excel')
-    response['Content-Disposition'] = f'attachment; filename="alumni_data_batch_{mentor.id}.xls"'
-
-    wb = xlwt.Workbook(encoding='utf-8')
-    ws = wb.add_sheet('Alumni Data')
-
-    # Define the columns
-    columns = [
-        'Full Name', 'Email', 'Mobile', 'Profile Photo', 'Current Job Profile', 'Current Company',
-        'Current Job Location', 'City', 'Sub District', 'District', 'State', 'Pincode',
-        'Is International', 'Country', 'Full Address', 'Graduation Year', 'Experience', 'Facebook',
-        'GitHub', 'Instagram', 'LinkedIn', 'Sector'
-    ]
-
-    # Write the column headers
-    for col_num, column_title in enumerate(columns):
-        ws.write(0, col_num, column_title)
-
-    # Write the data rows
-    rows = alumni_list.values_list(
-        'full_name', 'email', 'mobile', 'profile_photo', 'current_job_profile', 'current_company',
-        'current_job_location', 'city', 'sub_district', 'district', 'state', 'pincode',
-        'is_international', 'country', 'full_address', 'graduation_year', 'experience', 'facebook',
-        'github', 'instagram', 'linkedin', 'sector'
-    )
-
-    for row_num, row in enumerate(rows, start=1):
-        for col_num, cell_value in enumerate(row):
-            ws.write(row_num, col_num, str(cell_value))
-
-    wb.save(response)
-    return response
-
-def assign_batch_to_mentor(request):
-    if request.method == 'POST':
-        mentor_id = request.POST.get('mentor_id')
-        batch_id = request.POST.get('batch_id')
-        mentor = BatchMentor.objects.get(id=mentor_id)
-        batch = Batch.objects.get(id=batch_id)
-        mentor.assigned_batches.add(batch)
-        return redirect('view_batch_mentors')
-    mentors = BatchMentor.objects.all()
-    batches = Batch.objects.all()
-    return render(request, 'assign_batch.html', {'mentors': mentors, 'batches': batches})
-
-def view_alumni_in_batches(request, mentor_id):
-    mentor = get_object_or_404(BatchMentor, pk=mentor_id)
-    assigned_batches = mentor.assigned_batches.all()
-    alumni_list = Alumni.objects.filter(graduation_year__in=assigned_batches.values_list('graduation_year', flat=True))
-    return render(request, 'view_alumni_in_batches.html', {
-        'mentor': mentor,
-        'alumni_list': alumni_list,
-        'assigned_batches': assigned_batches
-    })
-
-from django.shortcuts import render, get_object_or_404
-from .models import BatchMentor, Alumni
-
-def view_available_batch_mentors(request):
-    available_mentors = BatchMentor.objects.get_available_mentors()
-    return render(request, 'batch_mentor/view_available_batch_mentors.html', {'available_mentors': available_mentors})
-
-def view_alumni_in_batches(request, mentor_id):
-    mentor = get_object_or_404(BatchMentor, id=mentor_id)
-    assigned_batches = mentor.assigned_batches.all()
-    alumni_list = Alumni.objects.filter(graduation_year__in=[batch.graduation_year for batch in assigned_batches])
-    return render(request, 'batch_mentor/view_alumni_in_batches.html', {'mentor': mentor, 'assigned_batches': assigned_batches, 'alumni_list': alumni_list})
-
-def edit_batch_mentor(request, id):
-    mentor = get_object_or_404(BatchMentor, id=id)
-    if request.method == 'POST':
-        form = BatchMentorForm(request.POST, instance=mentor)
-        if form.is_valid():
-            form.save()
-            form.save_m2m()  # Save the many-to-many relationships
-            messages.success(request, 'Batch Mentor updated successfully.')
-            return redirect('view_batch_mentors')
-    else:
-        form = BatchMentorForm(instance=mentor)
-    return render(request, 'alumni_coordinator/edit_batch_mentor.html', {'form': form, 'mentor': mentor})
-
-def delete_batch_mentor(request, id):
-    mentor = get_object_or_404(BatchMentor, id=id)
-    if request.method == 'POST':
-        mentor.delete()
-        messages.success(request, 'Batch Mentor deleted successfully.')
-        return redirect('view_batch_mentors')
-    return render(request, 'alumni_coordinator/delete_batch_mentor.html', {'mentor': mentor})
 
 # Alumni Login
 def alumni_login(request):

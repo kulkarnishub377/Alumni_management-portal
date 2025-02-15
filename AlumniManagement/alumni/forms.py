@@ -1,8 +1,6 @@
 from django import forms
-from django.contrib.auth.forms import UserCreationForm, UserChangeForm, AuthenticationForm
-from .models import Alumni, Admin, AlumniCoordinator, GalleryPhoto, Comment, BatchMentor, Batch
-
-from django.contrib.auth import authenticate
+from django.contrib.auth.forms import UserCreationForm
+from .models import Alumni, Admin, AlumniCoordinator, GalleryPhoto, Comment
 
 class AlumniRegistrationForm(UserCreationForm):
     class Meta:
@@ -108,33 +106,6 @@ class CommentForm(forms.ModelForm):
         model = Comment
         fields = ['text']
 
-class BatchMentorRegistrationForm(UserCreationForm):
-    assigned_batches = forms.ModelMultipleChoiceField(
-        queryset=Batch.objects.all(),
-        widget=forms.CheckboxSelectMultiple,
-        required=False
-    )
-
-    class Meta:
-        model = BatchMentor
-        fields = ['name', 'email', 'mobile', 'password1', 'password2', 'assigned_batches']
-
-class BatchMentorLoginForm(AuthenticationForm):
-    class Meta:
-        model = BatchMentor
-        fields = ['email', 'password']
-
-class BatchMentorForm(forms.ModelForm):
-    assigned_batches = forms.ModelMultipleChoiceField(
-        queryset=Batch.objects.all(),
-        widget=forms.CheckboxSelectMultiple,
-        required=False
-    )
-
-    class Meta:
-        model = BatchMentor
-        fields = ['name', 'email', 'mobile', 'assigned_batches']
-
 class LoginForm(forms.Form):
     email = forms.EmailField()
     password = forms.CharField(widget=forms.PasswordInput)
@@ -142,14 +113,3 @@ class LoginForm(forms.Form):
 class AlumniLoginForm(forms.Form):
     email = forms.EmailField(widget=forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'Enter your email'}))
     password = forms.CharField(widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Enter your password'}))
-
-class ForgotPasswordForm(forms.Form):
-    email = forms.EmailField()
-    mobile = forms.CharField(max_length=15)
-
-class OTPVerificationForm(forms.Form):
-    otp = forms.CharField(max_length=6)
-
-class ResetPasswordForm(forms.Form):
-    new_password = forms.CharField(widget=forms.PasswordInput)
-    confirm_password = forms.CharField(widget=forms.PasswordInput)
