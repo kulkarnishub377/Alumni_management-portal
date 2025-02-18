@@ -7,10 +7,11 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout, get_user_model
 from django.contrib.auth.models import User
 from django.contrib import messages
-from .models import Admin, Alumni, AlumniCoordinator, Comment, GalleryPhoto
+from .models import Admin, Alumni, AlumniCoordinator, Comment, GalleryPhoto, BatchMentor, Batch
 from .forms import (
     AdminRegistrationForm, AlumniRegistrationForm, AlumniCoordinatorRegistrationForm,
-    AlumniEditForm, GalleryPhotoForm, CommentForm, AlumniCoordinatorEditForm
+    AlumniEditForm, GalleryPhotoForm, CommentForm, AlumniCoordinatorEditForm,
+    BatchMentorRegistrationForm, BatchMentorLoginForm
 )
 from django.contrib.auth.forms import AuthenticationForm
 from django.urls import path
@@ -431,3 +432,49 @@ def alumni_login(request):
         else:
             messages.error(request, 'Invalid email or password')
     return render(request, 'alumni/alumni_login.html')
+
+def batch_mentor_registration(request):
+    if request.method == 'POST':
+        form = BatchMentorRegistrationForm(request.POST)
+        if form.is_valid():
+            batch_mentor = form.save(commit=False)
+            batch_mentor.set_password(form.cleaned_data['password'])
+            batch_mentor.save()
+            form.save_m2m()
+            return redirect('alumni_coordinator_dashboard')
+    else:
+        form = BatchMentorRegistrationForm()
+    return render(request, 'alumni_coordinator/batch_mentor_registration.html', {'form': form})
+
+def batch_mentor_login(request):
+    if request.method == 'POST':
+        form = BatchMentorLoginForm(request.POST)
+        if form.is_valid():
+            email = form.cleaned_data['email']
+            password = form.cleaned_data['password']
+            try:
+                batch_mentor = BatchMentor.objects.get(email=email)
+                if batch_mentor.check_password(password):
+                    request.session['batch_mentor_id'] = batch_mentor.id
+                    return redirect('batch_mentor_dashboard')
+                else:
+                    messages.error(request, 'Invalid password')
+            except BatchMentor.DoesNotExist:
+                messages.error(request, 'Invalid email')
+    else:
+        form = BatchMentorLoginForm()
+    return render(request, 'batch_mentor/batch_mentor_login.html', {'form': form})
+
+def batch_mentor_dashboard(request):
+    if 'batch_mentor_id' not in request.session:
+        return redirect('batch_mentor_login')
+    batch_mentor = BatchMentor.objects.get(pk=request.session['batch_mentor_id'])
+    alumni_list = Alumni.objects.filter(graduation_year__in=batch_mentor.assigned_batches.values_list('graduation_year', flat=True))
+    return render(request, 'batch_mentor/batch_mentor_dashboard.html', {
+        'batch_mentor': batch_mentor,
+        'alumni_list': alumni_list
+    })
+
+def view_batch_mentors(request):
+    batch_mentors = BatchMentor.objects.all()
+    return render(request, 'alumni_coordinator/view_batch_mentors.html', {'batch_mentors': batch_mentors})

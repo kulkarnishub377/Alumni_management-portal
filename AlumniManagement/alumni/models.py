@@ -134,3 +134,26 @@ class Comment(models.Model):
 
     def __str__(self):
         return self.text[:50]
+
+class Batch(models.Model):
+    graduation_year = models.IntegerField()
+    mentors = models.ManyToManyField('BatchMentor', related_name='batches')
+
+    def __str__(self):
+        return f"Batch {self.graduation_year}"
+
+class BatchMentor(models.Model):
+    email = models.EmailField(unique=True)
+    full_name = models.CharField(max_length=255)
+    mobile = models.CharField(max_length=15)
+    password = models.CharField(max_length=255)
+    assigned_batches = models.ManyToManyField(Batch, related_name='mentors_assigned')
+
+    def __str__(self):
+        return self.full_name
+
+    def set_password(self, raw_password):
+        self.password = make_password(raw_password)
+
+    def check_password(self, raw_password):
+        return check_password(raw_password, self.password)

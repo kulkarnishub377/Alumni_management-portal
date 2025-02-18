@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Batch Mentor Dashboard</title>
+    {% load static %}
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <style>
+        /* ...existing styles... */
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="batch-mentor-details">
+            <a href="{% url 'logout' %}" class="btn btn-danger logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</a>
+            <h2>Batch Mentor Details</h2>
+            <p><i class="fas fa-user"></i> Name: {{ batch_mentor.full_name }}</p>
+            <p><i class="fas fa-envelope"></i> Email: {{ batch_mentor.email }}</p>
+            <p><i class="fas fa-phone"></i> Mobile: {{ batch_mentor.mobile }}</p>
+        </div>
+        <div class="d-flex justify-content-between align-items-center mt-4">
+            <h1 class="dashboard-title">Batch Mentor Dashboard</h1>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-striped mt-3">
+                <thead>
+                    <tr>
+                        <th><i class="fas fa-user"></i> Profile Photo</th>
+                        <th><i class="fas fa-user"></i> Name</th>
+                        <th><i class="fas fa-envelope"></i> Email</th>
+                        <th><i class="fas fa-phone"></i> Mobile</th>
+                        <th><i class="fas fa-briefcase"></i> Current Job Profile</th>
+                        <th><i class="fas fa-building"></i> Current Company</th>
+                        <th><i class="fas fa-map-marker-alt"></i> Current Job Location</th>
+                        <th><i class="fas fa-city"></i> City</th>
+                        <th><i class="fas fa-map-signs"></i> Sub District</th>
+                        <th><i class="fas fa-map"></i> District</th>
+                        <th><i class="fas fa-flag"></i> State</th>
+                        <th><i class="fas fa-mail-bulk"></i> Pincode</th>
+                        <th><i class="fas fa-globe"></i> Country</th>
+                        <th><i class="fas fa-graduation-cap"></i> Graduation Year</th>
+                        <th><i class="fas fa-chart-line"></i> Experience</th>
+                        <th><i class="fab fa-linkedin"></i> LinkedIn</th>
+                        <th><i class="fab fa-facebook"></i> Facebook</th>
+                        <th><i class="fab fa-twitter"></i> Twitter</th>
+                        <th><i class="fab fa-whatsapp"></i> WhatsApp</th>
+                        <th><i class="fas fa-cogs"></i> Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for alumni in alumni_list %}
+                    <tr>
+                        <td>
+                            {% if alumni.profile_photo %}
+                                <img src="{{ alumni.profile_photo.url }}" alt="Profile Photo" class="profile-photo">
+                            {% else %}
+                                <img src="{% static 'images/default_profile.png' %}" alt="Default Profile Photo" class="profile-photo">
+                            {% endif %}
+                        </td>
+                        <td>{{ alumni.full_name }}</td>
+                        <td><a href="mailto:{{ alumni.email }}">{{ alumni.email }}</a></td>
+                        <td><a href="tel:{{ alumni.mobile }}">{{ alumni.mobile }}</a></td>
+                        <td>{{ alumni.current_job_profile }}</td>
+                        <td>{{ alumni.current_company }}</td>
+                        <td>{{ alumni.current_job_location }}</td>
+                        <td>{{ alumni.city }}</td>
+                        <td>{{ alumni.sub_district }}</td>
+                        <td>{{ alumni.district }}</td>
+                        <td>{{ alumni.state }}</td>
+                        <td>{{ alumni.pincode }}</td>
+                        <td>{{ alumni.country }}</td>
+                        <td>{{ alumni.graduation_year }}</td>
+                        <td>{{ alumni.experience }}</td>
+                        <td><a href="{{ alumni.linkedin }}" target="_blank" rel="noopener" class="btn btn-primary btn-sm" title="LinkedIn Profile"><i class="fab fa-linkedin"></i></a></td>
+                        <td><a href="{{ alumni.facebook }}" target="_blank" rel="noopener" class="btn btn-primary btn-sm" title="Facebook Profile"><i class="fab fa-facebook"></i></a></td>
+                        <td><a href="{{ alumni.twitter }}" target="_blank" rel="noopener" class="btn btn-primary btn-sm" title="Twitter Profile"><i class="fab fa-twitter"></i></a></td>
+                        <td><a href="https://wa.me/{{ alumni.mobile }}" target="_blank" rel="noopener" class="btn btn-success btn-sm" title="WhatsApp"><i class="fab fa-whatsapp"></i></a></td>
+                        <td>
+                            <a href="{% url 'edit_alumni' alumni.id %}" class="btn btn-warning btn-sm"><i class="fas fa-edit"></i> Edit</a>
+                            <a href="{% url 'delete_alumni' alumni.id %}" class="btn btn-danger btn-sm"><i class="fas fa-trash"></i> Delete</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+</html>

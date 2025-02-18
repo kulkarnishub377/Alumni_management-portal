@@ -1,6 +1,6 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
-from .models import Alumni, Admin, AlumniCoordinator, GalleryPhoto, Comment
+from .models import Alumni, Admin, AlumniCoordinator, GalleryPhoto, Comment, BatchMentor, Batch
 
 class AlumniRegistrationForm(UserCreationForm):
     class Meta:
@@ -113,3 +113,17 @@ class LoginForm(forms.Form):
 class AlumniLoginForm(forms.Form):
     email = forms.EmailField(widget=forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'Enter your email'}))
     password = forms.CharField(widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Enter your password'}))
+
+class BatchMentorRegistrationForm(forms.ModelForm):
+    password = forms.CharField(widget=forms.PasswordInput())
+
+    class Meta:
+        model = BatchMentor
+        fields = ['email', 'full_name', 'mobile', 'password', 'assigned_batches']
+        widgets = {
+            'assigned_batches': forms.CheckboxSelectMultiple(),
+        }
+
+class BatchMentorLoginForm(forms.Form):
+    email = forms.EmailField()
+    password = forms.CharField(widget=forms.PasswordInput())
