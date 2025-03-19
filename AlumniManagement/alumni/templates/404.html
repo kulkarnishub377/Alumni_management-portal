@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Page Not Found</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            overflow: hidden;
+            background-color: #f4f6ff;
+            font-family: "Poppins", sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            text-align: center;
+            flex-direction: column;
+            padding: 20px;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .cog-wheel {
+            position: relative;
+            width: 20vmin;
+            height: 20vmin;
+            border-radius: 50%;
+            border: 3vmin solid #f3c623;
+            margin: 2vmin;
+            animation: rotate 4s linear infinite; /* Increased speed */
+        }
+
+        .cog-wheel div {
+            position: absolute;
+            width: 5vmin;
+            height: 5vmin;
+            background-color: #f3c623;
+        }
+
+        .top { top: -7vmin; left: 5vmin; }
+        .down { bottom: -7vmin; left: 5vmin; }
+        .left { left: -7vmin; top: 5vmin; }
+        .right { right: -7vmin; top: 5vmin; }
+        .left-top { transform: rotateZ(-45deg); left: -4vmin; top: -4vmin; }
+        .left-down { transform: rotateZ(45deg); left: -4vmin; top: 12vmin; }
+        .right-top { transform: rotateZ(45deg); right: -4vmin; top: -4vmin; }
+        .right-down { transform: rotateZ(-45deg); right: -4vmin; top: 12vmin; }
+
+        h1 {
+            color: #142833;
+            font-size: 20vmin;
+            display: flex;
+            align-items: center;
+            gap: 2vmin;
+        }
+
+        .message {
+            font-family: "Montserrat", sans-serif;
+            font-weight: 600;
+            color: #092532;
+            margin-top: 2vmin;
+            padding: 0 5vmin;
+            max-width: 80%;
+        }
+
+        .home-link {
+            margin-top: 2vmin;
+            font-size: 2vmin;
+            color: #f3c623;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        @media (max-width: 600px) {
+            h1 {
+                font-size: 15vmin;
+            }
+
+            .cog-wheel {
+                width: 15vmin;
+                height: 15vmin;
+                border-width: 2vmin;
+            }
+
+            .cog-wheel div {
+                width: 4vmin;
+                height: 4vmin;
+            }
+
+            .top { top: -5vmin; left: 4vmin; }
+            .down { bottom: -5vmin; left: 4vmin; }
+            .left { left: -5vmin; top: 4vmin; }
+            .right { right: -5vmin; top: 4vmin; }
+            .left-top { left: -3vmin; top: -3vmin; }
+            .left-down { left: -3vmin; top: 9vmin; }
+            .right-top { right: -3vmin; top: -3vmin; }
+            .right-down { right: -3vmin; top: 9vmin; }
+
+            .message {
+                padding: 0 2vmin;
+            }
+
+            .home-link {
+                font-size: 3vmin;
+            }
+        }
+
+        @keyframes rotate {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container"></div>
+        <h1>4 <div class="cog-wheel">
+            <div class="top"></div>
+            <div class="down"></div>
+            <div class="left"></div>
+            <div class="right"></div>
+            <div class="left-top"></div>
+            <div class="left-down"></div>
+            <div class="right-top"></div>
+            <div class="right-down"></div>
+        </div> 4</h1>
+        <div class="message">
+            <h2>Oops! Page Not Found</h2>
+            <p>Sorry, the page you are looking for might have been removed, had its name changed, or is temporarily unavailable.</p>
+            <a href="{% url 'home' %}" class="home-link">Go back to Home</a>
+        </div>
+    </div>
+</body>
+</html>

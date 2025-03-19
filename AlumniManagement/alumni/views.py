@@ -10,8 +10,7 @@ from django.contrib import messages
 from .models import Admin, Alumni, AlumniCoordinator, Comment, GalleryPhoto, BatchMentor, Batch
 from .forms import (
     AdminRegistrationForm, AlumniRegistrationForm, AlumniCoordinatorRegistrationForm,
-    AlumniEditForm, GalleryPhotoForm, CommentForm, AlumniCoordinatorEditForm,
-    BatchMentorRegistrationForm, BatchMentorLoginForm
+    AlumniEditForm, GalleryPhotoForm, CommentForm, AlumniCoordinatorEditForm, BatchMentorRegistrationForm, BatchMentorLoginForm
 )
 from django.contrib.auth.forms import AuthenticationForm
 from django.urls import path
@@ -25,8 +24,10 @@ from django.contrib.auth.tokens import default_token_generator
 from django.contrib.auth.hashers import check_password, make_password
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.timezone import now
+from django.http import HttpResponseNotFound
+import logging
 
-
+logger = logging.getLogger(__name__)
 
 # Home Page
 def home(request):
@@ -433,19 +434,25 @@ def alumni_login(request):
             messages.error(request, 'Invalid email or password')
     return render(request, 'alumni/alumni_login.html')
 
+def custom_404(request, exception=None):
+    logger.error(f"404 Not Found: {request.path}")
+    return render(request, '404.html', status=404)
+
+# Batch Mentor Registration
 def batch_mentor_registration(request):
     if request.method == 'POST':
         form = BatchMentorRegistrationForm(request.POST)
         if form.is_valid():
-            batch_mentor = form.save(commit=False)
-            batch_mentor.set_password(form.cleaned_data['password'])
-            batch_mentor.save()
-            form.save_m2m()
-            return redirect('alumni_coordinator_dashboard')
+            mentor = form.save(commit=False)
+            mentor.set_password(form.cleaned_data['password'])
+            mentor.save()
+            form.save_m2m()  # Save the many-to-many relationships
+            return redirect('batch_mentor_login')
     else:
         form = BatchMentorRegistrationForm()
-    return render(request, 'alumni_coordinator/batch_mentor_registration.html', {'form': form})
+    return render(request, 'batch_mentor/batch_mentor_registration.html', {'form': form, 'batches': Batch.objects.all()})
 
+# Batch Mentor Login
 def batch_mentor_login(request):
     if request.method == 'POST':
         form = BatchMentorLoginForm(request.POST)
@@ -453,28 +460,32 @@ def batch_mentor_login(request):
             email = form.cleaned_data['email']
             password = form.cleaned_data['password']
             try:
-                batch_mentor = BatchMentor.objects.get(email=email)
-                if batch_mentor.check_password(password):
-                    request.session['batch_mentor_id'] = batch_mentor.id
+                mentor = BatchMentor.objects.get(email=email)
+                if mentor.check_password(password):
+                    request.session['mentor_id'] = mentor.id
                     return redirect('batch_mentor_dashboard')
                 else:
-                    messages.error(request, 'Invalid password')
+                    form.add_error('password', 'Invalid password')
             except BatchMentor.DoesNotExist:
-                messages.error(request, 'Invalid email')
+                form.add_error('email', 'Email not found')
     else:
         form = BatchMentorLoginForm()
     return render(request, 'batch_mentor/batch_mentor_login.html', {'form': form})
 
+# Batch Mentor Dashboard
 def batch_mentor_dashboard(request):
-    if 'batch_mentor_id' not in request.session:
+    if 'mentor_id' not in request.session:
         return redirect('batch_mentor_login')
-    batch_mentor = BatchMentor.objects.get(pk=request.session['batch_mentor_id'])
-    alumni_list = Alumni.objects.filter(graduation_year__in=batch_mentor.assigned_batches.values_list('graduation_year', flat=True))
+    mentor = BatchMentor.objects.get(pk=request.session['mentor_id'])
+    alumni_list = Alumni.objects.filter(assigned_batches__mentors_assigned=mentor)
     return render(request, 'batch_mentor/batch_mentor_dashboard.html', {
-        'batch_mentor': batch_mentor,
+        'batch_mentor': mentor,
         'alumni_list': alumni_list
     })
 
+# View Batch Mentors
 def view_batch_mentors(request):
+    if 'coordinator_id' not in request.session:
+        return redirect('alumni_coordinator_login')
     batch_mentors = BatchMentor.objects.all()
     return render(request, 'alumni_coordinator/view_batch_mentors.html', {'batch_mentors': batch_mentors})

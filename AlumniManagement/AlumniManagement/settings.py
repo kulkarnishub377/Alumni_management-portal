@@ -45,6 +45,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'alumni.middleware.ExceptionMiddleware',  # Add this line
 ]
 
 ROOT_URLCONF = 'AlumniManagement.urls'
@@ -126,3 +127,6 @@ EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = '361shubhamkulkarni@gmail.com'
 EMAIL_HOST_PASSWORD = 'zmwt nkeg eaei diqi'
+
+# Add the custom 404 handler
+handler404 = 'alumni.views.custom_404'
