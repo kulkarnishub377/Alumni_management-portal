@@ -31,12 +31,6 @@ urlpatterns = [
     path('coordinator/manage_gallery_photos/', views.manage_gallery_photos_coordinator, name='manage_gallery_photos_coordinator'),
     path('coordinator/manage_comments/', views.manage_comments_coordinator, name='manage_comments_coordinator'),
 
-    # Batch Mentor URLs
-    path('batch_mentor/register/', views.batch_mentor_registration, name='batch_mentor_registration'),
-    path('batch_mentor/login/', views.batch_mentor_login, name='batch_mentor_login'),
-    path('batch_mentor/dashboard/', views.batch_mentor_dashboard, name='batch_mentor_dashboard'),
-    path('alumni_coordinator/view_batch_mentors/', views.view_batch_mentors, name='view_batch_mentors'),
-
     # Gallery URLs
     path('gallery/', views.gallery, name='gallery'),
     path('add_gallery_photo/', views.add_gallery_photo, name='add_gallery_photo'),

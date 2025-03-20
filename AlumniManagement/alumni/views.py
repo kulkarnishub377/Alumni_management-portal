@@ -7,15 +7,15 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout, get_user_model
 from django.contrib.auth.models import User
 from django.contrib import messages
-from .models import Admin, Alumni, AlumniCoordinator, Comment, GalleryPhoto, BatchMentor, Batch
+from .models import Admin, Alumni, AlumniCoordinator, Comment, GalleryPhoto
 from .forms import (
     AdminRegistrationForm, AlumniRegistrationForm, AlumniCoordinatorRegistrationForm,
-    AlumniEditForm, GalleryPhotoForm, CommentForm, AlumniCoordinatorEditForm, BatchMentorRegistrationForm, BatchMentorLoginForm
+    AlumniEditForm, GalleryPhotoForm, CommentForm, AlumniCoordinatorEditForm
 )
 from django.contrib.auth.forms import AuthenticationForm
 from django.urls import path
 from django import forms
-from . import views
+from .import views
 from django.template.loader import render_to_string
 from io import BytesIO
 from PIL import Image, ImageDraw, ImageFont
@@ -24,7 +24,6 @@ from django.contrib.auth.tokens import default_token_generator
 from django.contrib.auth.hashers import check_password, make_password
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.timezone import now
-from django.http import HttpResponseNotFound
 import logging
 
 logger = logging.getLogger(__name__)
@@ -248,78 +247,114 @@ def export_alumni_to_excel(request):
     wb.save(response)
     return response
 
-def new_func():
-    header_style = xlwt.easyxf('font: bold 1')
-
-# Share Alumni Profile
-import os
 from django.http import HttpResponse
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image, ImageDraw, ImageFont, ImageFilter, ImageOps
+import os
 from .models import Alumni
 
 def share_alumni_profile(request, id):
     try:
         alumni = Alumni.objects.get(pk=id)
         
-        # Load header image
-        header_image_path = os.path.join(os.path.dirname(__file__), 'static', 'images', 'header-2.jpg')
+        # Paths for images
+        base_dir = os.path.dirname(__file__)
+        header_image_path = os.path.join(base_dir, 'static', 'images', 'header-2.jpg')
+        background_image_path = os.path.join(base_dir, 'static', 'images', 'back.jpg')
 
-        # Create a blank image
-        image = Image.new('RGB', (900, 1300), color=(245, 245, 245))  # Light gray background
+        # Create image and draw object
+        image = Image.new('RGBA', (900, 1300), (255, 255, 255, 255))
         draw = ImageDraw.Draw(image)
 
         # Load fonts
-        font_regular = ImageFont.truetype("arial.ttf", 24)
-        font_bold = ImageFont.truetype("arialbd.ttf", 28)
-        font_title = ImageFont.truetype("arialbd.ttf", 32)
+        font_regular = ImageFont.truetype("arial.ttf", 26)
+        font_bold = ImageFont.truetype("arialbd.ttf", 30)
+        font_title = ImageFont.truetype("arialbd.ttf", 36)
 
-        # Draw a stylish header
+        # Draw stylish header
         try:
             header_image = Image.open(header_image_path).resize((900, 180))
             image.paste(header_image, (0, 0))
         except FileNotFoundError:
-            draw.rectangle([(0, 0), (900, 180)], fill=(30, 144, 255))  # Blue header fallback
+            draw.rectangle([(0, 0), (900, 180)], fill=(30, 144, 255))  # Blue gradient fallback
             draw.text((300, 70), "ALUMNI PROFILE", fill="white", font=font_title)
 
-        # Draw a rounded profile picture
+        # Load and process background image as watermark
         try:
-            profile_photo = Image.open(alumni.profile_photo.path).resize((180, 180))
-            mask = Image.new('L', (180, 180), 0)
+            background = Image.open(background_image_path).convert("RGBA")
+            watermark_size = (background.width // 4, background.height // 4)  # Scale to 25%
+            background = background.resize(watermark_size)
+            watermark = Image.new("RGBA", image.size)
+            watermark.paste(background, ((image.width - watermark_size[0]) // 2, (image.height - watermark_size[1]) // 2))
+
+            # Apply washout effect
+            for x in range(watermark.width):
+                for y in range(watermark.height):
+                    r, g, b, a = watermark.getpixel((x, y))
+                    watermark.putpixel((x, y), (r, g, b, int(a * 0.1)))  # 10% opacity
+
+            image = Image.alpha_composite(image, watermark)
+        except FileNotFoundError:
+            pass  # If background image is not found, continue without it
+
+        # Draw rounded profile picture
+        try:
+            profile_photo = Image.open(alumni.profile_photo.path).resize((180, 180)).convert("RGBA")
+            mask = Image.new("L", (180, 180), 0)
             mask_draw = ImageDraw.Draw(mask)
             mask_draw.ellipse((0, 0, 180, 180), fill=255)
 
-            # Create a circular border
-            border = Image.new('RGB', (190, 190), (255, 255, 255))
-            border_draw = ImageDraw.Draw(border)
-            border_draw.ellipse((0, 0, 190, 190), fill=(255, 255, 255), outline=(0, 0, 0), width=5)
+            # Create shadow effect
+            shadow = Image.new("RGBA", (200, 200), (0, 0, 0, 50))
+            shadow_draw = ImageDraw.Draw(shadow)
+            shadow_draw.ellipse((10, 10, 190, 190), fill=(0, 0, 0, 80))
 
-            image.paste(border, (360, 190))
+            # Create a circular border
+            border = Image.new("RGBA", (190, 190), (255, 255, 255, 0))
+            border_draw = ImageDraw.Draw(border)
+            border_draw.ellipse((0, 0, 190, 190), outline=(255, 255, 255, 255), width=8)
+
+            image.paste(shadow, (350, 180), shadow)
+            image.paste(border, (360, 190), border)
             image.paste(profile_photo, (365, 195), mask)
         except FileNotFoundError:
             draw.text((390, 220), "No Photo", fill="red", font=font_bold)
 
-        # Draw profile details with spacing
+        # Draw profile details
         y_offset = 420
-        spacing = 40
-        text_color = (50, 50, 50)  # Dark gray for readability
+        spacing = 50
+        text_color = (50, 50, 50)
 
-        def draw_label(draw, position, label, value):
-            draw.text(position, f"{label}:", fill=(30, 144, 255), font=font_bold)  # Blue Labels
-            draw.text((position[0] + 200, position[1]), value if value else "N/A", fill=text_color, font=font_regular)
+        def draw_label(position, label, value):
+            draw.text(position, f"{label}:", fill=(30, 144, 255), font=font_bold)  # Blue label
+            draw.text((position[0] + 250, position[1]), value if value else "N/A", fill=text_color, font=font_regular)
 
-        draw_label(draw, (50, y_offset), "Full Name", alumni.full_name)
-        draw_label(draw, (50, y_offset + spacing), "Email", alumni.email)
-        draw_label(draw, (50, y_offset + spacing * 2), "Mobile", alumni.mobile)
-        draw_label(draw, (50, y_offset + spacing * 3), "Job Profile", alumni.current_job_profile)
-        draw_label(draw, (50, y_offset + spacing * 4), "Company", alumni.current_company)
-        draw_label(draw, (50, y_offset + spacing * 5), "Location", alumni.current_job_location)
-        draw_label(draw, (50, y_offset + spacing * 6), "Sector", alumni.sector)
-        draw_label(draw, (50, y_offset + spacing * 7), "City", alumni.city)
-        draw_label(draw, (50, y_offset + spacing * 8), "State", alumni.state)
-        draw_label(draw, (50, y_offset + spacing * 9), "Graduation Year", str(alumni.graduation_year))
-        draw_label(draw, (50, y_offset + spacing * 10), "Experience", str(alumni.experience) + " years")
+        # Profile details with professional formatting
+        details = [
+            ("Full Name", alumni.full_name),
+            ("Email", alumni.email),
+            ("Mobile", alumni.mobile),
+            ("ID", str(alumni.id)),
+            ("Current Job Profile", alumni.current_job_profile),
+            ("Current Company", alumni.current_company),
+            ("Location", alumni.current_job_location),
+            ("City", alumni.city),
+            ("Sub District", alumni.sub_district),
+            ("District", alumni.district),
+            ("State", alumni.state),
+            ("Pincode", alumni.pincode),
+            ("Country", alumni.country),
+            ("International", "Yes" if alumni.is_international else "No"),
+            ("Full Address", alumni.full_address),
+            ("Graduation Year", str(alumni.graduation_year)),
+            ("Experience", str(alumni.experience) + " years"),
+            ("Sector", alumni.sector),
+        ]
 
-        # Social Media Links
+        for label, value in details:
+            draw_label((50, y_offset), label, value)
+            y_offset += spacing
+
+        # Social Media Links with icons
         social_links = [
             ("LinkedIn", alumni.linkedin),
             ("Facebook", alumni.facebook),
@@ -327,15 +362,16 @@ def share_alumni_profile(request, id):
             ("GitHub", alumni.github),
         ]
 
-        y_offset += spacing * 11
+        y_offset += 30
         for platform, link in social_links:
             if link:
-                draw_label(draw, (50, y_offset), platform, link)
+                draw_label((50, y_offset), platform, link)
                 y_offset += spacing
 
-        # Convert to JPEG response
+        # Convert image to JPEG response with full quality
         response = HttpResponse(content_type="image/jpeg")
-        image.save(response, "JPEG")
+        image = image.convert("RGB")  # Remove alpha transparency
+        image.save(response, "JPEG", quality=100)
         return response
 
     except Alumni.DoesNotExist:
@@ -434,58 +470,11 @@ def alumni_login(request):
             messages.error(request, 'Invalid email or password')
     return render(request, 'alumni/alumni_login.html')
 
+
 def custom_404(request, exception=None):
     logger.error(f"404 Not Found: {request.path}")
     return render(request, '404.html', status=404)
 
-# Batch Mentor Registration
-def batch_mentor_registration(request):
-    if request.method == 'POST':
-        form = BatchMentorRegistrationForm(request.POST)
-        if form.is_valid():
-            mentor = form.save(commit=False)
-            mentor.set_password(form.cleaned_data['password'])
-            mentor.save()
-            form.save_m2m()  # Save the many-to-many relationships
-            return redirect('batch_mentor_login')
-    else:
-        form = BatchMentorRegistrationForm()
-    return render(request, 'batch_mentor/batch_mentor_registration.html', {'form': form, 'batches': Batch.objects.all()})
-
-# Batch Mentor Login
-def batch_mentor_login(request):
-    if request.method == 'POST':
-        form = BatchMentorLoginForm(request.POST)
-        if form.is_valid():
-            email = form.cleaned_data['email']
-            password = form.cleaned_data['password']
-            try:
-                mentor = BatchMentor.objects.get(email=email)
-                if mentor.check_password(password):
-                    request.session['mentor_id'] = mentor.id
-                    return redirect('batch_mentor_dashboard')
-                else:
-                    form.add_error('password', 'Invalid password')
-            except BatchMentor.DoesNotExist:
-                form.add_error('email', 'Email not found')
-    else:
-        form = BatchMentorLoginForm()
-    return render(request, 'batch_mentor/batch_mentor_login.html', {'form': form})
-
-# Batch Mentor Dashboard
-def batch_mentor_dashboard(request):
-    if 'mentor_id' not in request.session:
-        return redirect('batch_mentor_login')
-    mentor = BatchMentor.objects.get(pk=request.session['mentor_id'])
-    alumni_list = Alumni.objects.filter(assigned_batches__mentors_assigned=mentor)
-    return render(request, 'batch_mentor/batch_mentor_dashboard.html', {
-        'batch_mentor': mentor,
-        'alumni_list': alumni_list
-    })
-
-# View Batch Mentors
-def view_batch_mentors(request):
-    if 'coordinator_id' not in request.session:
-        return redirect('alumni_coordinator_login')
-    batch_mentors = BatchMentor.objects.all()
-    return render(request, 'alumni_coordinator/view_batch_mentors.html', {'batch_mentors': batch_mentors})
+def profile_view(request, slug):
+    alumni = get_object_or_404(Alumni, slug=slug)
+    return render(request, 'alumni/profile_view.html', {'alumni': alumni})

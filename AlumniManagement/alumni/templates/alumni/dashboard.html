@@ -1,0 +1,18 @@
+<!-- ...existing code... -->
+<div class="alumni-profile">
+    <h2>{{ alumni.full_name }}</h2>
+    <p>{{ alumni.email }}</p>
+    <!-- Add shareable link functionality -->
+    <a href="{{ alumni.get_shareable_link }}" target="_blank">
+        Share Profile
+    </a>
+    <button onclick="copyToClipboard('{{ alumni.get_shareable_link }}')">Copy Link</button>
+</div>
+<!-- ...existing code... -->
+
+<script>
+function copyToClipboard(text) {
+    navigator.clipboard.writeText(text);
+    alert("Profile link copied!");
+}
+</script>
