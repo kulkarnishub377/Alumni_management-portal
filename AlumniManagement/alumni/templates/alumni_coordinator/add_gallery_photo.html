@@ -15,40 +15,73 @@
             color: #333;
         }
         .form-container {
-            padding: 20px;
+            padding: 30px;
             background-color: #ffffff;
-            border-radius: 5px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            margin-top: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            margin-top: 50px;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            position: relative;
+        }
+        .back-button {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            font-size: 1.2rem;
+            color: #007bff;
+            text-decoration: none;
         }
         .form-title {
-            font-size: 2rem;
+            font-size: 2.5rem;
             font-weight: bold;
             color: #007bff;
             text-align: center;
-            margin-bottom: 20px;
+            margin-bottom: 30px;
         }
-        footer {
-            margin-top: 40px;
-            padding: 20px;
-            background-color: #007bff;
-            color: white;
-            text-align: center;
+        .form-group label {
+            font-size: 1.2rem;
+            color: #555;
+        }
+        .form-group input, .form-group textarea {
+            font-size: 1rem;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            width: 100%;
+        }
+        .form-group textarea {
+            resize: vertical;
+        }
+        .btn-primary {
+            font-size: 1.2rem;
+            padding: 10px 20px;
+            border-radius: 5px;
         }
     </style>
 </head>
 <body>
     <div class="container form-container">
+        <a href="javascript:history.back()" class="back-button"><i class="fas fa-arrow-left"></i> Back</a>
         <h1 class="form-title"><i class="fas fa-plus"></i> Add Gallery Photo</h1>
         <form method="post" enctype="multipart/form-data">
             {% csrf_token %}
-            {{ form.as_p }}
+            <div class="form-group">
+                <label for="id_title"><i class="fas fa-heading"></i> Title</label>
+                {{ form.title }}
+            </div>
+            <div class="form-group">
+                <label for="id_image"><i class="fas fa-image"></i> Image</label>
+                {{ form.image }}
+            </div>
+            <div class="form-group">
+                <label for="id_description"><i class="fas fa-align-left"></i> Description</label>
+                {{ form.description }}
+            </div>
             <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Save</button>
         </form>
     </div>
-    <footer>
-        <p>Contact us: info@college.edu | Phone: (123) 456-7890</p>
-    </footer>
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>

@@ -1,5 +1,6 @@
 from django.urls import path
 from . import views
+from .views import delete_alumni_confirm
 
 # URL patterns for the alumni management application
 urlpatterns = [
@@ -19,7 +20,7 @@ urlpatterns = [
     path('alumni/edit-profile/', views.alumni_edit_profile, name='alumni_edit_profile'),
     path('alumni/share/<int:id>/', views.share_alumni_profile, name='share_alumni_profile'),
     path('alumni/edit/<int:id>/', views.edit_alumni, name='edit_alumni'),
-    path('alumni/delete/<int:id>/', views.delete_alumni, name='delete_alumni'),
+    path('alumni/delete/<str:id>/', views.delete_alumni, name='delete_alumni'),
     path('alumni/login/', views.alumni_login, name='alumni_login'),
 
     # Alumni Coordinator URLs
@@ -44,4 +45,6 @@ urlpatterns = [
     path('logout/', views.logout_view, name='logout'),
     path('about/', views.about_us, name='about_us'),
 
+    # Delete confirmation URL
+    path('delete_alumni_confirm/<int:id>/', delete_alumni_confirm, name='delete_alumni_confirm'),
 ]

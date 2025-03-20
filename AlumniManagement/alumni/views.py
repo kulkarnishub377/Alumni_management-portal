@@ -177,13 +177,13 @@ def alumni_edit_profile(request):
 
 # Edit Alumni
 def edit_alumni(request, id):
-    alumni = Alumni.objects.get(pk=id)
+    alumni = get_object_or_404(Alumni, id=id)
     if request.method == 'POST':
         form = AlumniEditForm(request.POST, request.FILES, instance=alumni)
         if form.is_valid():
             form.save()
             messages.success(request, 'Profile updated successfully.')
-            return redirect('edit_profile')
+            return redirect('alumni_coordinator_dashboard')
         else:
             messages.error(request, 'Please correct the error below.')
     else:
@@ -205,9 +205,17 @@ def edit_profile(request):
 
 # Delete Alumni
 def delete_alumni(request, id):
-    alumni = Alumni.objects.get(pk=id)
+    alumni = get_object_or_404(Alumni, id=id)
     alumni.delete()
     return redirect('alumni_coordinator_dashboard')
+
+# Delete Alumni with Confirmation
+def delete_alumni_confirm(request, id):
+    alumni = get_object_or_404(Alumni, id=id)
+    if request.method == 'POST':
+        alumni.delete()
+        return redirect('alumni_coordinator_dashboard')
+    return render(request, 'alumni_coordinator/delete_alumni_confirm.html', {'alumni': alumni})
 
 # Export Alumni Data to Excel
 def export_alumni_to_excel(request):
@@ -248,7 +256,7 @@ def export_alumni_to_excel(request):
     return response
 
 from django.http import HttpResponse
-from PIL import Image, ImageDraw, ImageFont, ImageFilter, ImageOps
+from PIL import Image, ImageDraw, ImageFont, ImageOps
 import os
 from .models import Alumni
 
@@ -259,102 +267,93 @@ def share_alumni_profile(request, id):
         # Paths for images
         base_dir = os.path.dirname(__file__)
         header_image_path = os.path.join(base_dir, 'static', 'images', 'header-2.jpg')
-        background_image_path = os.path.join(base_dir, 'static', 'images', 'back.jpg')
+        watermark_image_path = os.path.join(base_dir, 'static', 'images', 'back.jpg')
 
-        # Create image and draw object
-        image = Image.new('RGBA', (900, 1300), (255, 255, 255, 255))
+        # Create A4-sized image
+        image = Image.new('RGBA', (1240, 1754), (255, 255, 255, 255))
         draw = ImageDraw.Draw(image)
 
         # Load fonts
-        font_regular = ImageFont.truetype("arial.ttf", 26)
-        font_bold = ImageFont.truetype("arialbd.ttf", 30)
-        font_title = ImageFont.truetype("arialbd.ttf", 36)
+        font_regular = ImageFont.truetype("arial.ttf", 28)
+        font_bold = ImageFont.truetype("arialbd.ttf", 34)
+        font_title = ImageFont.truetype("arialbd.ttf", 50)
 
-        # Draw stylish header
+        # Draw header image
         try:
-            header_image = Image.open(header_image_path).resize((900, 180))
+            header_image = Image.open(header_image_path).resize((1240, 200))
             image.paste(header_image, (0, 0))
         except FileNotFoundError:
-            draw.rectangle([(0, 0), (900, 180)], fill=(30, 144, 255))  # Blue gradient fallback
-            draw.text((300, 70), "ALUMNI PROFILE", fill="white", font=font_title)
+            draw.rectangle([(0, 0), (1240, 200)], fill=(30, 144, 255))
+            draw.text((400, 80), "ALUMNI PROFILE", fill="white", font=font_title)
 
-        # Load and process background image as watermark
+        # Apply watermark
         try:
-            background = Image.open(background_image_path).convert("RGBA")
-            watermark_size = (background.width // 4, background.height // 4)  # Scale to 25%
-            background = background.resize(watermark_size)
-            watermark = Image.new("RGBA", image.size)
-            watermark.paste(background, ((image.width - watermark_size[0]) // 2, (image.height - watermark_size[1]) // 2))
+            watermark = Image.open(watermark_image_path).convert("RGBA")
+            watermark = watermark.resize((image.width // 3, image.height // 3))  # Resize watermark to 50%
+            watermark.putalpha(50)  # Set transparency
 
-            # Apply washout effect
-            for x in range(watermark.width):
-                for y in range(watermark.height):
-                    r, g, b, a = watermark.getpixel((x, y))
-                    watermark.putpixel((x, y), (r, g, b, int(a * 0.1)))  # 10% opacity
-
-            image = Image.alpha_composite(image, watermark)
+            # Position watermark at the center
+            wm_x = (image.width - watermark.width) // 2
+            wm_y = (image.height - watermark.height) // 2
+            image.paste(watermark, (wm_x, wm_y), watermark)
         except FileNotFoundError:
-            pass  # If background image is not found, continue without it
+            pass
 
-        # Draw rounded profile picture
+        # Draw profile picture
         try:
-            profile_photo = Image.open(alumni.profile_photo.path).resize((180, 180)).convert("RGBA")
-            mask = Image.new("L", (180, 180), 0)
+            profile_photo = Image.open(alumni.profile_photo.path).resize((220, 220)).convert("RGBA")
+            mask = Image.new("L", (220, 220), 0)
             mask_draw = ImageDraw.Draw(mask)
-            mask_draw.ellipse((0, 0, 180, 180), fill=255)
-
-            # Create shadow effect
-            shadow = Image.new("RGBA", (200, 200), (0, 0, 0, 50))
-            shadow_draw = ImageDraw.Draw(shadow)
-            shadow_draw.ellipse((10, 10, 190, 190), fill=(0, 0, 0, 80))
-
-            # Create a circular border
-            border = Image.new("RGBA", (190, 190), (255, 255, 255, 0))
-            border_draw = ImageDraw.Draw(border)
-            border_draw.ellipse((0, 0, 190, 190), outline=(255, 255, 255, 255), width=8)
-
-            image.paste(shadow, (350, 180), shadow)
-            image.paste(border, (360, 190), border)
-            image.paste(profile_photo, (365, 195), mask)
+            mask_draw.ellipse((0, 0, 220, 220), fill=255)
+            image.paste(profile_photo, (510, 230), mask)
         except FileNotFoundError:
-            draw.text((390, 220), "No Photo", fill="red", font=font_bold)
+            draw.text((560, 280), "No Photo", fill="red", font=font_bold)
+
+        # Draw full name
+        full_name_bbox = draw.textbbox((0, 0), alumni.full_name, font=font_title)
+        full_name_position = (image.width // 2 - (full_name_bbox[2] - full_name_bbox[0]) // 2, 480)
+        draw.text(full_name_position, alumni.full_name, fill="black", font=font_title)
 
         # Draw profile details
-        y_offset = 420
-        spacing = 50
-        text_color = (50, 50, 50)
+        y_offset = 550
+        spacing = 60
+        text_color = (0, 0, 0)
 
         def draw_label(position, label, value):
-            draw.text(position, f"{label}:", fill=(30, 144, 255), font=font_bold)  # Blue label
-            draw.text((position[0] + 250, position[1]), value if value else "N/A", fill=text_color, font=font_regular)
+            """Draws a label and value with a slight shadow effect for better visibility."""
+            shadow_offset = 2
+            draw.text((position[0] + shadow_offset, position[1] + shadow_offset), f"{label}:", fill=(180, 180, 180), font=font_bold)
+            draw.text(position, f"{label}:", fill=(30, 144, 255), font=font_bold)
+            draw.text((position[0] + 300 + shadow_offset, position[1] + shadow_offset), value if value else "N/A", fill=(180, 180, 180), font=font_regular)
+            draw.text((position[0] + 300, position[1]), value if value else "N/A", fill=text_color, font=font_regular)
 
-        # Profile details with professional formatting
         details = [
-            ("Full Name", alumni.full_name),
             ("Email", alumni.email),
             ("Mobile", alumni.mobile),
             ("ID", str(alumni.id)),
-            ("Current Job Profile", alumni.current_job_profile),
-            ("Current Company", alumni.current_company),
+            ("Current Job", alumni.current_job_profile),
+            ("Company", alumni.current_company),
             ("Location", alumni.current_job_location),
             ("City", alumni.city),
-            ("Sub District", alumni.sub_district),
-            ("District", alumni.district),
             ("State", alumni.state),
             ("Pincode", alumni.pincode),
             ("Country", alumni.country),
-            ("International", "Yes" if alumni.is_international else "No"),
-            ("Full Address", alumni.full_address),
             ("Graduation Year", str(alumni.graduation_year)),
-            ("Experience", str(alumni.experience) + " years"),
+            ("Experience", f"{alumni.experience} years"),
             ("Sector", alumni.sector),
         ]
 
+        # Add bullet points to the labels
+        details = [(f"• {label}", value) for label, value in details]
+
         for label, value in details:
-            draw_label((50, y_offset), label, value)
+            draw_label((100, y_offset), label, value)
             y_offset += spacing
 
-        # Social Media Links with icons
+        # Social Media Links
+        y_offset += 40
+        draw.text((100, y_offset), "Social Links", fill="black", font=font_bold)
+        y_offset += 40
         social_links = [
             ("LinkedIn", alumni.linkedin),
             ("Facebook", alumni.facebook),
@@ -362,20 +361,20 @@ def share_alumni_profile(request, id):
             ("GitHub", alumni.github),
         ]
 
-        y_offset += 30
         for platform, link in social_links:
             if link:
-                draw_label((50, y_offset), platform, link)
+                draw_label((100, y_offset), platform, link)
                 y_offset += spacing
 
-        # Convert image to JPEG response with full quality
+        # Convert image to JPEG response
         response = HttpResponse(content_type="image/jpeg")
-        image = image.convert("RGB")  # Remove alpha transparency
+        image = image.convert("RGB")
         image.save(response, "JPEG", quality=100)
         return response
 
     except Alumni.DoesNotExist:
         return HttpResponse("Alumni not found", status=404)
+
 
 # Gallery Page
 def gallery(request):

@@ -21,7 +21,7 @@
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
         .gallery-title {
-            font-size: 2rem;
+            font-size: 2.5rem; /* Increased size */
             font-weight: bold;
             color: #007bff;
             text-align: center;
@@ -35,30 +35,28 @@
             border-radius: 5px;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
+        .gallery-image .card-title {
+            font-size: 1.25rem; /* Increased size */
+            font-weight: bold; /* Made bold */
+            color: #ff5733; /* Changed color */
+        }
         .btn-primary, .btn-danger {
             margin-top: 10px;
-        }
-        footer {
-            margin-top: 40px;
-            padding: 20px;
-            background-color: #007bff;
-            color: white;
-            text-align: center;
         }
     </style>
 </head>
 <body>
     <div class="container gallery-container">
         <h1 class="gallery-title"><i class="fas fa-images"></i> Manage Gallery Photos</h1>
-        <a href="{% url 'home' %}" class="btn btn-secondary mb-3"><i class="fas fa-home"></i> Home</a>
+        <button onclick="history.back()" class="btn btn-secondary mb-3"><i class="fas fa-arrow-left"></i> Back</button>
         <a href="{% url 'add_gallery_photo' %}" class="btn btn-primary mb-3"><i class="fas fa-plus"></i> Add Photo</a>
         <div class="row">
             {% for photo in photos %}
             <div class="col-md-4 gallery-image">
                 <div class="card mb-4">
+                    <h5 class="card-title text-center">{{ photo.title }}</h5>
                     <img src="{{ photo.image.url }}" class="card-img-top" alt="Gallery Photo">
-                    <div class="card-body">
-                        <h5 class="card-title text-center">{{ photo.name }}</h5>
+                    <div class="card-body"></div>
                         <p class="card-text text-center">{{ photo.description }}</p>
                         <a href="{% url 'delete_gallery_photo' photo.id %}" class="btn btn-danger"><i class="fas fa-trash"></i> Delete</a>
                     </div>
@@ -67,9 +65,6 @@
             {% endfor %}
         </div>
     </div>
-    <footer>
-        <p>Contact us: info@college.edu | Phone: (123) 456-7890</p>
-    </footer>
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
