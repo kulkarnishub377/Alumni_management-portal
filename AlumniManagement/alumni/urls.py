@@ -31,6 +31,14 @@ urlpatterns = [
     path('alumni_coordinator/export/', views.export_alumni_to_excel, name='export_alumni_to_excel'),
     path('coordinator/manage_gallery_photos/', views.manage_gallery_photos_coordinator, name='manage_gallery_photos_coordinator'),
     path('coordinator/manage_comments/', views.manage_comments_coordinator, name='manage_comments_coordinator'),
+    path('alumni-coordinator/manage-batch-mentors/', views.manage_batch_mentors, name='manage_batch_mentors'),
+    path('alumni-coordinator/edit-mentor/<int:id>/', views.edit_mentor, name='edit_mentor'),
+    path('alumni-coordinator/delete-mentor/<int:id>/', views.delete_mentor, name='delete_mentor'),
+
+    # Batch Mentor URLs
+    path('batch-mentor/register/', views.batch_mentor_registration, name='batch_mentor_register'),
+    path('batch-mentor/login/', views.batch_mentor_login, name='batch_mentor_login'),  # Updated name
+    path('batch-mentor/dashboard/', views.batch_mentor_dashboard, name='batch_mentor_dashboard'),
 
     # Gallery URLs
     path('gallery/', views.gallery, name='gallery'),
@@ -47,4 +55,10 @@ urlpatterns = [
 
     # Delete confirmation URL
     path('delete_alumni_confirm/<int:id>/', delete_alumni_confirm, name='delete_alumni_confirm'),
+
+    # Assign batch URL
+    path('assign_batch/<int:mentor_id>/', views.assign_batch, name='assign_batch'),
+
+    # Remove assigned batch URL
+    path('remove_assigned_batch/<int:mentor_id>/<int:year_id>/', views.remove_assigned_batch, name='remove_assigned_batch'),
 ]

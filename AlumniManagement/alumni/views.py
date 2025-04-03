@@ -7,10 +7,11 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout, get_user_model
 from django.contrib.auth.models import User
 from django.contrib import messages
-from .models import Admin, Alumni, AlumniCoordinator, Comment, GalleryPhoto
+from .models import Admin, Alumni, AlumniCoordinator, Comment, GalleryPhoto, BatchMentor, Batch, GraduationYear
 from .forms import (
     AdminRegistrationForm, AlumniRegistrationForm, AlumniCoordinatorRegistrationForm,
-    AlumniEditForm, GalleryPhotoForm, CommentForm, AlumniCoordinatorEditForm
+    AlumniEditForm, GalleryPhotoForm, CommentForm, AlumniCoordinatorEditForm,
+    BatchMentorRegistrationForm, BatchMentorLoginForm
 )
 from django.contrib.auth.forms import AuthenticationForm
 from django.urls import path
@@ -149,6 +150,9 @@ def alumni_profile(request):
         return redirect('alumni_login')
     try:
         alumni = Alumni.objects.get(email=request.user.email)
+        # Ensure profile_photo is handled gracefully
+        if not alumni.profile_photo:
+            alumni.profile_photo = None  # Placeholder logic if needed
     except Alumni.DoesNotExist:
         messages.error(request, 'Alumni profile not found.')
         return redirect('alumni_login')
@@ -477,3 +481,109 @@ def custom_404(request, exception=None):
 def profile_view(request, slug):
     alumni = get_object_or_404(Alumni, slug=slug)
     return render(request, 'alumni/profile_view.html', {'alumni': alumni})
+
+# Batch Mentor Registration
+def batch_mentor_registration(request):
+    if request.method == 'POST':
+        form = BatchMentorRegistrationForm(request.POST, request.FILES)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Batch Mentor registered successfully.')
+            return redirect('batch_mentor_login')
+        else:
+            messages.error(request, 'Please correct the errors below.')
+    else:
+        form = BatchMentorRegistrationForm()
+    return render(request, 'batch_mentor/registration.html', {'form': form})
+
+# Batch Mentor Login
+def batch_mentor_login(request):
+    if request.method == 'POST':
+        form = BatchMentorLoginForm(request.POST)
+        if form.is_valid():
+            email = form.cleaned_data['email']
+            password = form.cleaned_data['password']
+            try:
+                mentor = BatchMentor.objects.get(email=email)
+                if mentor.check_password(password):
+                    request.session['mentor_id'] = mentor.id
+                    return redirect('batch_mentor_dashboard')
+                else:
+                    messages.error(request, 'Invalid password.')
+            except BatchMentor.DoesNotExist:
+                messages.error(request, 'Mentor not found.')
+    else:
+        form = BatchMentorLoginForm()
+    return render(request, 'batch_mentor/login.html', {'form': form})
+
+# Batch Mentor Dashboard
+def batch_mentor_dashboard(request):
+    if 'mentor_id' not in request.session:
+        return redirect('batch_mentor_login')
+    mentor = BatchMentor.objects.get(pk=request.session['mentor_id'])
+    alumni_list = Alumni.objects.filter(graduation_year__in=mentor.assigned_batches.values_list('year', flat=True))  # Use 'year' instead of 'graduation_year'
+    return render(request, 'batch_mentor/dashboard.html', {'mentor': mentor, 'alumni_list': alumni_list})
+
+# Assign Batch
+def assign_batch(request, mentor_id):
+    if request.method == 'POST':
+        mentor = get_object_or_404(BatchMentor, id=mentor_id)
+        graduation_year = request.POST.get('graduation_year')
+        if graduation_year:
+            # Ensure graduation_year is an integer
+            graduation_year = int(graduation_year)
+            # Get or create the GraduationYear instance
+            year_instance, created = GraduationYear.objects.get_or_create(year=graduation_year)
+            mentor.assigned_batches.add(year_instance)  # Add GraduationYear instance
+            messages.success(request, f'Graduation Year {graduation_year} assigned to {mentor.full_name}.')
+        else:
+            messages.error(request, 'No graduation year selected.')
+        return redirect('manage_batch_mentors')
+    else:
+        messages.error(request, 'Invalid request method.')
+        return redirect('manage_batch_mentors')
+
+# Remove Assigned Batch
+def remove_assigned_batch(request, mentor_id, year_id):
+    mentor = get_object_or_404(BatchMentor, id=mentor_id)
+    year_instance = get_object_or_404(GraduationYear, id=year_id)
+    mentor.assigned_batches.remove(year_instance)  # Remove the GraduationYear instance
+    messages.success(request, f'Graduation Year {year_instance.year} removed from {mentor.full_name}.')
+    return redirect('manage_batch_mentors')
+
+# Manage Batch Mentors
+def manage_batch_mentors(request):
+    if 'coordinator_id' not in request.session:
+        return redirect('alumni_coordinator_login')  # Ensure proper redirection
+    mentors = BatchMentor.objects.all()
+    graduation_years = Alumni.objects.values_list('graduation_year', flat=True).distinct()  # Fetch unique graduation years
+    return render(request, 'alumni_coordinator/manage_batch_mentors.html', {'mentors': mentors, 'graduation_years': graduation_years})
+
+# Edit Mentor
+def edit_mentor(request, id):
+    mentor = get_object_or_404(BatchMentor, id=id)
+    if request.method == 'POST':
+        form = BatchMentorRegistrationForm(request.POST, request.FILES, instance=mentor)
+        if form.is_valid():
+            mentor = form.save(commit=False)
+            password1 = form.cleaned_data.get('password1')
+            password2 = form.cleaned_data.get('password2')
+            if password1 and password1 == password2:
+                mentor.set_password(password1)
+            mentor.save()
+            messages.success(request, 'Mentor updated successfully.')
+            return redirect('manage_batch_mentors')
+        else:
+            messages.error(request, 'Please correct the errors below.')
+    else:
+        form = BatchMentorRegistrationForm(instance=mentor)
+    return render(request, 'alumni_coordinator/edit_mentor.html', {'form': form, 'mentor': mentor})
+
+# Delete Mentor
+def delete_mentor(request, id):
+    mentor = get_object_or_404(BatchMentor, id=id)
+    if request.method == 'POST':
+        mentor.delete()
+        messages.success(request, 'Mentor deleted successfully.')
+        return redirect('manage_batch_mentors')
+    return render(request, 'alumni_coordinator/manage_batch_mentors.html', {'mentors': BatchMentor.objects.all()})

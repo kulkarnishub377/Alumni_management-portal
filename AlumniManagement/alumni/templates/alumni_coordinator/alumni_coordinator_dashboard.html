@@ -112,6 +112,10 @@
         <div class="button-group">
             <a href="{% url 'manage_gallery_photos_coordinator' %}" class="btn btn-primary"><i class="fas fa-images"></i> Manage Gallery</a>
         </div>
+        <div class="button-group">
+            <a href="{% url 'manage_batch_mentors' %}" class="btn btn-info"><i class="fas fa-users"></i> View Batch Mentors</a>
+            <a href="{% url 'batch_mentor_register' %}" class="btn btn-success"><i class="fas fa-user-plus"></i> Register Batch Mentor</a>
+        </div>
         <div class="search-container mt-4">
             <input type="text" id="searchInput" placeholder="Search..." class="form-control">
             <label for="searchOption" class="sr-only">Search Option</label>
@@ -131,12 +135,18 @@
                 <option value="country">Country</option>
                 <option value="graduation_year">Graduation Year</option>
                 <option value="experience">Experience</option>
+                <option value="sector">Sector</option>
+                <option value="github">GitHub</option>
+                <option value="instagram">Instagram</option>
+                <option value="is_international">Is International</option>
+                <option value="full_address">Full Address</option>
             </select>
         </div>
         <div class="table-responsive">
             <table class="table table-striped mt-3">
                 <thead>
                     <tr>
+                        <th data-sort="id"><i class="fas fa-id"></i> ID</th>
                         <th data-sort="profile_photo"><i class="fas fa-user"></i> Profile Photo</th>
                         <th data-sort="name"><i class="fas fa-user"></i> Name</th>
                         <th data-sort="email"><i class="fas fa-envelope"></i> Email</th>
@@ -150,24 +160,26 @@
                         <th data-sort="state"><i class="fas fa-flag"></i> State</th>
                         <th data-sort="pincode"><i class="fas fa-mail-bulk"></i> Pincode</th>
                         <th data-sort="country"><i class="fas fa-globe"></i> Country</th>
+                        <th data-sort="is_international"><i class="fas fa-plane"></i> Is International</th>
+                        <th data-sort="full_address"><i class="fas fa-address-card"></i> Full Address</th>
                         <th data-sort="graduation_year"><i class="fas fa-graduation-cap"></i> Graduation Year</th>
                         <th data-sort="experience"><i class="fas fa-chart-line"></i> Experience</th>
+                        <th data-sort="sector"><i class="fas fa-industry"></i> Sector</th>
+                        <th data-sort="github"><i class="fab fa-github"></i> GitHub</th>
+                        <th data-sort="instagram"><i class="fab fa-instagram"></i> Instagram</th>
                         <th data-sort="linkedin"><i class="fab fa-linkedin"></i> LinkedIn</th>
                         <th data-sort="facebook"><i class="fab fa-facebook"></i> Facebook</th>
-                        <th data-sort="twitter"><i class="fab fa-twitter"></i> Twitter</th>
                         <th data-sort="whatsapp"><i class="fab fa-whatsapp"></i> WhatsApp</th>
                         <th><i class="fas fa-cogs"></i> Actions</th>
+                    </tr>
                     </tr>
                 </thead>
                 <tbody id="alumniTable">
                     {% for alumni in alumni_list %}
                     <tr>
+                        <td>{{ alumni.id }}</td>
                         <td>
-                            {% if alumni.profile_photo %}
-                                <img src="{{ alumni.profile_photo.url }}" alt="Profile Photo" class="profile-photo">
-                            {% else %}
-                                <img src="{% static 'images/default_profile.png' %}" alt="Default Profile Photo" class="profile-photo">
-                            {% endif %}
+                             <img src="{{ alumni.profile_photo.url }}" alt="Profile Photo" class="profile-photo">
                         </td>
                         <td>{{ alumni.full_name }}</td>
                         <td><a href="mailto:{{ alumni.email }}">{{ alumni.email }}</a></td>
@@ -181,15 +193,29 @@
                         <td>{{ alumni.state }}</td>
                         <td>{{ alumni.pincode }}</td>
                         <td>{{ alumni.country }}</td>
+                        <td>{{ alumni.is_international|yesno:"Yes,No" }}</td>
+                        <td>{{ alumni.full_address }}</td>
                         <td>{{ alumni.graduation_year }}</td>
                         <td>{{ alumni.experience }}</td>
-                        <td><a href="{{ alumni.linkedin }}" target="_blank" rel="noopener" class="btn btn-primary btn-sm" title="LinkedIn Profile"><i class="fab fa-linkedin"></i></a></td>
-                        <td><a href="{{ alumni.facebook }}" target="_blank" rel="noopener" class="btn btn-primary btn-sm" title="Facebook Profile"><i class="fab fa-facebook"></i></a></td>
-                        <td><a href="{{ alumni.twitter }}" target="_blank" rel="noopener" class="btn btn-primary btn-sm" title="Twitter Profile"><i class="fab fa-twitter"></i></a></td>
-                        <td><a href="https://wa.me/{{ alumni.mobile }}" target="_blank" rel="noopener" class="btn btn-success btn-sm" title="WhatsApp"><i class="fab fa-whatsapp"></i></a></td>
+                        <td>{{ alumni.sector }}</td>
+                        <td>
+                            <a href="{{ alumni.github }}" target="_blank" rel="noopener" class="btn btn-dark btn-sm" title="GitHub Profile"><i class="fab fa-github"></i></a>
+                        </td>
+                        <td>
+                            <a href="{{ alumni.instagram }}" target="_blank" rel="noopener" class="btn btn-danger btn-sm" title="Instagram Profile"><i class="fab fa-instagram"></i></a>
+                        </td>
+                        <td>
+                            <a href="{{ alumni.linkedin }}" target="_blank" rel="noopener" class="btn btn-primary btn-sm" title="LinkedIn Profile"><i class="fab fa-linkedin"></i></a>
+                        </td>
+                        <td>
+                            <a href="{{ alumni.facebook }}" target="_blank" rel="noopener" class="btn btn-primary btn-sm" title="Facebook Profile"><i class="fab fa-facebook"></i></a>
+                        </td>
+                        <td>
+                            <a href="https://wa.me/{{ alumni.mobile }}" target="_blank" rel="noopener" class="btn btn-success btn-sm" title="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+                        </td>
                         <td>
                             <a href="{% url 'edit_alumni' alumni.id %}" class="btn btn-warning btn-sm"><i class="fas fa-edit"></i> Edit</a>
-                            <button class="btn btn-danger btn-sm" data-toggle="modal" data-target="#deleteModal{{ alumni.id }}"><i class="fas fa-trash"></i> Delete</button>
+                            <button type="button" class="btn btn-danger btn-sm" data-toggle="modal" data-target="#deleteModal{{ alumni.id }}"><i class="fas fa-trash"></i> Delete</button>
                         </td>
                     </tr>
                     {% endfor %}

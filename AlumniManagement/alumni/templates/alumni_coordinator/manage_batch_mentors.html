@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Batch Mentors</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Roboto', sans-serif;
+        }
+        .container {
+            background: #ffffff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            margin-top: 50px;
+        }
+        .btn-back, .btn-register {
+            margin-bottom: 20px;
+        }
+        .btn-back i, .btn-register i {
+            margin-right: 5px;
+        }
+        table {
+            margin-top: 20px;
+        }
+        th {
+            background-color: #343a40;
+            color: #ffffff;
+        }
+        th, td {
+            text-align: center;
+            vertical-align: middle;
+        }
+        .modal-header {
+            background-color: #007bff;
+            color: #ffffff;
+        }
+        .modal-footer .btn-secondary {
+            background-color: #6c757d;
+        }
+        .modal-footer .btn-danger {
+            background-color: #dc3545;
+        }
+        .profile-photo {
+            width: 50px;
+            height: 50px;
+            object-fit: cover;
+            border-radius: 50%;
+        }
+        .table-actions button, .table-actions a {
+            margin: 0 5px;
+        }
+        @media (max-width: 768px) {
+            .btn-back, .btn-register {
+                width: 100%;
+                margin-bottom: 10px;
+            }
+            .table {
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="d-flex flex-wrap justify-content-between">
+            <a href="{% url 'alumni_coordinator_dashboard' %}" class="btn btn-primary btn-back">
+                <i class="fas fa-arrow-left"></i> Back to Dashboard
+            </a>
+            <a href="{% url 'batch_mentor_register' %}" class="btn btn-success btn-register">
+                <i class="fas fa-user-plus"></i> Register New Mentor
+            </a>
+        </div>
+        <table class="table table-striped table-bordered">
+            <thead>
+            <tr>
+                <th><i class="fas fa-image"></i> Profile Photo</th>
+                <th><i class="fas fa-user"></i> Full Name</th>
+                <th><i class="fas fa-envelope"></i> Email</th>
+                <th><i class="fas fa-phone"></i> Mobile</th>
+                <th><i class="fas fa-cogs"></i> Actions</th>
+                <th><i class="fas fa-tasks"></i> Assign Batch</th>
+                <th><i class="fas fa-calendar-alt"></i> Assigned Graduation Years</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for mentor in mentors %}
+            <tr>
+                <td>
+                    <img src="{{ mentor.profile_photo.url }}" alt="Profile Photo" class="profile-photo">
+                </td>
+                <td>{{ mentor.full_name }}</td>
+                <td>{{ mentor.email }}</td>
+                <td>{{ mentor.mobile }}</td>
+                <td class="table-actions">
+                    <a href="{% url 'edit_mentor' mentor.id %}" class="btn btn-warning btn-sm">
+                        <i class="fas fa-edit"></i> Edit
+                    </a>
+                    <button type="button" class="btn btn-danger btn-sm" data-toggle="modal" data-target="#deleteModal{{ mentor.id }}">
+                        <i class="fas fa-trash-alt"></i> Delete
+                    </button>
+                </td>
+                <td>
+                    <button type="button" class="btn btn-info btn-sm" data-toggle="modal" data-target="#assignBatchModal{{ mentor.id }}">
+                        <i class="fas fa-tasks"></i> Assign Batch
+                    </button>
+                </td>
+                <td>
+                    {% for batch in mentor.assigned_batches.all %}
+                        <div class="d-flex align-items-center mb-2">
+                            <span class="badge badge-primary mr-2">{{ batch.year }}</span>
+                            <a href="{% url 'remove_assigned_batch' mentor.id batch.id %}" class="btn btn-danger btn-sm">
+                                <i class="fas fa-times"></i>
+                            </a>
+                        </div>
+                    {% empty %}
+                        <span class="text-muted">None</span>
+                    {% endfor %}
+                </td>
+            </tr>
+            <!-- Delete Confirmation Modal -->
+            <div class="modal fade" id="deleteModal{{ mentor.id }}" tabindex="-1" aria-labelledby="deleteModalLabel{{ mentor.id }}" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="deleteModalLabel{{ mentor.id }}">Confirm Deletion</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            Are you sure you want to delete mentor "{{ mentor.full_name }}"?
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                            <form method="post" action="{% url 'delete_mentor' mentor.id %}">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-danger">Yes, Delete</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Assign Batch Modal -->
+            <div class="modal fade" id="assignBatchModal{{ mentor.id }}" tabindex="-1" aria-labelledby="assignBatchModalLabel{{ mentor.id }}" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="assignBatchModalLabel{{ mentor.id }}">Assign Batch to {{ mentor.full_name }}</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <form method="post" action="{% url 'assign_batch' mentor.id %}">
+                            {% csrf_token %}
+                            <div class="modal-body">
+                                <label for="graduation_year">Select Graduation Year:</label>
+                                <select name="graduation_year" id="graduation_year" class="form-control" required>
+                                    {% for year in graduation_years %}
+                                    <option value="{{ year }}">{{ year }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                                <button type="submit" class="btn btn-primary">Assign</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.4.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

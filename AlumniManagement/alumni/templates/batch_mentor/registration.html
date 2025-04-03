@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Batch Mentor Registration</title>
+    {% load static %}
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: Arial, sans-serif;
+        }
+        .outer-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            width: 100%;
+        }
+        .form-group i {
+            margin-right: 5px;
+        }
+        .profile-photo-preview {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 50%;
+            margin-bottom: 10px;
+            display: none;
+        }
+        .form-group label {
+            font-weight: bold;
+        }
+        .form-group .text-danger {
+            font-size: 0.875em;
+        }
+        .btn-primary {
+            background-color: #007bff;
+            border-color: #007bff;
+        }
+        .btn-primary:hover {
+            background-color: #0056b3;
+            border-color: #0056b3;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .header h2 {
+            margin: 0;
+            font-size: 2em;
+            color: #333;
+        }
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ced4da;
+            border-radius: 5px;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="outer-container">
+        <div class="container">
+            <div class="header">
+                <h2><i class="fas fa-user-plus"></i> Batch Mentor Registration</h2>
+            </div>
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="text-center mb-4">
+                    <img id="profilePhotoPreview" class="profile-photo-preview" src="#" alt="Profile Photo Preview">
+                </div>
+                <div class="form-group">
+                    <label for="profile_photo"><i class="fas fa-camera"></i> Profile Photo</label>
+                    {{ form.profile_photo }}
+                    <div class="text-danger">{{ form.profile_photo.errors }}</div>
+                </div>
+                <div class="form-group">
+                    <label for="full_name"><i class="fas fa-user"></i> Full Name</label>
+                    {{ form.full_name }}
+                    <div class="text-danger">{{ form.full_name.errors }}</div>
+                </div>
+                <div class="form-group">
+                    <label for="mobile"><i class="fas fa-phone"></i> Mobile</label>
+                    {{ form.mobile }}
+                    <div class="text-danger">{{ form.mobile.errors }}</div>
+                </div>
+                <div class="form-group">
+                    <label for="email"><i class="fas fa-envelope"></i> Email</label>
+                    {{ form.email }}
+                    <div class="text-danger">{{ form.email.errors }}</div>
+                </div>
+                <div class="form-group">
+                    <label for="password1"><i class="fas fa-lock"></i> Password</label>
+                    {{ form.password1 }}
+                    <div class="text-danger">{{ form.password1.errors }}</div>
+                </div>
+                <div class="form-group">
+                    <label for="password2"><i class="fas fa-lock"></i> Confirm Password</label>
+                    {{ form.password2 }}
+                    <div class="text-danger">{{ form.password2.errors }}</div>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">Register</button>
+            </form>
+        </div>
+    </div>
+    <script>
+        document.querySelector('input[name="profile_photo"]').addEventListener('change', function(event) {
+            const [file] = event.target.files;
+            if (file) {
+                const preview = document.getElementById('profilePhotoPreview');
+                preview.src = URL.createObjectURL(file);
+                preview.style.display = 'block';
+            }
+        });
+    </script>
+</body>
+</html>

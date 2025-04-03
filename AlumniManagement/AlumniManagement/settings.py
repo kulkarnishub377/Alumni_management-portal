@@ -43,9 +43,9 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',  # Ensure this is present
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'alumni.middleware.ExceptionMiddleware',  # Add this line
+    'alumni.middleware.ExceptionMiddleware',  # Custom middleware
 ]
 
 ROOT_URLCONF = 'AlumniManagement.urls'
@@ -72,11 +72,11 @@ WSGI_APPLICATION = 'AlumniManagement.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'sk',
-        'USER': 'root',
-        'PASSWORD': 'Shub@3684',
-        'HOST': 'localhost',
-        'PORT': '3306',
+        'NAME': 'sk',  # Database name
+        'USER': 'root',  # MySQL username
+        'PASSWORD': 'Shub@3684',  # MySQL password
+        'HOST': 'localhost',  # MySQL host
+        'PORT': '3306',  # MySQL port
     }
 }
 

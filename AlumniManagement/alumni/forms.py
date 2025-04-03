@@ -115,15 +115,38 @@ class AlumniLoginForm(forms.Form):
     password = forms.CharField(widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Enter your password'}))
 
 class BatchMentorRegistrationForm(forms.ModelForm):
-    password = forms.CharField(widget=forms.PasswordInput())
+    password1 = forms.CharField(
+        widget=forms.PasswordInput(attrs={'class': 'form-control'}),
+        label="Password",
+        required=False
+    )
+    password2 = forms.CharField(
+        widget=forms.PasswordInput(attrs={'class': 'form-control'}),
+        label="Confirm Password",
+        required=False
+    )
 
     class Meta:
         model = BatchMentor
-        fields = ['email', 'full_name', 'mobile', 'password', 'assigned_batches']
-        widgets = {
-            'assigned_batches': forms.CheckboxSelectMultiple(),
-        }
+        fields = ['full_name', 'mobile', 'email', 'profile_photo']
+
+    def clean(self):
+        cleaned_data = super().clean()
+        password1 = cleaned_data.get("password1")
+        password2 = cleaned_data.get("password2")
+        if password1 and password1 != password2:
+            self.add_error('password2', "Passwords do not match")
+        return cleaned_data
+
+    def save(self, commit=True):
+        mentor = super().save(commit=False)
+        mentor.username = self.cleaned_data.get("email")  # Explicitly set username as email
+        mentor.set_password(self.cleaned_data["password1"])
+        mentor.full_name = self.cleaned_data.get("full_name")  # Ensure full_name is set
+        if commit:
+            mentor.save()
+        return mentor
 
 class BatchMentorLoginForm(forms.Form):
-    email = forms.EmailField()
-    password = forms.CharField(widget=forms.PasswordInput())
+    email = forms.EmailField(widget=forms.EmailInput(attrs={'class': 'form-control'}))
+    password = forms.CharField(widget=forms.PasswordInput(attrs={'class': 'form-control'}))

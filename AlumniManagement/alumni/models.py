@@ -137,23 +137,38 @@ class Comment(models.Model):
 
 class Batch(models.Model):
     graduation_year = models.IntegerField()
-    mentors = models.ManyToManyField('BatchMentor', related_name='batches')
+    mentors = models.ManyToManyField('BatchMentor', related_name='batches_assigned')
 
     def __str__(self):
         return f"Batch {self.graduation_year}"
 
-class BatchMentor(models.Model):
-    email = models.EmailField(unique=True)
-    full_name = models.CharField(max_length=255)
-    mobile = models.CharField(max_length=15)
-    password = models.CharField(max_length=255)
-    assigned_batches = models.ManyToManyField(Batch, related_name='mentors_assigned')
+class GraduationYear(models.Model):
+    year = models.IntegerField(unique=True)
 
     def __str__(self):
-        return self.full_name
+        return str(self.year)
+
+class BatchMentor(models.Model):
+    full_name = models.CharField(max_length=255)
+    mobile = models.CharField(max_length=15)
+    email = models.EmailField(unique=True)
+    password = models.CharField(max_length=255)
+    profile_photo = models.ImageField(upload_to='media/mentor_photos/', blank=True, null=True)
+    assigned_batches = models.ManyToManyField('GraduationYear', blank=True, related_name='mentors_assigned')
+    username = models.CharField(max_length=255, unique=True)
+
+    REQUIRED_FIELDS = ['full_name', 'mobile', 'email']
+
+    def save(self, *args, **kwargs):
+        if not self.username:  # Ensure username is set to email if not already set
+            self.username = self.email
+        super().save(*args, **kwargs)
 
     def set_password(self, raw_password):
         self.password = make_password(raw_password)
 
     def check_password(self, raw_password):
         return check_password(raw_password, self.password)
+
+    def __str__(self):
+        return self.full_name
