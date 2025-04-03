@@ -7,13 +7,6 @@ urlpatterns = [
     # Home page
     path('', views.home, name='home'),
 
-    # Admin URLs
-    path('admin/login/', views.admin_login, name='admin_login'),
-    path('admin/register/', views.admin_registration, name='admin_registration'),
-    path('admin/dashboard/', views.admin_dashboard, name='admin_dashboard'),
-    path('admin/manage_gallery_photos/', views.manage_gallery_photos_admin, name='manage_gallery_photos_admin'),
-    path('admin/manage_comments/', views.manage_comments_admin, name='manage_comments_admin'),
-
     # Alumni URLs
     path('alumni/register/', views.alumni_registration, name='alumni_registration'),
     path('alumni/profile/', views.alumni_profile, name='alumni_profile'),

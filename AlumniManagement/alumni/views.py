@@ -1,13 +1,12 @@
 import sys
-import xlwt
 from django.http import HttpResponse, JsonResponse
-sys.setrecursionlimit(1000)
+sys.setrecursionlimit(10000)
 
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout, get_user_model
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, Group
 from django.contrib import messages
-from .models import Admin, Alumni, AlumniCoordinator, Comment, GalleryPhoto, BatchMentor, Batch, GraduationYear
+from .models import Alumni, AlumniCoordinator, Comment, GalleryPhoto, BatchMentor, GraduationYear
 from .forms import (
     AdminRegistrationForm, AlumniRegistrationForm, AlumniCoordinatorRegistrationForm,
     AlumniEditForm, GalleryPhotoForm, CommentForm, AlumniCoordinatorEditForm,
@@ -32,38 +31,6 @@ logger = logging.getLogger(__name__)
 # Home Page
 def home(request):
     return render(request, 'home.html')
-
-
-# Admin Login
-def admin_login(request):  
-    if request.method == 'POST':
-        email = request.POST.get('email')
-        password = request.POST.get('password')
-        try:
-            admin = Admin.objects.get(email=email, password=password)
-            request.session['admin_id'] = admin.id
-            return redirect('admin_dashboard')
-        except Admin.DoesNotExist:
-            return render(request, 'alumni/templates/admin/admin_login.html', {'error': 'Invalid credentials'})
-    return render(request, 'alumni/templates/admin/admin_login.html')
-
-# Admin Registration
-def admin_registration(request):
-    if request.method == 'POST':
-        form = AdminRegistrationForm(request.POST)
-        if form.is_valid():
-            form.save()
-            return redirect('admin_login')
-    else:
-        form = AdminRegistrationForm()
-    return render(request, 'alumni/templates/admin/admin_registration.html', {'form': form})
-
-# Admin Dashboard
-def admin_dashboard(request):
-    if 'admin_id' not in request.session:
-        return redirect('admin_login')
-    alumni_list = Alumni.objects.all()
-    return render(request, 'alumni/templates/admin/admin_dashboard.html', {'alumni_list': alumni_list})
 
 # Alumni Coordinator Login
 def alumni_coordinator_login(request):  
