@@ -5,117 +5,233 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Alumni Coordinator Dashboard</title>
     {% load static %}
+    <!-- External Stylesheets -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <style>
+        /* General Styles */
         body {
-            font-family: Arial, sans-serif;
-            background-color: #f9f9f9;
+            font-family: 'Roboto', sans-serif;
+            background-color: #f4f4f9;
             color: #333;
+            margin: 0;
+            padding: 0;
         }
-        .coordinator-details, .edit-alumni-form {
-            background-color: #ffffff;
+        .container-fluid {
             padding: 20px;
-            border-radius: 5px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            position: relative;
+        }
+        .dashboard-title {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #007bff;
+            font-family: 'Caveat', cursive;
+            text-align: center;
+            margin: 20px auto;
         }
         .logout-btn {
             position: absolute;
             top: 20px;
             right: 20px;
+            z-index: 1000;
         }
-        .search-container, .pagination {
-            display: flex;
-            gap: 10px;
+
+        /* Coordinator Details */
+        .coordinator-details {
+            background: #ffffff;
+            color: #000;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             margin-bottom: 20px;
         }
-        .search-container input, .search-container select, .pagination a, .pagination span {
-            border: 1px solid #ddd;
-            border-radius: 4px;
+        .coordinator-details h2 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            color: #007bff;
         }
+        .coordinator-details p {
+            margin: 5px 0;
+            font-weight: bold;
+        }
+        .coordinator-details p span {
+            font-weight: normal;
+        }
+        .edit-profile-btn {
+            background-color: #ffc107;
+            border: none;
+            color: #333;
+        }
+
+        /* Buttons */
+        .button-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        .btn {
+            border-radius: 50px;
+            padding: 10px 20px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+        .btn:hover {
+            transform: scale(1.05);
+        }
+
+        /* Table Styles */
+        .table-responsive {
+            overflow-x: auto;
+            margin-top: 20px;
+        }
+        .table {
+            border-collapse: collapse;
+            width: 100%;
+            background-color: #fff;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border: 1px solid #ddd; /* Light border for the table */
+        }
+        .table th, .table td {
+            padding: 12px 15px;
+            text-align: left;
+            border: 1px solid #ddd; /* Add border to table cells */
+        }
+        .table thead th {
+            background-color: #007bff;
+            color: #fff;
+            font-weight: bold;
+            border-bottom: 2px solid #0056b3; /* Slightly darker border for header */
+        }
+        .table tbody tr:nth-child(odd) {
+            background-color: #f9f9f9;
+        }
+        .table tbody tr:hover {
+            background-color: #f1f1f1;
+            border: 1px solid #ccc; /* Highlight border on hover */
+        }
+
+        /* Profile Photo */
         .profile-photo {
             width: 50px;
             height: 50px;
             object-fit: cover;
             border-radius: 50%;
+            border: 2px solid #007bff;
         }
-        table th {
-            cursor: pointer;
-        }
-        .table-responsive {
-            overflow-x: auto;
-        }
-        .edit-profile-btn, .btn {
-            margin-top: 10px;
-        }
-        .table {
-            border-collapse: collapse;
-            width: 100%;
-        }
-        .table th, .table td {
-            border: 1px solid #ddd;
-            padding: 8px;
-        }
-        .table thead th {
-            background-color: #007bff;
-            color: white;
-        }
-        .table tbody tr:nth-child(odd) {
-            background-color: #f9f9f9;
-        }
-        .table tbody tr:nth-child(even) {
-            background-color: #ffffff;
-        }
-        .table tbody tr:hover {
-            background-color: #f1f1f1;
-        }
-        .btn-primary, .btn-danger, .btn-warning, .btn-success {
-            border-color: transparent;
-        }
-        .btn-primary { background-color: #007bff; }
-        .btn-danger { background-color: #dc3545; }
-        .btn-warning { background-color: #ffc107; }
-        .btn-success { background-color: #28a745; }
-        .dashboard-title {
-            font-size: 2rem;
-            font-weight: bold;
-            color: #007bff;
-            font-family: 'Caveat', cursive;
-            text-align: center;
-        }
-        .d-flex {
-            justify-content: center !important;
-        }
-        .button-group {
+
+        /* Search and Pagination */
+        .search-container {
             display: flex;
+            flex-wrap: wrap;
             gap: 10px;
+            margin-bottom: 20px;
+        }
+        .search-container {
             justify-content: center;
+            display: flex;
+        }
+        .search-container input, .search-container select {
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            padding: 15px 20px;
+            font-size: 1.2rem;
+            width: 100%;
+            max-width: 400px;
+            color: #333; /* Ensure text is visible */
+            background-color: #fff; /* Set background color for better contrast */
+        }
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
             margin-top: 20px;
+        }
+        .pagination a, .pagination span {
+            border: 1px solid #ddd;
+            border-radius: 50px;
+            padding: 8px 15px;
+            text-decoration: none;
+            color: #007bff;
+            transition: all 0.3s ease;
+        }
+        .pagination a:hover {
+            background-color: #007bff;
+            color: #fff;
+        }
+        .pagination .disabled {
+            background-color: #f4f4f9;
+            color: #aaa;
+        }
+
+        /* Modal Styles */
+        .modal-content {
+            border-radius: 10px;
+        }
+        .modal-header {
+            background-color: #007bff;
+            color: #fff;
+            border-bottom: none;
+        }
+        .modal-footer {
+            border-top: none;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .dashboard-title {
+                font-size: 2rem;
+            }
+            .coordinator-details {
+                text-align: center;
+            }
+            .logout-btn {
+                position: static;
+                margin-top: 10px;
+            }
+        }
+        .rows-per-page {
+            width: auto;
         }
     </style>
 </head>
 <body>
     <div class="container-fluid">
+        <!-- Coordinator Details -->
         <div class="coordinator-details">
-            <a href="{% url 'home' %}" class="btn btn-danger logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</a>
+            <a href="{% url 'home' %}" class="btn btn-danger logout-btn">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </a>
             <h2>Alumni Coordinator Details</h2>
             <p><i class="fas fa-user"></i> Name: {{ coordinator.name }}</p>
-            <p><i class="fas fa-envelope"></i> Email: {{ coordinator.email }}</p>
-            <p><i class="fas fa-phone"></i> Mobile: {{ coordinator.mobile }}</p>
-            <a href="{% url 'edit_coordinator_profile' %}" class="btn btn-primary edit-profile-btn"><i class="fas fa-edit"></i> Edit Profile</a>
+            <p><i class="fas fa-envelope"></i> Email: <a href="mailto:{{ coordinator.email }}">{{ coordinator.email }}</a></p>
+            <p><i class="fas fa-phone"></i> Mobile: <a href="tel:{{ coordinator.mobile }}">{{ coordinator.mobile }}</a></p>
+            <a href="{% url 'edit_coordinator_profile' %}" class="btn btn-primary edit-profile-btn">
+                <i class="fas fa-edit"></i> Edit Profile
+            </a>
         </div>
+
+        <!-- Dashboard Title -->
         <div class="d-flex justify-content-between align-items-center mt-4">
             <h1 class="dashboard-title">Alumni Coordinator Dashboard</h1>
         </div>
+
+        <!-- Action Buttons -->
         <div class="button-group">
-            <a href="{% url 'manage_gallery_photos_coordinator' %}" class="btn btn-primary"><i class="fas fa-images"></i> Manage Gallery</a>
+            <a href="{% url 'manage_gallery_photos_coordinator' %}" class="btn btn-primary">
+                <i class="fas fa-images"></i> Manage Gallery
+            </a>
+            <a href="{% url 'manage_batch_mentors' %}" class="btn btn-info">
+                <i class="fas fa-users"></i> View Batch Mentors
+            </a>
+            <a href="{% url 'batch_mentor_register' %}" class="btn btn-success">
+                <i class="fas fa-user-plus"></i> Register Batch Mentor
+            </a>
         </div>
-        <div class="button-group">
-            <a href="{% url 'manage_batch_mentors' %}" class="btn btn-info"><i class="fas fa-users"></i> View Batch Mentors</a>
-            <a href="{% url 'batch_mentor_register' %}" class="btn btn-success"><i class="fas fa-user-plus"></i> Register Batch Mentor</a>
-        </div>
+
+        <!-- Search Section -->
         <div class="search-container mt-4">
             <input type="text" id="searchInput" placeholder="Search..." class="form-control">
             <label for="searchOption" class="sr-only">Search Option</label>
@@ -142,12 +258,14 @@
                 <option value="full_address">Full Address</option>
             </select>
         </div>
+
+        <!-- Alumni Table -->
         <div class="table-responsive">
-            <table class="table table-striped mt-3">
+            <table class="table table-striped mt-3" id="alumniTable">
                 <thead>
                     <tr>
-                        <th data-sort="id"><i class="fas fa-id"></i> ID</th>
-                        <th data-sort="profile_photo"><i class="fas fa-user"></i> Profile Photo</th>
+                        <th data-sort="id"><i class="fas fa-hashtag"></i> ID</th>
+                        <th data-sort="profile_photo"><i class="fas fa-user-circle"></i> Profile Photo</th>
                         <th data-sort="name"><i class="fas fa-user"></i> Name</th>
                         <th data-sort="email"><i class="fas fa-envelope"></i> Email</th>
                         <th data-sort="mobile"><i class="fas fa-phone"></i> Mobile</th>
@@ -155,14 +273,14 @@
                         <th data-sort="current_company"><i class="fas fa-building"></i> Current Company</th>
                         <th data-sort="current_job_location"><i class="fas fa-map-marker-alt"></i> Current Job Location</th>
                         <th data-sort="city"><i class="fas fa-city"></i> City</th>
-                        <th data-sort="sub_district"><i class="fas fa-map-signs"></i> Sub District</th>
-                        <th data-sort="district"><i class="fas fa-map"></i> District</th>
+                        <th data-sort="sub_district"><i class="fas fa-map"></i> Sub District</th>
+                        <th data-sort="district"><i class="fas fa-map-marked-alt"></i> District</th>
                         <th data-sort="state"><i class="fas fa-flag"></i> State</th>
-                        <th data-sort="pincode"><i class="fas fa-mail-bulk"></i> Pincode</th>
+                        <th data-sort="pincode"><i class="fas fa-map-pin"></i> Pincode</th>
                         <th data-sort="country"><i class="fas fa-globe"></i> Country</th>
                         <th data-sort="is_international"><i class="fas fa-plane"></i> Is International</th>
                         <th data-sort="full_address"><i class="fas fa-address-card"></i> Full Address</th>
-                        <th data-sort="graduation_year"><i class="fas fa-graduation-cap"></i> Graduation Year</th>
+                        <th data-sort="graduation_year"><i class="fas fa-calendar-alt"></i> Graduation Year</th>
                         <th data-sort="experience"><i class="fas fa-chart-line"></i> Experience</th>
                         <th data-sort="sector"><i class="fas fa-industry"></i> Sector</th>
                         <th data-sort="github"><i class="fab fa-github"></i> GitHub</th>
@@ -172,15 +290,12 @@
                         <th data-sort="whatsapp"><i class="fab fa-whatsapp"></i> WhatsApp</th>
                         <th><i class="fas fa-cogs"></i> Actions</th>
                     </tr>
-                    </tr>
                 </thead>
-                <tbody id="alumniTable">
+                <tbody>
                     {% for alumni in alumni_list %}
                     <tr>
                         <td>{{ alumni.id }}</td>
-                        <td>
-                             <img src="{{ alumni.profile_photo.url }}" alt="Profile Photo" class="profile-photo">
-                        </td>
+                        <td><img src="{{ alumni.profile_photo.url }}" alt="Profile Photo" class="profile-photo"></td>
                         <td>{{ alumni.full_name }}</td>
                         <td><a href="mailto:{{ alumni.email }}">{{ alumni.email }}</a></td>
                         <td><a href="tel:{{ alumni.mobile }}">{{ alumni.mobile }}</a></td>
@@ -199,30 +314,55 @@
                         <td>{{ alumni.experience }}</td>
                         <td>{{ alumni.sector }}</td>
                         <td>
-                            <a href="{{ alumni.github }}" target="_blank" rel="noopener" class="btn btn-dark btn-sm" title="GitHub Profile"><i class="fab fa-github"></i></a>
+                            <a href="{{ alumni.github }}" target="_blank" rel="noopener" class="btn btn-dark btn-sm" title="GitHub Profile">
+                                <i class="fab fa-github"></i>
+                            </a>
                         </td>
                         <td>
-                            <a href="{{ alumni.instagram }}" target="_blank" rel="noopener" class="btn btn-danger btn-sm" title="Instagram Profile"><i class="fab fa-instagram"></i></a>
+                            <a href="{{ alumni.instagram }}" target="_blank" rel="noopener" class="btn btn-danger btn-sm" title="Instagram Profile">
+                                <i class="fab fa-instagram"></i>
+                            </a>
                         </td>
                         <td>
-                            <a href="{{ alumni.linkedin }}" target="_blank" rel="noopener" class="btn btn-primary btn-sm" title="LinkedIn Profile"><i class="fab fa-linkedin"></i></a>
+                            <a href="{{ alumni.linkedin }}" target="_blank" rel="noopener" class="btn btn-primary btn-sm" title="LinkedIn Profile">
+                                <i class="fab fa-linkedin"></i>
+                            </a>
                         </td>
                         <td>
-                            <a href="{{ alumni.facebook }}" target="_blank" rel="noopener" class="btn btn-primary btn-sm" title="Facebook Profile"><i class="fab fa-facebook"></i></a>
+                            <a href="{{ alumni.facebook }}" target="_blank" rel="noopener" class="btn btn-primary btn-sm" title="Facebook Profile">
+                                <i class="fab fa-facebook"></i>
+                            </a>
                         </td>
                         <td>
-                            <a href="https://wa.me/{{ alumni.mobile }}" target="_blank" rel="noopener" class="btn btn-success btn-sm" title="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+                            <a href="https://wa.me/{{ alumni.mobile }}" target="_blank" rel="noopener" class="btn btn-success btn-sm" title="WhatsApp">
+                                <i class="fab fa-whatsapp"></i>
+                            </a>
                         </td>
                         <td>
-                            <a href="{% url 'edit_alumni' alumni.id %}" class="btn btn-warning btn-sm"><i class="fas fa-edit"></i> Edit</a>
-                            <button type="button" class="btn btn-danger btn-sm" data-toggle="modal" data-target="#deleteModal{{ alumni.id }}"><i class="fas fa-trash"></i> Delete</button>
+                            <a href="{% url 'edit_alumni' alumni.id %}" class="btn btn-warning btn-sm">
+                                <i class="fas fa-edit"></i> Edit
+                            </a>
+                            <button type="button" class="btn btn-danger btn-sm" data-toggle="modal" data-target="#deleteModal{{ alumni.id }}">
+                                <i class="fas fa-trash"></i> Delete
+                            </button>
                         </td>
                     </tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
-        <div class="pagination">
+
+        <!-- Rows Per Page and Pagination -->
+        <div class="form-group">
+            <label for="rowsPerPage" class="mr-2">Rows per page:</label>
+            <select id="rowsPerPage" class="form-control d-inline-block rows-per-page" title="Select number of rows per page">
+                <option value="10">10</option>
+                <option value="20">20</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+            </select>
+        </div>
+            <div class="pagination">
             {% if page_obj.has_previous %}
                 <a href="?page=1" class="btn btn-outline-primary btn-sm">First</a>
                 <a href="?page={{ page_obj.previous_page_number }}" class="btn btn-outline-primary btn-sm">Previous</a>
@@ -232,12 +372,29 @@
                 <a href="?page={{ page_obj.next_page_number }}" class="btn btn-outline-primary btn-sm">Next</a>
                 <a href="?page={{ page_obj.paginator.num_pages }}" class="btn btn-outline-primary btn-sm">Last</a>
             {% endif %}
+            </div>
         </div>
-        <div class="d-flex justify-content-center mt-4">
-            <a href="{% url 'export_alumni_to_excel' %}" class="btn btn-success"><i class="fas fa-file-excel"></i> Download Excel</a>
+
+        <script>
+            // Handle Rows Per Page Selection
+            document.getElementById('rowsPerPage').addEventListener('change', function() {
+            const rowsPerPage = this.value;
+            const urlParams = new URLSearchParams(window.location.search);
+            urlParams.set('rows', rowsPerPage);
+            urlParams.set('page', 1); // Reset to the first page
+            window.location.search = urlParams.toString();
+            });
+        </script>
+
+        <!-- Download Button -->
+        <div class="button-group">
+            <button id="downloadExcel" class="btn btn-success">
+                <i class="fas fa-file-excel"></i> Download Excel File
+            </button>
         </div>
     </div>
-    <!-- Delete Confirmation Modal -->
+
+    <!-- Delete Confirmation Modals -->
     {% for alumni in alumni_list %}
     <div class="modal fade" id="deleteModal{{ alumni.id }}" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel{{ alumni.id }}" aria-hidden="true">
         <div class="modal-dialog" role="document">
@@ -262,46 +419,34 @@
         </div>
     </div>
     {% endfor %}
+
+    <!-- Scripts -->
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script>
+        // Search Functionality
         document.getElementById('searchInput').addEventListener('keyup', function() {
             let filter = this.value.toLowerCase();
             let option = document.getElementById('searchOption').value;
-            let rows = document.querySelectorAll('#alumniTable tr');
+            let rows = document.querySelectorAll('#alumniTable tbody tr');
             rows.forEach(row => {
-                let text = '';
-                if (option === 'all') {
-                    text = row.textContent.toLowerCase();
-                } else {
-                    let index = getColumnIndex(option);
-                    text = row.children[index].textContent.toLowerCase();
-                }
+                let text = option === 'all' ? row.textContent.toLowerCase() : row.children[getColumnIndex(option)].textContent.toLowerCase();
                 row.style.display = text.includes(filter) ? '' : 'none';
             });
         });
 
         function getColumnIndex(option) {
-            switch (option) {
-                case 'name': return 1;
-                case 'email': return 2;
-                case 'mobile': return 3;
-                case 'current_job_profile': return 4;
-                case 'current_company': return 5;
-                case 'current_job_location': return 6;
-                case 'city': return 7;
-                case 'sub_district': return 8;
-                case 'district': return 9;
-                case 'state': return 10;
-                case 'pincode': return 11;
-                case 'country': return 12;
-                case 'graduation_year': return 13;
-                case 'experience': return 14;
-                default: return 1;
-            }
+            const columnMap = {
+                name: 2, email: 3, mobile: 4, current_job_profile: 5, current_company: 6,
+                current_job_location: 7, city: 8, sub_district: 9, district: 10, state: 11,
+                pincode: 12, country: 13, graduation_year: 16, experience: 17
+            };
+            return columnMap[option] || 2;
         }
 
+        // Sorting Functionality
         document.querySelectorAll('th[data-sort]').forEach(header => {
             header.addEventListener('click', function() {
                 let table = header.closest('table');
@@ -316,6 +461,35 @@
                 });
                 rows.forEach(row => tbody.appendChild(row));
             });
+        });
+
+        // Download Excel Functionality
+        document.getElementById('downloadExcel').addEventListener('click', function() {
+            const table = document.getElementById('alumniTable');
+            const rows = Array.from(table.querySelectorAll('tbody tr')).filter(row => row.style.display !== 'none');
+            const data = [];
+            const headers = Array.from(table.querySelectorAll('thead th'))
+                .map((th, index) => ({ text: th.textContent.trim(), index }))
+                .filter(header => !['Actions', 'Profile Photo', 'GitHub', 'Instagram', 'LinkedIn', 'Facebook', 'WhatsApp'].includes(header.text));
+            data.push(headers.map(header => header.text));
+
+            rows.forEach(row => {
+                const cells = Array.from(row.querySelectorAll('td'))
+                    .filter((_, index) => headers.some(header => header.index === index))
+                    .map(td => td.textContent.trim());
+                data.push(cells);
+            });
+
+            if (data.length > 1) {
+                const worksheet = XLSX.utils.aoa_to_sheet(data);
+                const workbook = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(workbook, worksheet, 'Alumni Data');
+                const timestamp = new Date().toISOString().replace(/[-:T]/g, '').split('.')[0];
+                const filename = `Alumni_Data_${timestamp}.xlsx`;
+                XLSX.writeFile(workbook, filename);
+            } else {
+                alert('No data available to download.');
+            }
         });
     </script>
 </body>

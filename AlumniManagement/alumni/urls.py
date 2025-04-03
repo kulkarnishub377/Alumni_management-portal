@@ -28,7 +28,6 @@ urlpatterns = [
     path('alumni_coordinator/register/', views.alumni_coordinator_registration, name='alumni_coordinator_registration'),
     path('alumni_coordinator/dashboard/', views.alumni_coordinator_dashboard, name='alumni_coordinator_dashboard'),
     path('alumni_coordinator/edit-profile/', views.edit_coordinator_profile, name='edit_coordinator_profile'),
-    path('alumni_coordinator/export/', views.export_alumni_to_excel, name='export_alumni_to_excel'),
     path('coordinator/manage_gallery_photos/', views.manage_gallery_photos_coordinator, name='manage_gallery_photos_coordinator'),
     path('coordinator/manage_comments/', views.manage_comments_coordinator, name='manage_comments_coordinator'),
     path('alumni-coordinator/manage-batch-mentors/', views.manage_batch_mentors, name='manage_batch_mentors'),

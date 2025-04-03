@@ -221,44 +221,6 @@ def delete_alumni_confirm(request, id):
         return redirect('alumni_coordinator_dashboard')
     return render(request, 'alumni_coordinator/delete_alumni_confirm.html', {'alumni': alumni})
 
-# Export Alumni Data to Excel
-def export_alumni_to_excel(request):
-    if 'coordinator_id' not in request.session:
-        return redirect('alumni_coordinator_login')
-    
-    response = HttpResponse(content_type='application/ms-excel')
-    response['Content-Disposition'] = 'attachment; filename="alumni_data.xls"'
-
-    wb = xlwt.Workbook(encoding='utf-8')
-    ws = wb.add_sheet('Alumni Data')
-
-    # Define the columns
-    columns = [
-        'Full Name', 'Email', 'Mobile', 'Profile Photo', 'Current Job Profile', 'Current Company',
-        'Current Job Location', 'City', 'Sub District', 'District', 'State', 'Pincode',
-        'Is International', 'Country', 'Full Address', 'Graduation Year', 'Experience', 'Facebook',
-        'GitHub', 'Instagram', 'LinkedIn', 'Sector'
-    ]
-
-    # Write the column headers
-    for col_num, column_title in enumerate(columns):
-        ws.write(0, col_num, column_title)
-
-    # Write the data rows
-    rows = Alumni.objects.all().values_list(
-        'full_name', 'email', 'mobile', 'profile_photo', 'current_job_profile', 'current_company',
-        'current_job_location', 'city', 'sub_district', 'district', 'state', 'pincode',
-        'is_international', 'country', 'full_address', 'graduation_year', 'experience', 'facebook',
-        'github', 'instagram', 'linkedin', 'sector'
-    )
-
-    for row_num, row in enumerate(rows, start=1):
-        for col_num, cell_value in enumerate(row):
-            ws.write(row_num, col_num, str(cell_value))
-
-    wb.save(response)
-    return response
-
 from django.http import HttpResponse
 from PIL import Image, ImageDraw, ImageFont, ImageOps
 import os

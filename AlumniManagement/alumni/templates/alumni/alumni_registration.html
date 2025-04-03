@@ -6,229 +6,268 @@
     <title>Alumni Registration</title>
     {% load static %}
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <style>
         body {
-            background-color: #f8f9fa;
-            font-family: Arial, sans-serif;
+            font-family: 'Arial', sans-serif;
+            color: #333;
         }
-        .outer-container {
+        .registration-container {
+            min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 100vh;
             padding: 20px;
         }
-        .container {
-            background-color: #fff;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            max-width: 600px;
+        .registration-form {
+            background: #ffffff;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
             width: 100%;
+            max-width: 600px;
         }
-        .form-group i {
-            margin-right: 5px;
+        .form-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .form-header h2 {
+            font-weight: bold;
+            color: #6a11cb;
+        }
+        .form-header p {
+            color: #6c757d;
+            font-size: 14px;
         }
         .profile-photo-preview {
-            width: 100px;
-            height: 100px;
-            object-fit: cover;
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        .profile-photo-preview img {
+            width: 120px;
+            height: 120px;
             border-radius: 50%;
-            margin-bottom: 10px;
-            display: none;
+            object-fit: cover;
+            border: 2px solid #6a11cb;
+            display: none; /* Initially hidden */
         }
-        .form-group label {
-            font-weight: bold;
+        .form-control {
+            height: 45px;
+            font-size: 16px;
+            border-radius: 8px;
         }
-        .form-group .text-danger {
-            font-size: 0.875em;
+        .form-control:focus {
+            box-shadow: 0 0 8px rgba(106, 17, 203, 0.6);
+            border-color: #6a11cb;
         }
         .btn-primary {
-            background-color: #007bff;
-            border-color: #007bff;
+            background: linear-gradient(135deg, #6a11cb, #2575fc);
+            border: none;
+            font-size: 16px;
+            padding: 12px 20px;
+            border-radius: 8px;
+            transition: background 0.3s ease;
         }
         .btn-primary:hover {
-            background-color: #0056b3;
-            border-color: #0056b3;
+            background: linear-gradient(135deg, #2575fc, #6a11cb);
         }
-        .top-icon {
-            font-size: 3em;
-            color: #007bff;
-            text-align: center;
-            margin-bottom: 20px;
+        .password-toggle {
+            position: relative;
         }
-        .header {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        .header h2 {
-            margin: 0;
-            font-size: 2em;
-            color: #333;
-        }
-        .form-group input, .form-group select, .form-group textarea {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ced4da;
-            border-radius: 5px;
-            margin-top: 5px;
-        }
-        .form-group input[type="radio"] {
-            width: auto;
-            margin-right: 10px;
+        .password-toggle .toggle-icon {
+            position: absolute;
+            top: 50%;
+            right: 10px;
+            transform: translateY(-50%);
+            cursor: pointer;
         }
     </style>
+    <script>
+        function previewProfilePhoto(event) {
+            const preview = document.getElementById('profile-photo-preview');
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    preview.src = e.target.result;
+                    preview.style.display = 'block'; // Show the image
+                };
+                reader.readAsDataURL(file);
+            } else {
+                preview.style.display = 'none'; // Hide the image if no file is selected
+            }
+        }
+
+        function togglePasswordVisibility(inputId, iconId) {
+            const input = document.getElementById(inputId);
+            const icon = document.getElementById(iconId);
+            if (input.type === "password") {
+                input.type = "text";
+                icon.classList.remove("fa-eye");
+                icon.classList.add("fa-eye-slash");
+            } else {
+                input.type = "password";
+                icon.classList.remove("fa-eye-slash");
+                icon.classList.add("fa-eye");
+            }
+        }
+    </script>
 </head>
 <body>
-    <div class="outer-container">
-        <div class="container">
-            <div class="header">
-                <div class="top-icon">
-                    <i class="fas fa-user-graduate"></i>
-                </div>
-                <h2>Alumni Registration</h2>
+    <div class="registration-container">
+        <div class="registration-form">
+            <div class="form-header">
+                <h2><i class="fas fa-user-graduate"></i> Alumni Registration</h2>
+                <p>Fill in the details to register</p>
+            </div>
+            <div class="profile-photo-preview">
+                <img id="profile-photo-preview" alt="Profile Photo">
             </div>
             <form method="post" enctype="multipart/form-data">
                 {% csrf_token %}
-                <div class="text-center mb-4">
-                    <img id="profilePhotoPreview" class="profile-photo-preview" src="#" alt="Profile Photo Preview">
-                </div>
                 <div class="form-group">
                     <label for="profile_photo"><i class="fas fa-camera"></i> Profile Photo</label>
-                    {{ form.profile_photo }}
+                    <input type="file" id="profile_photo" name="profile_photo" class="form-control" onchange="previewProfilePhoto(event)">
                     <div class="text-danger">{{ form.profile_photo.errors }}</div>
                 </div>
                 <div class="form-group">
                     <label for="full_name"><i class="fas fa-user"></i> Full Name</label>
-                    {{ form.full_name }}
+                    <input type="text" id="full_name" name="full_name" class="form-control" placeholder="Full Name">
                     <div class="text-danger">{{ form.full_name.errors }}</div>
                 </div>
                 <div class="form-group">
                     <label for="mobile"><i class="fas fa-phone"></i> Mobile</label>
-                    {{ form.mobile }}
+                    <input type="text" id="mobile" name="mobile" class="form-control" placeholder="Mobile">
                     <div class="text-danger">{{ form.mobile.errors }}</div>
                 </div>
                 <div class="form-group">
                     <label for="email"><i class="fas fa-envelope"></i> Email</label>
-                    {{ form.email }}
+                    <input type="email" id="email" name="email" class="form-control" placeholder="Email">
                     <div class="text-danger">{{ form.email.errors }}</div>
                 </div>
                 <div class="form-group">
-                    <label for="current_job_profile"><i class="fas fa-briefcase"></i> Current Job Profile</label>
-                    {{ form.current_job_profile }}
-                    <div class="text-danger">{{ form.current_job_profile.errors }}</div>
-                </div>
-                <div class="form-group">
-                    <label for="current_company"><i class="fas fa-building"></i> Current Company</label>
-                    {{ form.current_company }}
-                    <div class="text-danger">{{ form.current_company.errors }}</div>
-                </div>
-                <div class="form-group">
-                    <label for="current_job_location"><i class="fas fa-map-marker-alt"></i> Current Job Location</label>
-                    {{ form.current_job_location }}
-                    <div class="text-danger">{{ form.current_job_location.errors }}</div>
-                </div>
-                <div class="form-group">
-                    <label for="sector"><i class="fas fa-industry"></i> Sector</label>
-                    {{ form.sector }}
-                    <div class="text-danger">{{ form.sector.errors }}</div>
-                </div>
-                <div class="form-group">
-                    <label for="city"><i class="fas fa-city"></i> City</label>
-                    {{ form.city }}
-                    <div class="text-danger">{{ form.city.errors }}</div>
-                </div>
-                <div class="form-group">
-                    <label for="sub_district"><i class="fas fa-map"></i> Sub District</label>
-                    {{ form.sub_district }}
-                    <div class="text-danger">{{ form.sub_district.errors }}</div>
-                </div>
-                <div class="form-group">
-                    <label for="district"><i class="fas fa-map-signs"></i> District</label>
-                    {{ form.district }}
-                    <div class="text-danger">{{ form.district.errors }}</div>
-                </div>
-                <div class="form-group">
-                    <label for="state"><i class="fas fa-flag"></i> State</label>
-                    {{ form.state }}
-                    <div class="text-danger">{{ form.state.errors }}</div>
-                </div>
-                <div class="form-group">
-                    <label for="pincode"><i class="fas fa-mail-bulk"></i> Pincode</label>
-                    {{ form.pincode }}
-                    <div class="text-danger">{{ form.pincode.errors }}</div>
-                </div>
-                <div class="form-group">
-                    <label for="is_international"><i class="fas fa-globe"></i> Is International</label>
-                    <div>
-                        <label><input type="radio" name="is_international" value="yes"> Yes</label>
-                        <label><input type="radio" name="is_international" value="no"> No</label>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label for="country"><i class="fas fa-globe"></i> Country</label>
-                    {{ form.country }}
-                    <div class="text-danger">{{ form.country.errors }}</div>
-                </div>
-                <div class="form-group">
-                    <label for="full_address"><i class="fas fa-address-card"></i> Full Address</label>
-                    {{ form.full_address }}
-                    <div class="text-danger">{{ form.full_address.errors }}</div>
-                </div>
-                <div class="form-group">
-                    <label for="graduation_year"><i class="fas fa-calendar"></i> Graduation Year</label>
-                    {{ form.graduation_year }}
-                    <div class="text-danger">{{ form.graduation_year.errors }}</div>
-                </div>
-                <div class="form-group">
-                    <label for="experience"><i class="fas fa-briefcase"></i> Experience</label>
-                    {{ form.experience }}
-                    <div class="text-danger">{{ form.experience.errors }}</div>
-                </div>
-                <div class="form-group">
-                    <label for="facebook"><i class="fab fa-facebook"></i> Facebook</label>
-                    {{ form.facebook }}
-                    <div class="text-danger">{{ form.facebook.errors }}</div>
-                </div>
-                <div class="form-group">
-                    <label for="github"><i class="fab fa-github"></i> GitHub</label>
-                    {{ form.github }}
-                    <div class="text-danger">{{ form.github.errors }}</div>
-                </div>
-                <div class="form-group">
-                    <label for="instagram"><i class="fab fa-instagram"></i> Instagram</label>
-                    {{ form.instagram }}
-                    <div class="text-danger">{{ form.instagram.errors }}</div>
-                </div>
-                <div class="form-group">
-                    <label for="linkedin"><i class="fab fa-linkedin"></i> LinkedIn</label>
-                    {{ form.linkedin }}
-                    <div class="text-danger">{{ form.linkedin.errors }}</div>
-                </div>
-                <div class="form-group">
                     <label for="password1"><i class="fas fa-lock"></i> Password</label>
-                    {{ form.password1 }}
+                    <div class="password-toggle">
+                        <input type="password" id="password1" name="password1" class="form-control" placeholder="Password">
+                        <i id="toggle-password1" class="fas fa-eye toggle-icon" onclick="togglePasswordVisibility('password1', 'toggle-password1')"></i>
+                    </div>
                     <div class="text-danger">{{ form.password1.errors }}</div>
                 </div>
                 <div class="form-group">
                     <label for="password2"><i class="fas fa-lock"></i> Confirm Password</label>
-                    {{ form.password2 }}
+                    <div class="password-toggle">
+                        <input type="password" id="password2" name="password2" class="form-control" placeholder="Confirm Password">
+                        <i id="toggle-password2" class="fas fa-eye toggle-icon" onclick="togglePasswordVisibility('password2', 'toggle-password2')"></i>
+                    </div>
                     <div class="text-danger">{{ form.password2.errors }}</div>
                 </div>
-                <button type="submit" class="btn btn-primary btn-block">Register</button>
+                <div class="form-group">
+                    <label for="current_job_profile"><i class="fas fa-briefcase"></i> Current Job Profile</label>
+                    <input type="text" id="current_job_profile" name="current_job_profile" class="form-control" placeholder="Current Job Profile">
+                    <div class="text-danger">{{ form.current_job_profile.errors }}</div>
+                </div>
+                <div class="form-group">
+                    <label for="current_company"><i class="fas fa-building"></i> Current Company</label>
+                    <input type="text" id="current_company" name="current_company" class="form-control" placeholder="Current Company">
+                    <div class="text-danger">{{ form.current_company.errors }}</div>
+                </div>
+                <div class="form-group">
+                    <label for="current_job_location"><i class="fas fa-map-marker-alt"></i> Current Job Location</label>
+                    <input type="text" id="current_job_location" name="current_job_location" class="form-control" placeholder="Current Job Location">
+                    <div class="text-danger">{{ form.current_job_location.errors }}</div>
+                </div>
+                <div class="form-group">
+                    <label for="city"><i class="fas fa-city"></i> City</label>
+                    <input type="text" id="city" name="city" class="form-control" placeholder="City">
+                    <div class="text-danger">{{ form.city.errors }}</div>
+                </div>
+                <div class="form-group">
+                    <label for="sub_district"><i class="fas fa-map"></i> Sub District</label>
+                    <input type="text" id="sub_district" name="sub_district" class="form-control" placeholder="Sub District">
+                    <div class="text-danger">{{ form.sub_district.errors }}</div>
+                </div>
+                <div class="form-group">
+                    <label for="district"><i class="fas fa-map"></i> District</label>
+                    <input type="text" id="district" name="district" class="form-control" placeholder="District">
+                    <div class="text-danger">{{ form.district.errors }}</div>
+                </div>
+                <div class="form-group">
+                    <label for="state"><i class="fas fa-map"></i> State</label>
+                    <input type="text" id="state" name="state" class="form-control" placeholder="State">
+                    <div class="text-danger">{{ form.state.errors }}</div>
+                </div>
+                <div class="form-group">
+                    <label for="pincode"><i class="fas fa-map-pin"></i> Pincode</label>
+                    <input type="text" id="pincode" name="pincode" class="form-control" placeholder="Pincode">
+                    <div class="text-danger">{{ form.pincode.errors }}</div>
+                </div>
+                <div class="form-group">
+                    <label for="is_international"><i class="fas fa-globe"></i> Is International</label>
+                    <select id="is_international" name="is_international" class="form-control">
+                        <option value="True">Yes</option>
+                        <option value="False">No</option>
+                    </select>
+                    <div class="text-danger">{{ form.is_international.errors }}</div>
+                </div>
+                <div class="form-group">
+                    <label for="country"><i class="fas fa-flag"></i> Country</label>
+                    <input type="text" id="country" name="country" class="form-control" placeholder="Country">
+                    <div class="text-danger">{{ form.country.errors }}</div>
+                </div>
+                <div class="form-group">
+                    <label for="full_address"><i class="fas fa-address-card"></i> Full Address</label>
+                    <textarea id="full_address" name="full_address" class="form-control" placeholder="Full Address"></textarea>
+                    <div class="text-danger">{{ form.full_address.errors }}</div>
+                </div>
+                <div class="form-group">
+                    <label for="graduation_year"><i class="fas fa-calendar"></i> Graduation Year</label>
+                    <input type="text" id="graduation_year" name="graduation_year" class="form-control" placeholder="Graduation Year">
+                    <div class="text-danger">{{ form.graduation_year.errors }}</div>
+                </div>
+                <div class="form-group">
+                    <label for="experience"><i class="fas fa-briefcase"></i> Experience</label>
+                    <input type="text" id="experience" name="experience" class="form-control" placeholder="Experience">
+                    <div class="text-danger">{{ form.experience.errors }}</div>
+                </div>
+                <div class="form-group">
+                    <label for="facebook"><i class="fab fa-facebook"></i> Facebook</label>
+                    <input type="url" id="facebook" name="facebook" class="form-control" placeholder="Facebook Profile URL">
+                    <div class="text-danger">{{ form.facebook.errors }}</div>
+                </div>
+                <div class="form-group">
+                    <label for="github"><i class="fab fa-github"></i> GitHub</label>
+                    <input type="url" id="github" name="github" class="form-control" placeholder="GitHub Profile URL">
+                    <div class="text-danger">{{ form.github.errors }}</div>
+                </div>
+                <div class="form-group">
+                    <label for="instagram"><i class="fab fa-instagram"></i> Instagram</label>
+                    <input type="url" id="instagram" name="instagram" class="form-control" placeholder="Instagram Profile URL">
+                    <div class="text-danger">{{ form.instagram.errors }}</div>
+                </div>
+                <div class="form-group">
+                    <label for="linkedin"><i class="fab fa-linkedin"></i> LinkedIn</label>
+                    <input type="url" id="linkedin" name="linkedin" class="form-control" placeholder="LinkedIn Profile URL">
+                    <div class="text-danger">{{ form.linkedin.errors }}</div>
+                </div>
+                <div class="form-group">
+                    <label for="sector"><i class="fas fa-industry"></i> Sector</label>
+                    <input type="text" id="sector" name="sector" class="form-control" placeholder="Sector">
+                    <div class="text-danger">{{ form.sector.errors }}</div>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">
+                    <i class="fas fa-user-plus"></i> Register
+                </button>
             </form>
+            <div class="footer-links text-center mt-4">
+                <a href="{% url 'home' %}" class="text-decoration-none text-primary mx-2">
+                    <i class="fas fa-home"></i> Home
+                </a>
+                <a href="{% url 'alumni_login' %}" class="text-decoration-none text-primary mx-2">
+                    <i class="fas fa-sign-in-alt"></i> Login
+                </a>
+            </div>
         </div>
     </div>
-    <script>
-        document.querySelector('input[name="profile_photo"]').addEventListener('change', function(event) {
-            const [file] = event.target.files;
-            if (file) {
-                const preview = document.getElementById('profilePhotoPreview');
-                preview.src = URL.createObjectURL(file);
-                preview.style.display = 'block';
-            }
-        });
-    </script>
 </body>
 </html>

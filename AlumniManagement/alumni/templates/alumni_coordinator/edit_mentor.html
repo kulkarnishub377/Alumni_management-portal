@@ -4,105 +4,145 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Edit Mentor</title>
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    {% load static %}
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-    <!-- Custom CSS -->
     <style>
         body {
-            background-color: #f8f9fa;
             font-family: 'Arial', sans-serif;
+            color: #333;
         }
-        .form-container {
+        .edit-mentor-container {
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .edit-mentor-form {
             background: #ffffff;
-            padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-        .form-title {
-            font-weight: bold;
-            color: #343a40;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        .form-title i {
-            color: #007bff;
-        }
-        .form-group label {
-            font-weight: bold;
-            color: #495057;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 1rem;
-            margin-bottom: 5px;
-        }
-        .form-group input, .form-group select, .form-group textarea {
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
             width: 100%;
-            padding: 10px;
-            border: 1px solid #ced4da;
-            border-radius: 5px;
-            margin-top: 5px;
-            font-size: 1rem;
-            background-color: #f8f9fa;
-            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+            max-width: 600px;
         }
-        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
-            border-color: #007bff;
-            box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
-            outline: none;
+        .form-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .form-header h2 {
+            font-weight: bold;
+            color: #6a11cb;
+        }
+        .form-header p {
+            color: #6c757d;
+            font-size: 14px;
+        }
+        .form-control {
+            height: 45px;
+            font-size: 16px;
+            border-radius: 8px;
+        }
+        .form-control:focus {
+            box-shadow: 0 0 8px rgba(106, 17, 203, 0.6);
+            border-color: #6a11cb;
         }
         .btn-primary {
-            background-color: #007bff;
-            border-color: #007bff;
-            display: flex;
-            align-items: center;
-            gap: 8px;
+            background: linear-gradient(135deg, #6a11cb, #2575fc);
+            border: none;
+            font-size: 16px;
+            padding: 12px 20px;
+            border-radius: 8px;
+            transition: background 0.3s ease;
         }
         .btn-primary:hover {
-            background-color: #0056b3;
-            border-color: #004085;
+            background: linear-gradient(135deg, #2575fc, #6a11cb);
         }
         .btn-secondary {
-            background-color: #6c757d;
-            border-color: #6c757d;
-            display: flex;
-            align-items: center;
-            gap: 8px;
+            background: #6c757d;
+            border: none;
+            font-size: 16px;
+            padding: 12px 20px;
+            border-radius: 8px;
+            transition: background 0.3s ease;
         }
         .btn-secondary:hover {
-            background-color: #5a6268;
-            border-color: #545b62;
+            background: #5a6268;
+        }
+        .password-toggle {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+        }
+        .password-wrapper {
+            position: relative;
         }
     </style>
 </head>
 <body>
-    <div class="container mt-5"></div>
-        <div class="row justify-content-center">
-            <div class="col-md-6">
-                <div class="form-container">
-                    <h2 class="form-title mb-4">
-                        <i class="fas fa-user-edit"></i> Edit Mentor: {{ mentor.full_name }}
-                    </h2>
-                    <form method="post" enctype="multipart/form-data" action="{% url 'edit_mentor' mentor.id %}">
-                        {% csrf_token %}
-                        {{ form.as_p }}
-                        <div class="d-flex justify-content-between mt-4">
-                            <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-save"></i> Save Changes
-                            </button>
-                            <a href="{% url 'manage_batch_mentors' %}" class="btn btn-secondary">
-                                <i class="fas fa-times"></i> Cancel
-                            </a>
-                        </div>
-                    </form>
-                </div>
+    <div class="edit-mentor-container">
+        <div class="edit-mentor-form">
+            <div class="form-header">
+                <h2><i class="fas fa-user-edit"></i> Edit Mentor</h2>
+                <p>Update the details of mentor: {{ mentor.full_name }}</p>
             </div>
+            <form method="post" enctype="multipart/form-data" action="{% url 'edit_mentor' mentor.id %}">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="id_full_name">Full Name</label>
+                    <input type="text" name="full_name" id="id_full_name" class="form-control" placeholder="Enter full name" value="{{ form.full_name.value|default:'' }}">
+                </div>
+                <div class="form-group">
+                    <label for="id_mobile">Mobile</label>
+                    <input type="text" name="mobile" id="id_mobile" class="form-control" placeholder="Enter mobile number" value="{{ form.mobile.value|default:'' }}">
+                </div>
+                <div class="form-group">
+                    <label for="id_email">Email</label>
+                    <input type="email" name="email" id="id_email" class="form-control" placeholder="Enter email address" value="{{ form.email.value|default:'' }}">
+                </div>
+                <div class="form-group">
+                    <label for="id_profile_photo">Profile Photo</label>
+                    <input type="file" name="profile_photo" id="id_profile_photo" class="form-control">
+                </div>
+                <div class="form-group password-wrapper">
+                    <label for="id_password1">Password</label>
+                    <input type="password" name="password1" id="id_password1" class="form-control" placeholder="Enter password">
+                    <i class="fas fa-eye password-toggle" onclick="togglePasswordVisibility('id_password1')"></i>
+                </div>
+                <div class="form-group password-wrapper">
+                    <label for="id_password2">Confirm Password</label>
+                    <input type="password" name="password2" id="id_password2" class="form-control" placeholder="Confirm password">
+                    <i class="fas fa-eye password-toggle" onclick="togglePasswordVisibility('id_password2')"></i>
+                </div>
+                <div class="d-flex justify-content-between mt-4">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Save Changes
+                    </button>
+                    <a href="{% url 'manage_batch_mentors' %}" class="btn btn-secondary">
+                        <i class="fas fa-times"></i> Cancel
+                    </a>
+                </div>
+            </form>
         </div>
     </div>
 
-    <!-- Bootstrap JS and Popper.js -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function togglePasswordVisibility(fieldId) {
+            const passwordField = document.getElementById(fieldId);
+            const toggleIcon = passwordField.nextElementSibling;
+            if (passwordField.type === 'password') {
+                passwordField.type = 'text';
+                toggleIcon.classList.remove('fa-eye');
+                toggleIcon.classList.add('fa-eye-slash');
+            } else {
+                passwordField.type = 'password';
+                toggleIcon.classList.remove('fa-eye-slash');
+                toggleIcon.classList.add('fa-eye');
+            }
+        }
+    </script>
 </body>
 </html>
