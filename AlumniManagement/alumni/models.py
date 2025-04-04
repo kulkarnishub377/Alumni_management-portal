@@ -180,3 +180,13 @@ class Notice(models.Model):
 
     def __str__(self):
         return self.title
+
+class Event(models.Model):
+    title = models.CharField(max_length=255)
+    description = models.TextField()
+    media = models.FileField(upload_to='events/', max_length=255, blank=True, null=True)  # Make media optional
+    date = models.DateField()  # Add event date field
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.title

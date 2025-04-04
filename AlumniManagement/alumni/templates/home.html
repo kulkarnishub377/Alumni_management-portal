@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Alumni Portal</title>
     {% load static %}
-    {% load tz %} <!-- Load the tz template tag library -->
+    {% load tz %}
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <style>
@@ -17,7 +17,7 @@
         }
 
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Roboto', sans-serif;
             color: white;
             background-color: black;
             display: flex;
@@ -27,7 +27,6 @@
 
         /* Header styles */
         .header {
-            position: relative;
             padding: 20px;
             display: flex;
             justify-content: space-between;
@@ -36,7 +35,6 @@
         }
 
         .logo {
-            padding-top: 10px;
             padding-left: 40px;
         }
 
@@ -67,6 +65,7 @@
             text-decoration: none;
             border-radius: 5px;
             display: inline-block;
+            transition: background-color 0.3s ease;
         }
 
         .buttons a:hover {
@@ -84,7 +83,7 @@
             background-size: cover;
             background-position: center;
             z-index: 1;
-            filter: blur(0px);
+            filter: blur(2px);
         }
 
         .overlay {
@@ -97,84 +96,107 @@
             z-index: 2;
         }
 
-        /* Enhanced Notice Board Styles */
-        .notice-board {
-            position: relative;
-            z-index: 3;
+        /* Main container for boards */
+        .main-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
             padding: 20px;
-            background-color: rgba(0, 0, 0, 0.85);
-            margin: 20px auto;
-            border-radius: 15px;
-            max-height: 350px; /* Increased height for better visibility */
-            overflow: hidden; /* Hide overflow */
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5); /* Add shadow for depth */
-            width: 90%; /* Center and limit width */
+            z-index: 3;
+            position: relative;
         }
 
-        .notice-board h2 {
+        /* Notice Board Styles */
+        .notice-board, .event-board {
+            flex: 1;
+            margin: 10px;
+            padding: 20px;
+            background-color: rgba(0, 0, 0, 0.85);
+            border-radius: 15px;
+            max-height: 400px;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .notice-board:hover, .event-board:hover {
+            transform: scale(1.02);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.7);
+        }
+
+        .notice-board h2, .event-board h2 {
             font-size: 36px;
             margin-bottom: 20px;
             color: #ffcc00;
             text-align: center;
-            text-transform: uppercase; /* Make text uppercase */
-            letter-spacing: 2px; /* Add spacing for better readability */
-            background-color: rgba(0, 0, 0); /* Add background color */
-            padding: 10px; /* Add padding for better spacing */
-            border-radius: 10px; /* Add rounded corners */
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            background-color: rgba(0, 0, 0, 0.9);
+            padding: 10px;
+            border-radius: 10px;
+            position: sticky;
+            top: 0;
+            z-index: 5;
         }
 
-        .notice-board ul {
+        .notice-board ul, .event-board ul {
             list-style: none;
             padding: 0;
             margin: 0;
-            animation: scroll-notices 15s linear infinite; /* Adjusted duration for smoother scrolling */
+            animation: scroll-content 20s linear infinite;
         }
 
-        .notice-board li {
+        .notice-board li, .event-board li {
             margin-bottom: 15px;
             padding: 15px;
             background-color: rgba(255, 255, 255, 0.1);
             border-radius: 10px;
-            transition: transform 0.3s, background-color 0.3s; /* Add hover effect */
+            transition: transform 0.3s, background-color 0.3s;
         }
 
-        .notice-board li:hover {
-            transform: scale(1.05); /* Slightly enlarge on hover */
+        .notice-board li:hover, .event-board li:hover {
+            transform: scale(1.05);
             background-color: rgba(255, 255, 255, 0.2);
         }
 
-        .notice-board h4 {
+        .notice-board h4, .event-board h4 {
             font-size: 22px;
             color: #ffcc00;
             margin-bottom: 8px;
             font-weight: bold;
         }
 
-        .notice-board p {
+        .notice-board p, .event-board p {
             font-size: 16px;
             color: white;
-            line-height: 1.5; /* Improve readability */
+            line-height: 1.5;
         }
 
-        .notice-board small {
+        .notice-board small, .event-board small {
             font-size: 14px;
             color: gray;
             display: block;
             margin-top: 5px;
         }
 
+        .event-board small.date {
+            font-size: 18px; /* Increased size for the date */
+            color: #ffcc00;
+            font-weight: bold;
+        }
+
         /* Scrolling animation */
-        @keyframes scroll-notices {
+        @keyframes scroll-content {
             0% {
-            transform: translateY(0);
+                transform: translateY(0);
             }
             100% {
-            transform: translateY(calc(-100%)); /* Ensure scrolling accommodates all notices */
+                transform: translateY(calc(-100%));
             }
         }
 
         /* Pause scrolling on hover */
-        .notice-board ul:hover {
+        .notice-board ul:hover, .event-board ul:hover {
             animation-play-state: paused;
         }
 
@@ -190,21 +212,16 @@
             padding: 15px 0;
             z-index: 4;
             font-size: 14px;
-            letter-spacing: 1px; /* Add spacing for better readability */
+            letter-spacing: 1px;
         }
 
         footer p {
             margin: 5px 0;
-        }
-
-        footer p {
-            margin: 5px 0;
-            font-size: 14px;
         }
     </style>
 </head>
 <body>
-     <!-- Header Section -->
+    <!-- Header Section -->
     <div class="header">
         <div class="logo">
             <span>DR. VITHALRAO VIKHE PATIL COLLEGE OF ENGINEERING AHMEDNAGAR</span>
@@ -226,7 +243,7 @@
             <a href="{% url 'about_us' %}" class="btn btn-dark">
                 <i class="fas fa-info-circle"></i> About Us
             </a>
-            <a href="{% url 'batch_mentor_login' %}" class="btn btn-warning">
+            <a href="{% url 'batch_mentor_login' %}" class="btn btn-warning"></a>
                 <i class="fas fa-user-tie"></i> Batch Mentor Login
             </a>
             <a href="{% url 'batch_mentor_register' %}" class="btn btn-secondary">
@@ -239,26 +256,49 @@
     <div class="background-image"></div>
     <div class="overlay"></div>
 
-    <!-- Notice Board Section -->
-    <div class="notice-board">
-        <h2>Notice Board</h2>
-        <ul>
-            {% for notice in notices %}
-            <li>
-            <h4>{{ notice.title }}</h4>
-            <p>{{ notice.description }}</p>
-            <small>Posted on: {{ notice.created_at|timezone:"Asia/Kolkata"|date:"d-m-Y, h:i A" }}</small>
-            </li>
-            {% empty %}
-            <p>No notices available.</p>
-            {% endfor %}
-        </ul>
-    </div>
-       <!-- Footer Section -->
-       <footer>
-        <p>&copy; 2023 DR. VITHALRAO VIKHE PATIL COLLEGE OF ENGINEERING AHMEDNAGAR. All rights reserved.</p>
-        <p>Contact us: info@college.edu | Phone: (123) 456-7890</p>
-    </footer>
+    <!-- Main Container -->
+    <div class="main-container">
+        <!-- Notice Board Section -->
+        <div class="notice-board">
+            <h2>Notice Board</h2>
+            <ul>
+                {% for notice in notices %}
+                <li>
+                    <h4>{{ notice.title }}</h4>
+                    <p>{{ notice.description }}</p>
+                    <small>Posted on: {{ notice.created_at|timezone:"Asia/Kolkata"|date:"d-m-Y, h:i A" }}</small>
+                </li>
+                {% empty %}
+                <p>No notices available.</p>
+                {% endfor %}
+            </ul>
+        </div>
 
+        <!-- Event Board Section -->
+        <div class="event-board">
+            <h2>Event Board</h2>
+            <ul>
+                {% for event in events %}
+                <li>
+                    <h4>
+                        <a href="{% if event.media %}{% url 'download_event_media' event.id %}{% else %}#{% endif %}" class="event-title">
+                            {{ event.title }}
+                        </a>
+                    </h4>
+                    <small class="date">Date: {{ event.date|date:"d-m-Y" }}</small><br>
+                    <p>{{ event.description }}</p>
+                    <small>Posted on: {{ event.created_at|timezone:"Asia/Kolkata"|date:"d-m-Y, h:i A" }}</small>
+                </li>
+                {% empty %}
+                <p>No events available.</p>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2023 Alumni Portal. All rights reserved.</p>
+    </footer>
 </body>
 </html>

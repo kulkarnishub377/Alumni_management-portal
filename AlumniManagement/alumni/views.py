@@ -1,16 +1,16 @@
 import sys
-from django.http import HttpResponse, JsonResponse
+from django.http import HttpResponse, JsonResponse, FileResponse
 sys.setrecursionlimit(10000)
 
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout, get_user_model
 from django.contrib.auth.models import User, Group
 from django.contrib import messages
-from .models import Alumni, AlumniCoordinator, Comment, GalleryPhoto, BatchMentor, GraduationYear, Notice
+from .models import Alumni, AlumniCoordinator, Comment, GalleryPhoto, BatchMentor, GraduationYear, Notice, Event
 from .forms import (
     AdminRegistrationForm, AlumniRegistrationForm, AlumniCoordinatorRegistrationForm,
     AlumniEditForm, GalleryPhotoForm, CommentForm, AlumniCoordinatorEditForm,
-    BatchMentorRegistrationForm, BatchMentorLoginForm, NoticeForm
+    BatchMentorRegistrationForm, BatchMentorLoginForm, NoticeForm, EventForm
 )
 from django.contrib.auth.forms import AuthenticationForm
 from django.urls import path
@@ -38,7 +38,8 @@ otp_storage = {}
 # Home Page with Notices
 def home(request):
     notices = Notice.objects.all().order_by('-created_at')[:5]  # Fetch the latest two notices
-    return render(request, 'home.html', {'notices': notices})
+    events = Event.objects.all().order_by('-date', '-created_at')  # Order by date and creation time
+    return render(request, 'home.html', {'notices': notices, 'events': events})
 
 # Alumni Coordinator Login
 def alumni_coordinator_login(request):  
@@ -631,3 +632,29 @@ def delete_notice(request, id):
         except Exception as e:
             return JsonResponse({'success': False, 'error': str(e)})
     return JsonResponse({'success': False, 'error': 'Invalid request method.'})
+
+def manage_events(request):
+    if 'coordinator_id' not in request.session:
+        return redirect('alumni_coordinator_login')
+    events = Event.objects.all()
+    return render(request, 'alumni_coordinator/manage_events.html', {'events': events})
+
+def add_event(request):
+    if request.method == 'POST':
+        form = EventForm(request.POST, request.FILES)
+        if form.is_valid():
+            form.save()
+            return JsonResponse({'success': True})
+        return JsonResponse({'success': False, 'error': 'Invalid form data.'})
+    return JsonResponse({'success': False, 'error': 'Invalid request method.'})
+
+def delete_event(request, event_id):
+    if request.method == 'POST':
+        event = get_object_or_404(Event, id=event_id)
+        event.delete()
+        return JsonResponse({'success': True})
+    return JsonResponse({'success': False, 'error': 'Invalid request method.'})
+
+def download_event_media(request, event_id):
+    event = get_object_or_404(Event, id=event_id)
+    return FileResponse(event.media.open(), as_attachment=True, filename=event.media.name)

@@ -1,6 +1,6 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
-from .models import Alumni, Admin, AlumniCoordinator, GalleryPhoto, Comment, BatchMentor, Batch, Notice
+from .models import Alumni, Admin, AlumniCoordinator, GalleryPhoto, Comment, BatchMentor, Batch, Notice, Event
 
 class AlumniRegistrationForm(UserCreationForm):
     class Meta:
@@ -155,3 +155,12 @@ class NoticeForm(forms.ModelForm):
     class Meta:
         model = Notice
         fields = ['title', 'description']
+
+class EventForm(forms.ModelForm):
+    class Meta:
+        model = Event
+        fields = ['title', 'description', 'media', 'date']  # Include the optional media field
+        widgets = {
+            'date': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+            'media': forms.ClearableFileInput(attrs={'class': 'form-control', 'accept': 'image/*,video/*'}),
+        }

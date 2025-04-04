@@ -66,4 +66,10 @@ urlpatterns = [
     path('manage-notices/', views.manage_notices, name='manage_notices'),
     path('add-notice/', views.add_notice, name='add_notice'),
     path('delete-notice/<int:id>/', views.delete_notice, name='delete_notice'),
+    
+    # Event management URLs
+    path('manage-events/', views.manage_events, name='manage_events'),
+    path('add-event/', views.add_event, name='add_event'),
+    path('delete-event/<int:event_id>/', views.delete_event, name='delete_event'),
+    path('download-event-media/<int:event_id>/', views.download_event_media, name='download_event_media'),
 ]
