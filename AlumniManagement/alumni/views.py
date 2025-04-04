@@ -6,11 +6,11 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout, get_user_model
 from django.contrib.auth.models import User, Group
 from django.contrib import messages
-from .models import Alumni, AlumniCoordinator, Comment, GalleryPhoto, BatchMentor, GraduationYear
+from .models import Alumni, AlumniCoordinator, Comment, GalleryPhoto, BatchMentor, GraduationYear, Notice
 from .forms import (
     AdminRegistrationForm, AlumniRegistrationForm, AlumniCoordinatorRegistrationForm,
     AlumniEditForm, GalleryPhotoForm, CommentForm, AlumniCoordinatorEditForm,
-    BatchMentorRegistrationForm, BatchMentorLoginForm
+    BatchMentorRegistrationForm, BatchMentorLoginForm, NoticeForm
 )
 from django.contrib.auth.forms import AuthenticationForm
 from django.urls import path
@@ -35,9 +35,10 @@ logger = logging.getLogger(__name__)
 
 otp_storage = {}
 
-# Home Page
+# Home Page with Notices
 def home(request):
-    return render(request, 'home.html')
+    notices = Notice.objects.all().order_by('-created_at')[:5]  # Fetch the latest two notices
+    return render(request, 'home.html', {'notices': notices})
 
 # Alumni Coordinator Login
 def alumni_coordinator_login(request):  
@@ -596,4 +597,37 @@ def resend_otp(request):
         # Logic to resend OTP (e.g., send OTP to user's email or phone)
         # For now, we'll simulate success.
         return JsonResponse({'success': True, 'message': 'OTP resent successfully.'})
+    return JsonResponse({'success': False, 'error': 'Invalid request method.'})
+
+# Manage Notices (Alumni Coordinator)
+def manage_notices(request):
+    if 'coordinator_id' not in request.session:
+        return redirect('alumni_coordinator_login')
+    notices = Notice.objects.all().order_by('-created_at')
+    return render(request, 'alumni_coordinator/manage_notices.html', {'notices': notices})
+
+# Add Notice
+def add_notice(request):
+    if 'coordinator_id' not in request.session:
+        return JsonResponse({'success': False, 'error': 'Unauthorized access.'}, status=403)
+    if request.method == 'POST':
+        form = NoticeForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return JsonResponse({'success': True, 'message': 'Notice added successfully.'})
+        else:
+            return JsonResponse({'success': False, 'error': 'Invalid form data.'})
+    return JsonResponse({'success': False, 'error': 'Invalid request method.'})
+
+from django.views.decorators.csrf import csrf_exempt
+
+@csrf_exempt
+def delete_notice(request, id):
+    if request.method == 'POST':
+        try:
+            notice = get_object_or_404(Notice, id=id)
+            notice.delete()
+            return JsonResponse({'success': True, 'message': 'Notice deleted successfully.'})
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': str(e)})
     return JsonResponse({'success': False, 'error': 'Invalid request method.'})

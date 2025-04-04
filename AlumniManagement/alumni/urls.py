@@ -61,4 +61,9 @@ urlpatterns = [
 
     # Resend OTP URL
     path('resend-otp/', views.resend_otp, name='resend_otp'),
+
+    # Notice management URLs
+    path('manage-notices/', views.manage_notices, name='manage_notices'),
+    path('add-notice/', views.add_notice, name='add_notice'),
+    path('delete-notice/<int:id>/', views.delete_notice, name='delete_notice'),
 ]

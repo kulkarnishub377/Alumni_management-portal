@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Notices</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        /* General Styles */
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f8f9fa;
+            color: #333;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 40px auto;
+            background: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: #007bff;
+            color: #fff;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #0056b3;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 1.8rem;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: bold;
+            text-decoration: none;
+            text-align: center;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: #28a745;
+            color: #fff;
+        }
+
+        .btn-primary:hover {
+            background: #218838;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: #fff;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: #fff;
+        }
+
+        .btn-danger:hover {
+            background: #c82333;
+        }
+
+        .notice-list {
+            list-style: none;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .notice-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            border-bottom: 1px solid #ddd;
+            transition: background 0.3s ease;
+        }
+
+        .notice-item:hover {
+            background: #f8f9fa;
+        }
+
+        .notice-content h5 {
+            margin: 0;
+            font-size: 1.2rem;
+            color: #007bff;
+        }
+
+        .notice-content p {
+            margin: 5px 0;
+            font-size: 14px;
+            color: #555;
+        }
+
+        .notice-content small {
+            font-size: 12px;
+            color: #888;
+        }
+
+        .no-notices {
+            text-align: center;
+            padding: 20px;
+            font-size: 16px;
+            color: #888;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-content {
+            background-color: #fff;
+            margin: 10% auto;
+            padding: 20px;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 10px;
+        }
+
+        .modal-header h5 {
+            margin: 0;
+            font-size: 1.2rem;
+        }
+
+        .modal-body {
+            margin: 20px 0;
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .close {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+        }
+
+        .form-group label {
+            font-weight: bold;
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        .form-control {
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 10px;
+            font-size: 14px;
+            width: 100%;
+        }
+
+        .form-control:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+        }
+
+        .back-button-container {
+            padding: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container"></div>
+        <header class="header">
+            <h1>Manage Notices</h1>
+            <button class="btn btn-primary" id="openModal">
+                <i class="fas fa-plus"></i> Add Notice
+            </button>
+        </header>
+        <div class="back-button-container"></div>
+            <a href="javascript:history.back()" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Back
+            </a>
+        </div>
+
+        <!-- Main Content -->
+        <main>
+            <ul class="notice-list">
+                {% for notice in notices %}
+                <li class="notice-item">
+                    <div class="notice-content">
+                        <h5>{{ notice.title }}</h5>
+                        <p>{{ notice.description }}</p>
+                        <small>Posted on: {{ notice.created_at|date:"F j, Y, g:i a" }}</small>
+                    </div>
+                    <div>
+                        <button class="btn btn-danger delete-btn" data-id="{{ notice.id }}">
+                            <i class="fas fa-trash-alt"></i> Delete
+                        </button>
+                    </div>
+                </li>
+                {% empty %}
+                <p class="no-notices">No notices available.</p>
+                {% endfor %}
+            </ul>
+        </main>
+    </div>
+
+    <!-- Add Notice Modal -->
+    <div class="modal" id="addNoticeModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5><i class="fas fa-plus-circle"></i> Add Notice</h5>
+                <button class="close" id="closeModal">&times;</button>
+            </div>
+            <form method="post" id="addNoticeForm">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="id_title"><i class="fas fa-heading"></i> Title</label>
+                        <input type="text" id="id_title" name="title" class="form-control" placeholder="Enter notice title" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="id_description"><i class="fas fa-align-left"></i> Description</label>
+                        <textarea id="id_description" name="description" class="form-control" rows="4" placeholder="Enter notice description" required></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" id="closeModalFooter">Close</button>
+                    <button type="submit" class="btn btn-success"><i class="fas fa-save"></i> Add Notice</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Open Modal
+        $('#openModal').on('click', function() {
+            $('#addNoticeModal').fadeIn();
+        });
+
+        // Close Modal
+        $('#closeModal, #closeModalFooter').on('click', function() {
+            $('#addNoticeModal').fadeOut();
+        });
+
+        // Add Notice Form Submission
+        $(document).on('submit', '#addNoticeForm', function(e) {
+            e.preventDefault();
+            const formData = $(this).serialize();
+            $.ajax({
+                url: "{% url 'add_notice' %}",
+                type: "POST",
+                data: formData,
+                success: function(response) {
+                    if (response.success) {
+                        alert('Notice added successfully.');
+                        location.reload();
+                    } else {
+                        alert('Failed to add notice. Please try again.');
+                    }
+                },
+                error: function() {
+                    alert('An error occurred. Please try again.');
+                }
+            });
+        });
+
+        // Delete Notice
+        $(document).on('click', '.delete-btn', function() {
+            const noticeId = $(this).data('id');
+            if (confirm('Are you sure you want to delete this notice?')) {
+                $.ajax({
+                    url: `/delete-notice/${noticeId}/`,
+                    type: "POST",
+                    data: {
+                        csrfmiddlewaretoken: '{{ csrf_token }}'
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            alert('Notice deleted successfully.');
+                            location.reload();
+                        } else {
+                            alert('Failed to delete notice. Please try again.');
+                        }
+                    },
+                    error: function() {
+                        alert('An error occurred. Please try again.');
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>

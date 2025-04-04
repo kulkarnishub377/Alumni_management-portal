@@ -5,17 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Alumni Portal</title>
     {% load static %}
+    {% load tz %} <!-- Load the tz template tag library -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <style>
-        /* Reset all elements to remove default margin and padding */
+        /* Reset and global styles */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-        
-        /* Set the background and font styles for the whole page */
+
         body {
             font-family: Arial, sans-serif;
             color: white;
@@ -24,137 +24,241 @@
             flex-direction: column;
             min-height: 100vh;
         }
-        
-        /* Header styling for logo and buttons container */
+
+        /* Header styles */
         .header {
             position: relative;
             padding: 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            z-index: 2; /* Make sure header is above background image */
+            z-index: 3;
         }
-        
-        /* Logo styling */
+
         .logo {
             padding-top: 10px;
             padding-left: 40px;
-            font-size: 20px;
         }
-        
+
         .logo h1 {
             font-size: 48px;
             font-weight: bold;
-            color: #ffcc00; /* TCS yellow */
+            color: #ffcc00;
         }
-        
+
         .portal {
             font-size: 48px;
             font-weight: lighter;
-            color: yellow; /* Different yellow for emphasis */
+            color: yellow;
         }
-        
-        /* Buttons in header */
+
         .buttons {
             padding-right: 50px;
             text-align: right;
         }
-        
-        .buttons button {
+
+        .buttons a {
             background-color: #ffcc00;
             border: none;
             color: black;
             padding: 10px 20px;
             font-size: 16px;
             margin: 5px;
-            cursor: pointer;
-            border-radius: 5px;
-        }
-        
-        .buttons nav a {
-            color: #ffcc00;
-            margin: 0 10px;
-            font-size: 14px;
             text-decoration: none;
+            border-radius: 5px;
+            display: inline-block;
         }
-        
-        /* Full-screen background image */
+
+        .buttons a:hover {
+            background-color: #e6b800;
+        }
+
+        /* Background image and overlay */
         .background-image {
-            position: fixed; /* Fixed position for full background */
+            position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background-image: url("{% static 'images/Img-1.png' %}"); /* Replace with actual path */
-            background-size: cover; /* Cover entire screen */
-            background-position: center; /* Center image */
-            z-index: 1; /* Place behind other elements */
-            filter: blur(0px); /* Blur effect for the background */
+            background-image: url("{% static 'images/Img-1.png' %}");
+            background-size: cover;
+            background-position: center;
+            z-index: 1;
+            filter: blur(0px);
         }
-        
-        /* Overlay to add dark fade at top */
+
         .overlay {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: linear-gradient(to bottom, rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.3)); /* Black fade effect */
-            z-index: 1; /* Keep overlay above background */
+            background: linear-gradient(to bottom, rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.3));
+            z-index: 2;
+        }
+
+        /* Enhanced Notice Board Styles */
+        .notice-board {
+            position: relative;
+            z-index: 3;
+            padding: 20px;
+            background-color: rgba(0, 0, 0, 0.85);
+            margin: 20px auto;
+            border-radius: 15px;
+            max-height: 350px; /* Increased height for better visibility */
+            overflow: hidden; /* Hide overflow */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5); /* Add shadow for depth */
+            width: 90%; /* Center and limit width */
+        }
+
+        .notice-board h2 {
+            font-size: 36px;
+            margin-bottom: 20px;
+            color: #ffcc00;
+            text-align: center;
+            text-transform: uppercase; /* Make text uppercase */
+            letter-spacing: 2px; /* Add spacing for better readability */
+            background-color: rgba(0, 0, 0); /* Add background color */
+            padding: 10px; /* Add padding for better spacing */
+            border-radius: 10px; /* Add rounded corners */
+        }
+
+        .notice-board ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            animation: scroll-notices 15s linear infinite; /* Adjusted duration for smoother scrolling */
+        }
+
+        .notice-board li {
+            margin-bottom: 15px;
+            padding: 15px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            transition: transform 0.3s, background-color 0.3s; /* Add hover effect */
+        }
+
+        .notice-board li:hover {
+            transform: scale(1.05); /* Slightly enlarge on hover */
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .notice-board h4 {
+            font-size: 22px;
+            color: #ffcc00;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+
+        .notice-board p {
+            font-size: 16px;
+            color: white;
+            line-height: 1.5; /* Improve readability */
+        }
+
+        .notice-board small {
+            font-size: 14px;
+            color: gray;
+            display: block;
+            margin-top: 5px;
+        }
+
+        /* Scrolling animation */
+        @keyframes scroll-notices {
+            0% {
+            transform: translateY(0);
+            }
+            100% {
+            transform: translateY(calc(-100%)); /* Ensure scrolling accommodates all notices */
+            }
+        }
+
+        /* Pause scrolling on hover */
+        .notice-board ul:hover {
+            animation-play-state: paused;
+        }
+
+        /* Footer styles */
+        footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background-color: rgba(0, 0, 0, 0.95);
+            color: white;
+            text-align: center;
+            padding: 15px 0;
+            z-index: 4;
+            font-size: 14px;
+            letter-spacing: 1px; /* Add spacing for better readability */
+        }
+
+        footer p {
+            margin: 5px 0;
+        }
+
+        footer p {
+            margin: 5px 0;
+            font-size: 14px;
         }
     </style>
 </head>
 <body>
-    <!-- Header Section -->
+     <!-- Header Section -->
     <div class="header">
         <div class="logo">
             <span>DR. VITHALRAO VIKHE PATIL COLLEGE OF ENGINEERING AHMEDNAGAR</span>
             <h1>ALUMNI <br><span class="portal">PORTAL</span></h1>
         </div>
         <div class="buttons">
-           <a href="{% url 'alumni_login' %}" class="btn btn-info">
-            <i class="fas fa-user-graduate"></i> Alumni Login
+            <a href="{% url 'alumni_login' %}" class="btn btn-info">
+                <i class="fas fa-user-graduate"></i> Alumni Login
             </a>
             <a href="{% url 'alumni_registration' %}" class="btn btn-primary">
-            <i class="fas fa-user-plus"></i> Alumni Registration
+                <i class="fas fa-user-plus"></i> Alumni Registration
             </a>
-            <!--
-            <a href="{% url 'alumni_coordinator_registration' %}" class="btn btn-warning">
-            <i class="fas fa-user-plus"></i> Alumni Coordinator Registration
-            </a>
-            -->
             <a href="{% url 'alumni_coordinator_login' %}" class="btn btn-danger">
-            <i class="fas fa-sign-in-alt"></i> Alumni Coordinator Login
+                <i class="fas fa-sign-in-alt"></i> Alumni Coordinator Login
             </a>
             <a href="{% url 'gallery' %}" class="btn btn-success">
-            <i class="fas fa-images"></i> Gallery
+                <i class="fas fa-images"></i> Gallery
             </a>
             <a href="{% url 'about_us' %}" class="btn btn-dark">
-            <i class="fas fa-info-circle"></i> About Us
+                <i class="fas fa-info-circle"></i> About Us
             </a>
             <a href="{% url 'batch_mentor_login' %}" class="btn btn-warning">
-            <i class="fas fa-user-tie"></i> Batch Mentor Login
+                <i class="fas fa-user-tie"></i> Batch Mentor Login
             </a>
             <a href="{% url 'batch_mentor_register' %}" class="btn btn-secondary">
-            <i class="fas fa-user-plus"></i> Batch Mentor Registration
+                <i class="fas fa-user-plus"></i> Batch Mentor Registration
             </a>
-        </div>
-    </div>
-        </div>
-            </nav>
         </div>
     </div>
 
     <!-- Full Background Image and Overlay -->
     <div class="background-image"></div>
-    
     <div class="overlay"></div>
 
-   
-    <!-- Footer Section -->
-    <footer>
+    <!-- Notice Board Section -->
+    <div class="notice-board">
+        <h2>Notice Board</h2>
+        <ul>
+            {% for notice in notices %}
+            <li>
+            <h4>{{ notice.title }}</h4>
+            <p>{{ notice.description }}</p>
+            <small>Posted on: {{ notice.created_at|timezone:"Asia/Kolkata"|date:"d-m-Y, h:i A" }}</small>
+            </li>
+            {% empty %}
+            <p>No notices available.</p>
+            {% endfor %}
+        </ul>
+    </div>
+       <!-- Footer Section -->
+       <footer>
         <p>&copy; 2023 DR. VITHALRAO VIKHE PATIL COLLEGE OF ENGINEERING AHMEDNAGAR. All rights reserved.</p>
         <p>Contact us: info@college.edu | Phone: (123) 456-7890</p>
     </footer>
+
 </body>
 </html>
