@@ -59,17 +59,25 @@
             background-color: #ffcc00;
             border: none;
             color: black;
-            padding: 10px 20px;
-            font-size: 16px;
-            margin: 5px;
+            padding: 12px 25px;
+            font-size: 18px;
+            margin: 8px;
             text-decoration: none;
-            border-radius: 5px;
+            border-radius: 8px;
             display: inline-block;
-            transition: background-color 0.3s ease;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            font-weight: bold;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
         }
 
         .buttons a:hover {
             background-color: #e6b800;
+            transform: translateY(-3px);
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .buttons a i {
+            margin-right: 8px;
         }
 
         /* Background image and overlay */
@@ -180,7 +188,7 @@
         }
 
         .event-board small.date {
-            font-size: 18px; /* Increased size for the date */
+            font-size: 18px;
             color: #ffcc00;
             font-weight: bold;
         }
@@ -243,7 +251,7 @@
             <a href="{% url 'about_us' %}" class="btn btn-dark">
                 <i class="fas fa-info-circle"></i> About Us
             </a>
-            <a href="{% url 'batch_mentor_login' %}" class="btn btn-warning"></a>
+            <a href="{% url 'batch_mentor_login' %}" class="btn btn-warning">
                 <i class="fas fa-user-tie"></i> Batch Mentor Login
             </a>
             <a href="{% url 'batch_mentor_register' %}" class="btn btn-secondary">

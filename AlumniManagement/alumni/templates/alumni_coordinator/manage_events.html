@@ -10,20 +10,22 @@
     <style>
         body {
             font-family: 'Arial', sans-serif;
-            background-color: #f8f9fa;
+            background-color: #f4f6f9;
             color: #333;
+            margin: 0;
+            padding: 0;
         }
         .container {
             margin-top: 50px;
             background: #ffffff;
             padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            border-radius: 12px;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
         }
         h1 {
-            font-size: 2rem;
+            font-size: 2.5rem;
             font-weight: bold;
-            color: #007bff;
+            color: #0056b3;
             text-align: center;
             margin-bottom: 30px;
         }
@@ -31,60 +33,70 @@
             background: linear-gradient(135deg, #6a11cb, #2575fc);
             border: none;
             font-size: 16px;
-            padding: 10px 20px;
+            padding: 12px 25px;
             border-radius: 8px;
-            transition: background 0.3s ease;
+            transition: background 0.3s ease, transform 0.2s ease;
         }
         .btn-primary:hover {
             background: linear-gradient(135deg, #2575fc, #6a11cb);
+            transform: scale(1.05);
         }
         .btn-secondary {
             background: #6c757d;
             border: none;
             font-size: 16px;
-            padding: 10px 20px;
+            padding: 12px 25px;
             border-radius: 8px;
-            transition: background 0.3s ease;
+            transition: background 0.3s ease, transform 0.2s ease;
         }
         .btn-secondary:hover {
             background: #5a6268;
+            transform: scale(1.05);
         }
         .btn-success {
             background: #28a745;
             border: none;
             font-size: 16px;
-            padding: 10px 20px;
+            padding: 12px 25px;
             border-radius: 8px;
-            transition: background 0.3s ease;
+            transition: background 0.3s ease, transform 0.2s ease;
         }
         .btn-success:hover {
             background: #218838;
+            transform: scale(1.05);
         }
         .btn-danger {
             background: #dc3545;
             border: none;
             font-size: 16px;
-            padding: 10px 20px;
+            padding: 12px 25px;
             border-radius: 8px;
-            transition: background 0.3s ease;
+            transition: background 0.3s ease, transform 0.2s ease;
         }
         .btn-danger:hover {
             background: #c82333;
+            transform: scale(1.05);
         }
         .table th {
-            background-color: #007bff;
+            background-color: #0056b3;
             color: #fff;
             text-align: center;
+            font-size: 1rem;
+            padding: 15px;
         }
         .table td {
             text-align: center;
+            font-size: 0.95rem;
+            padding: 12px;
         }
         .modal-content {
-            border-radius: 10px;
+            border-radius: 12px;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
         }
         .modal-header {
-            background-color: #007bff;
+            background-color: #0056b3;
             color: #fff;
+            border-bottom: none;
         }
         .modal-footer .btn-secondary {
             background-color: #6c757d;
@@ -94,6 +106,28 @@
         }
         .back-btn {
             margin-bottom: 20px;
+        }
+        #loader {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 1050;
+            text-align: center;
+        }
+        #loader div {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+        #loader p {
+            color: white;
+            margin-top: 10px;
+            font-size: 1.2rem;
         }
     </style>
 </head>
@@ -185,12 +219,26 @@
         </div>
     </div>
 
+    <!-- Loader -->
+    <div id="loader">
+        <div>
+            <div class="spinner-border text-light">
+                <span class="sr-only">Loading...</span>
+            </div>
+            <p>Processing, please wait...</p>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script>
         $(document).on('submit', '#addEventForm', function(e) {
             e.preventDefault();
             const formData = new FormData(this);
+
+            // Show loader
+            $('#loader').show();
+
             $.ajax({
                 url: "{% url 'add_event' %}",
                 type: "POST",
@@ -198,14 +246,20 @@
                 processData: false,
                 contentType: false,
                 success: function(response) {
+                    // Hide loader
+                    $('#loader').hide();
+
                     if (response.success) {
-                        alert('Event added successfully.');
+                        alert('Event added successfully. Notifications have been sent to all alumni and batch mentors.');
                         location.reload();
                     } else {
                         alert('Failed to add event. Please try again.');
                     }
                 },
                 error: function() {
+                    // Hide loader
+                    $('#loader').hide();
+
                     alert('An error occurred. Please try again.');
                 }
             });
