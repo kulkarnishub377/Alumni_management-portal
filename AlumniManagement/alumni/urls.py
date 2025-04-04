@@ -26,6 +26,7 @@ urlpatterns = [
     path('alumni-coordinator/manage-batch-mentors/', views.manage_batch_mentors, name='manage_batch_mentors'),
     path('alumni-coordinator/edit-mentor/<int:id>/', views.edit_mentor, name='edit_mentor'),
     path('alumni-coordinator/delete-mentor/<int:id>/', views.delete_mentor, name='delete_mentor'),
+    path('alumni_coordinator/send_email_notification/', views.send_email_notification, name='send_email_notification'),
 
     # Batch Mentor URLs
     path('batch-mentor/register/', views.batch_mentor_registration, name='batch_mentor_register'),

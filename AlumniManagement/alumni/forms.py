@@ -1,3 +1,4 @@
+from datetime import datetime  # Correct import for datetime.now()
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from .models import Alumni, Admin, AlumniCoordinator, GalleryPhoto, Comment, BatchMentor, Batch, Notice, Event
@@ -163,4 +164,17 @@ class EventForm(forms.ModelForm):
         widgets = {
             'date': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
             'media': forms.ClearableFileInput(attrs={'class': 'form-control', 'accept': 'image/*,video/*'}),
+        }
+
+from django import forms
+from .models import Alumni
+
+class AlumniForm(forms.ModelForm):
+    class Meta:
+        model = Alumni
+        fields = '__all__'
+        widgets = {
+            'graduation_year': forms.Select(choices=[
+                (year, year) for year in range(1900, datetime.now().year + 1)
+            ])
         }

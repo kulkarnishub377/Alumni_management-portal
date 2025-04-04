@@ -71,9 +71,11 @@ def alumni_coordinator_dashboard(request):
         return redirect('alumni_coordinator_login')
     coordinator = AlumniCoordinator.objects.get(pk=request.session['coordinator_id'])
     alumni_list = Alumni.objects.all()
+    graduation_years = GraduationYear.objects.all()
     return render(request, 'alumni_coordinator/alumni_coordinator_dashboard.html', {
         'coordinator': coordinator,
-        'alumni_list': alumni_list
+        'alumni_list': alumni_list,
+        'graduation_years': graduation_years,
     })
 
 # Alumni Coordinator Edit Profile
@@ -690,3 +692,61 @@ def delete_event(request, event_id):
 def download_event_media(request, event_id):
     event = get_object_or_404(Event, id=event_id)
     return FileResponse(event.media.open(), as_attachment=True, filename=event.media.name)
+
+from django.core.mail import EmailMultiAlternatives
+from django.template.loader import render_to_string
+from django.conf import settings
+
+def send_email_notification(request):
+    if request.method == 'POST':
+        try:
+            title = request.POST.get('title')
+            description = request.POST.get('description')
+            recipients = request.POST.get('recipients')
+            media = request.FILES.get('media')
+
+            # Determine recipients
+            emails = []
+            if recipients == 'all':
+                emails = list(Alumni.objects.values_list('email', flat=True)) + list(BatchMentor.objects.values_list('email', flat=True))
+            elif recipients == 'alumni':
+                emails = list(Alumni.objects.values_list('email', flat=True))
+            elif recipients == 'mentors':
+                emails = list(BatchMentor.objects.values_list('email', flat=True))
+            else:
+                emails = list(Alumni.objects.filter(graduation_year=recipients).values_list('email', flat=True))
+
+            # Prepare email
+            email_subject = f"Announcement: {title}"
+            email_body_html = render_to_string('email_templates/notification_email.html', {
+                'title': title,
+                'description': description,
+            })
+            email_body_text = f"{title}\n\n{description}\n\nVisit Alumni Portal: https://yourdomain.com"
+
+            email = EmailMultiAlternatives(
+                subject=email_subject,
+                body=email_body_text,
+                from_email='dvvpcoe.alumni@gmail.com',  # Use a verified domain email
+                to=emails,
+                reply_to=['dvvpcoe.alumni@gmail.com']  # Add a Reply-To header
+            )
+            email.attach_alternative(email_body_html, "text/html")
+
+            # Add custom headers
+            email.extra_headers = {
+                'X-Priority': '1',  # High priority
+                'Importance': 'High',  # Mark as important
+                'X-MSMail-Priority': 'High',  # For Microsoft email clients
+            }
+
+            # Attach media if provided
+            if media:
+                email.attach(media.name, media.read(), media.content_type)
+
+            # Send email
+            email.send()
+            return JsonResponse({'success': True, 'message': 'Email notification sent successfully.'})
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': str(e)}, status=500)
+    return JsonResponse({'success': False, 'error': 'Invalid request method.'}, status=400)

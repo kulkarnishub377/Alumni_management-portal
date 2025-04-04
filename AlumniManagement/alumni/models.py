@@ -3,6 +3,8 @@ from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, Permis
 from django.contrib.auth.hashers import make_password, check_password
 from django.conf import settings
 import datetime
+from datetime import datetime
+from django.core.validators import MinValueValidator, MaxValueValidator
 
 class Admin(models.Model):
     name = models.CharField(max_length=255)
@@ -62,7 +64,13 @@ class Alumni(AbstractBaseUser, PermissionsMixin):
     is_international = models.BooleanField(default=False)
     country = models.CharField(max_length=255, blank=True, null=True)
     full_address = models.TextField()
-    graduation_year = models.IntegerField()
+    graduation_year = models.PositiveIntegerField(
+        default=datetime.now().year,
+        validators=[
+            MinValueValidator(1900),
+            MaxValueValidator(datetime.now().year)
+        ]
+    )
     experience = models.IntegerField(default=0)
     facebook = models.URLField(blank=True, null=True)
     github = models.URLField(blank=True, null=True)

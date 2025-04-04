@@ -195,6 +195,41 @@
         .rows-per-page {
             width: auto;
         }
+
+        /* Loader Styles */
+        #emailLoader {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1050;
+            text-align: center;
+        }
+        #emailLoader .spinner-border {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 3rem;
+            height: 3rem;
+        }
+
+        /* Confirmation Message Styles */
+        #emailSuccessMessage {
+            display: none;
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #28a745;
+            color: #fff;
+            padding: 15px 20px;
+            border-radius: 5px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            z-index: 1050;
+        }
     </style>
 </head>
 <body>
@@ -235,6 +270,9 @@
             <a href="{% url 'manage_events' %}" class="btn btn-dark">
                 <i class="fas fa-calendar-alt"></i> Manage Events
             </a>
+            <button class="btn btn-info" data-toggle="modal" data-target="#emailNotificationModal">
+                <i class="fas fa-envelope"></i> Send Email Notification
+            </button>
         </div>
 
         <!-- Search Section -->
@@ -270,7 +308,17 @@
             <table class="table table-striped mt-3" id="alumniTable">
                 <thead>
                     <tr>
-                        <th data-sort="id"><i class="fas fa-hashtag"></i> ID</th>
+                        <th data-sort="id">
+                            <i class="fas fa-hashtag"></i> ID
+                            <span class="sort-options">
+                                <button class="btn btn-sm btn-outline-primary sort-asc" title="Sort Ascending"></button>
+                                    <i class="fas fa-sort-amount-down"></i>
+                                </button>
+                                <button class="btn btn-sm btn-outline-primary sort-desc" title="Sort Descending"></button>
+                                    <i class="fas fa-sort-amount-up"></i>
+                                </button>
+                            </span>
+                        </th>
                         <th data-sort="profile_photo"><i class="fas fa-user-circle"></i> Profile Photo</th>
                         <th data-sort="name"><i class="fas fa-user"></i> Name</th>
                         <th data-sort="email"><i class="fas fa-envelope"></i> Email</th>
@@ -425,6 +473,82 @@
         </div>
     </div>
     {% endfor %}
+    <!-- Email Notification Modal -->
+    <div class="modal fade" id="emailNotificationModal" tabindex="-1" role="dialog" aria-labelledby="emailNotificationModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title" id="emailNotificationModalLabel">
+                        <i class="fas fa-envelope"></i> Send Email Notification
+                    </h5>
+                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <form id="emailNotificationForm" method="post" enctype="multipart/form-data" action="{% url 'send_email_notification' %}">
+                    {% csrf_token %}
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label for="emailTitle">
+                                <i class="fas fa-heading"></i> Title
+                            </label>
+                            <input type="text" id="emailTitle" name="title" class="form-control" placeholder="Enter notification title" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="emailDescription">
+                                <i class="fas fa-align-left"></i> Description
+                            </label>
+                            <textarea id="emailDescription" name="description" class="form-control" rows="4" placeholder="Enter notification description" required></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="emailMedia">
+                                <i class="fas fa-paperclip"></i> Media (Optional)
+                            </label>
+                            <input type="file" id="emailMedia" name="media" class="form-control" accept="image/*,video/*">
+                        </div>
+                        <div class="form-group">
+                            <label for="emailRecipients">
+                                <i class="fas fa-users"></i> Send To
+                            </label>
+                            <select id="emailRecipients" name="recipients" class="form-control" required>
+                                <option value="all">
+                                    <i class="fas fa-globe"></i> All Alumni and Batch Mentors
+                                </option>
+                                <option value="alumni">
+                                    <i class="fas fa-user-graduate"></i> All Alumni
+                                </option>
+                                <option value="mentors">
+                                    <i class="fas fa-chalkboard-teacher"></i> All Batch Mentors
+                                </option>
+                                {% for batch in graduation_years %}
+                                <option value="{{ batch.year }}">
+                                    <i class="fas fa-calendar-alt"></i> Graduation Year: {{ batch.year }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                            <i class="fas fa-times"></i> Cancel
+                        </button>
+                        <button type="submit" class="btn btn-primary" id="sendEmailButton">
+                            <i class="fas fa-paper-plane"></i> Send Email
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div id="emailLoader">
+        <div class="spinner-border text-light" role="status">
+            <span class="sr-only">Loading...</span>
+        </div>
+    </div>
+    <div id="emailSuccessMessage">
+        <i class="fas fa-check-circle"></i> Email sent successfully!
+    </div>
 
     <!-- Scripts -->
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
@@ -496,6 +620,50 @@
             } else {
                 alert('No data available to download.');
             }
+        });
+
+        document.getElementById('emailNotificationForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+            const form = this;
+            const loader = document.getElementById('emailLoader');
+            const successMessage = document.getElementById('emailSuccessMessage');
+            const sendButton = document.getElementById('sendEmailButton');
+
+            loader.style.display = 'block';
+            sendButton.disabled = true;
+
+            const formData = new FormData(form);
+
+            fetch(form.action, {
+                method: 'POST',
+                body: formData,
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                loader.style.display = 'none';
+                sendButton.disabled = false;
+
+                if (data.success) {
+                    successMessage.style.display = 'block';
+                    setTimeout(() => {
+                        successMessage.style.display = 'none';
+                        $('#emailNotificationModal').modal('hide');
+                        form.reset(); // Reset the form after successful submission
+                    }, 3000);
+                } else {
+                    alert(data.error || 'Failed to send email. Please try again.');
+                }
+            })
+            .catch(error => {
+                loader.style.display = 'none';
+                sendButton.disabled = false;
+                alert('An error occurred: ' + error.message);
+            });
         });
     </script>
 </body>
