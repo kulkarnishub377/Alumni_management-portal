@@ -125,8 +125,14 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = '361shubhamkulkarni@gmail.com'
-EMAIL_HOST_PASSWORD = 'zmwt nkeg eaei diqi'
+EMAIL_HOST_USER = 'noreply.dvvpcoe@gmail.com'
+EMAIL_HOST_PASSWORD = 'fywu rpod cpqg raan'
+
+# Custom email headers to mark emails as important
+EMAIL_HEADERS = {
+    'X-Priority': '1',  # High priority
+    'Importance': 'High',  # Mark as important
+}
 
 # Add the custom 404 handler
 handler404 = 'alumni.views.custom_404'
