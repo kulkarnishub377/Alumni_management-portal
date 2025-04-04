@@ -10,7 +10,7 @@
     <style>
         body {
             font-family: 'Arial', sans-serif;
-            background-color: #f4f6f9;
+            background-color: #f8f9fa;
             color: #333;
             margin: 0;
             padding: 0;
@@ -19,23 +19,25 @@
             margin-top: 50px;
             background: #ffffff;
             padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+            border-radius: 15px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
         }
         h1 {
-            font-size: 2.5rem;
+            font-size: 2.8rem;
             font-weight: bold;
-            color: #0056b3;
+            color: #007bff;
             text-align: center;
             margin-bottom: 30px;
+        }
+        .btn {
+            font-size: 16px;
+            padding: 12px 25px;
+            border-radius: 10px;
+            transition: all 0.3s ease;
         }
         .btn-primary {
             background: linear-gradient(135deg, #6a11cb, #2575fc);
             border: none;
-            font-size: 16px;
-            padding: 12px 25px;
-            border-radius: 8px;
-            transition: background 0.3s ease, transform 0.2s ease;
         }
         .btn-primary:hover {
             background: linear-gradient(135deg, #2575fc, #6a11cb);
@@ -44,57 +46,37 @@
         .btn-secondary {
             background: #6c757d;
             border: none;
-            font-size: 16px;
-            padding: 12px 25px;
-            border-radius: 8px;
-            transition: background 0.3s ease, transform 0.2s ease;
         }
         .btn-secondary:hover {
             background: #5a6268;
             transform: scale(1.05);
         }
-        .btn-success {
-            background: #28a745;
-            border: none;
-            font-size: 16px;
-            padding: 12px 25px;
-            border-radius: 8px;
-            transition: background 0.3s ease, transform 0.2s ease;
-        }
-        .btn-success:hover {
-            background: #218838;
-            transform: scale(1.05);
-        }
         .btn-danger {
             background: #dc3545;
             border: none;
-            font-size: 16px;
-            padding: 12px 25px;
-            border-radius: 8px;
-            transition: background 0.3s ease, transform 0.2s ease;
         }
         .btn-danger:hover {
             background: #c82333;
             transform: scale(1.05);
         }
         .table th {
-            background-color: #0056b3;
+            background-color: #007bff;
             color: #fff;
             text-align: center;
-            font-size: 1rem;
+            font-size: 1.1rem;
             padding: 15px;
         }
         .table td {
             text-align: center;
-            font-size: 0.95rem;
+            font-size: 1rem;
             padding: 12px;
         }
         .modal-content {
-            border-radius: 12px;
-            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+            border-radius: 15px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
         }
         .modal-header {
-            background-color: #0056b3;
+            background-color: #007bff;
             color: #fff;
             border-bottom: none;
         }
@@ -114,7 +96,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.6);
+            background: rgba(0, 0, 0, 0.7);
             z-index: 1050;
             text-align: center;
         }
@@ -123,11 +105,25 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
+            text-align: center;
+        }
+        #loader .spinner-border {
+            width: 4rem;
+            height: 4rem;
         }
         #loader p {
             color: white;
-            margin-top: 10px;
-            font-size: 1.2rem;
+            margin-top: 15px;
+            font-size: 1.5rem;
+        }
+        .form-group label span {
+            margin-left: 8px;
+            font-size: 1rem;
+            color: #333;
+        }
+        .form-group input[type="checkbox"] {
+            transform: scale(1.3);
+            margin-right: 8px;
         }
     </style>
 </head>
@@ -209,6 +205,12 @@
                             <label for="media"><i class="fas fa-file-upload"></i> Media (Optional, Max: 2MB)</label>
                             <input type="file" id="media" name="media" class="form-control" accept="image/*,video/*">
                         </div>
+                        <div class="form-group">
+                            <label for="sendNotification">
+                                <input type="checkbox" id="sendNotification" name="sendNotification">
+                                <span>Send Notification to Alumni and Batch Mentors</span>
+                            </label>
+                        </div>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-dismiss="modal"><i class="fas fa-times"></i> Close</button>
@@ -235,9 +237,10 @@
         $(document).on('submit', '#addEventForm', function(e) {
             e.preventDefault();
             const formData = new FormData(this);
+            const sendNotification = $('#sendNotification').is(':checked') ? 'true' : 'false';
+            formData.append('sendNotification', sendNotification);
 
-            // Show loader
-            $('#loader').show();
+            $('#loader').fadeIn();
 
             $.ajax({
                 url: "{% url 'add_event' %}",
@@ -246,20 +249,16 @@
                 processData: false,
                 contentType: false,
                 success: function(response) {
-                    // Hide loader
-                    $('#loader').hide();
-
+                    $('#loader').fadeOut();
                     if (response.success) {
-                        alert('Event added successfully. Notifications have been sent to all alumni and batch mentors.');
+                        alert('Event added successfully.');
                         location.reload();
                     } else {
                         alert('Failed to add event. Please try again.');
                     }
                 },
                 error: function() {
-                    // Hide loader
-                    $('#loader').hide();
-
+                    $('#loader').fadeOut();
                     alert('An error occurred. Please try again.');
                 }
             });
@@ -268,6 +267,7 @@
         $(document).on('click', '.delete-btn', function() {
             const eventId = $(this).data('id');
             if (confirm('Are you sure you want to delete this event?')) {
+                $('#loader').fadeIn();
                 $.ajax({
                     url: `/delete-event/${eventId}/`,
                     type: "POST",
@@ -275,6 +275,7 @@
                         csrfmiddlewaretoken: '{{ csrf_token }}'
                     },
                     success: function(response) {
+                        $('#loader').fadeOut();
                         if (response.success) {
                             alert('Event deleted successfully.');
                             location.reload();
@@ -283,6 +284,7 @@
                         }
                     },
                     error: function() {
+                        $('#loader').fadeOut();
                         alert('An error occurred. Please try again.');
                     }
                 });

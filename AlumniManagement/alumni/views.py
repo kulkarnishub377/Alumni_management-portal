@@ -646,38 +646,32 @@ from django.conf import settings
 def add_event(request):
     if request.method == 'POST':
         form = EventForm(request.POST, request.FILES)
+        send_notification = request.POST.get('sendNotification') == 'true'  # Check if checkbox is selected
         if form.is_valid():
             event = form.save()
 
-            # Fetch all alumni and batch mentors
-            alumni_emails = Alumni.objects.values_list('email', flat=True)
-            mentor_emails = BatchMentor.objects.values_list('email', flat=True)
-            recipient_list = list(alumni_emails) + list(mentor_emails)
+            if send_notification:  # Send emails only if checkbox is selected
+                alumni_emails = Alumni.objects.values_list('email', flat=True)
+                mentor_emails = BatchMentor.objects.values_list('email', flat=True)
+                recipient_list = list(alumni_emails) + list(mentor_emails)
 
-            # Send emails separately to each recipient
-            for recipient in recipient_list:
-                email_subject = f"New Event: {event.title}"
-                email_body = render_to_string('emails/new_event_notification.html', {
-                    'event': event,
-                })
-
-                email = EmailMessage(
-                    subject=email_subject,
-                    body=email_body,
-                    from_email=settings.DEFAULT_FROM_EMAIL,
-                    to=[recipient],
-                )
-                email.content_subtype = 'html'  # Set email content type to HTML
-
-                # Attach media if available
-                if event.media:
-                    email.attach_file(event.media.path)
-
-                # Send email
-                email.send()
+                for recipient in recipient_list:
+                    email_subject = f"New Event: {event.title}"
+                    email_body = render_to_string('emails/new_event_notification.html', {'event': event})
+                    email = EmailMessage(
+                        subject=email_subject,
+                        body=email_body,
+                        from_email=settings.DEFAULT_FROM_EMAIL,
+                        to=[recipient],
+                    )
+                    email.content_subtype = 'html'
+                    if event.media:
+                        email.attach_file(event.media.path)
+                    email.send()
 
             return JsonResponse({'success': True})
-        return JsonResponse({'success': False, 'error': 'Invalid form data.'})
+        else:
+            return JsonResponse({'success': False, 'error': 'Invalid form data.'})
     return JsonResponse({'success': False, 'error': 'Invalid request method.'})
 
 def delete_event(request, event_id):
