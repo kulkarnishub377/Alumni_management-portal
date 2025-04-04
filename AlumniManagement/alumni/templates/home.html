@@ -272,7 +272,15 @@
             <ul>
                 {% for notice in notices %}
                 <li>
-                    <h4>{{ notice.title }}</h4>
+                    <h4>
+                        {% if notice.media %}
+                        <a href="{% url 'download_notice_media' notice.id %}" class="text-primary">
+                            {{ notice.title }}
+                        </a>
+                        {% else %}
+                        {{ notice.title }}
+                        {% endif %}
+                    </h4>
                     <p>{{ notice.description }}</p>
                     <small>Posted on: {{ notice.created_at|timezone:"Asia/Kolkata"|date:"d-m-Y, h:i A" }}</small>
                 </li>

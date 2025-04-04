@@ -612,13 +612,19 @@ def add_notice(request):
     if 'coordinator_id' not in request.session:
         return JsonResponse({'success': False, 'error': 'Unauthorized access.'}, status=403)
     if request.method == 'POST':
-        form = NoticeForm(request.POST)
+        form = NoticeForm(request.POST, request.FILES)
         if form.is_valid():
             form.save()
             return JsonResponse({'success': True, 'message': 'Notice added successfully.'})
         else:
             return JsonResponse({'success': False, 'error': 'Invalid form data.'})
     return JsonResponse({'success': False, 'error': 'Invalid request method.'})
+
+def download_notice_media(request, notice_id):
+    notice = get_object_or_404(Notice, id=notice_id)
+    if notice.media:
+        return FileResponse(notice.media.open(), as_attachment=True, filename=notice.media.name)
+    return JsonResponse({'success': False, 'error': 'No media available for this notice.'})
 
 from django.views.decorators.csrf import csrf_exempt
 

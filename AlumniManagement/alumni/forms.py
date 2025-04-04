@@ -154,7 +154,7 @@ class BatchMentorLoginForm(forms.Form):
 class NoticeForm(forms.ModelForm):
     class Meta:
         model = Notice
-        fields = ['title', 'description']
+        fields = ['title', 'description', 'media']  # Include media field
 
 class EventForm(forms.ModelForm):
     class Meta:

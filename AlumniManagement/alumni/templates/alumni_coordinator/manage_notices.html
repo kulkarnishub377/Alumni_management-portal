@@ -4,284 +4,195 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Manage Notices</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <style>
-        /* General Styles */
         body {
-            font-family: 'Roboto', sans-serif;
-            margin: 0;
-            padding: 0;
+            font-family: 'Arial', sans-serif;
             background-color: #f8f9fa;
             color: #333;
-        }
-
-        .container {
-            max-width: 900px;
-            margin: 40px auto;
-            background: #ffffff;
-            border-radius: 10px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-            overflow: hidden;
-        }
-
-        .header {
-            background: #007bff;
-            color: #fff;
-            padding: 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 2px solid #0056b3;
-        }
-
-        .header h1 {
             margin: 0;
-            font-size: 1.8rem;
+            padding: 0;
         }
-
-        .btn {
-            display: inline-block;
-            padding: 10px 20px;
-            font-size: 14px;
+        .container {
+            margin-top: 50px;
+            background: #ffffff;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        }
+        h1 {
+            font-size: 2.8rem;
             font-weight: bold;
-            text-decoration: none;
+            color: #007bff;
             text-align: center;
-            border-radius: 5px;
-            cursor: pointer;
+            margin-bottom: 30px;
+        }
+        .btn {
+            font-size: 16px;
+            padding: 12px 25px;
+            border-radius: 10px;
             transition: all 0.3s ease;
         }
-
         .btn-primary {
-            background: #28a745;
-            color: #fff;
+            background: linear-gradient(135deg, #6a11cb, #2575fc);
+            border: none;
         }
-
         .btn-primary:hover {
-            background: #218838;
+            background: linear-gradient(135deg, #2575fc, #6a11cb);
+            transform: scale(1.05);
         }
-
         .btn-secondary {
             background: #6c757d;
-            color: #fff;
+            border: none;
         }
-
         .btn-secondary:hover {
             background: #5a6268;
+            transform: scale(1.05);
         }
-
         .btn-danger {
             background: #dc3545;
-            color: #fff;
+            border: none;
         }
-
         .btn-danger:hover {
             background: #c82333;
+            transform: scale(1.05);
         }
-
-        .notice-list {
-            list-style: none;
-            margin: 0;
-            padding: 20px;
-        }
-
-        .notice-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+        .table th {
+            background-color: #007bff;
+            color: #fff;
+            text-align: center;
+            font-size: 1.1rem;
             padding: 15px;
-            border-bottom: 1px solid #ddd;
-            transition: background 0.3s ease;
         }
-
-        .notice-item:hover {
-            background: #f8f9fa;
+        .table td {
+            text-align: center;
+            font-size: 1rem;
+            padding: 12px;
         }
-
-        .notice-content h5 {
-            margin: 0;
-            font-size: 1.2rem;
-            color: #007bff;
+        .modal-content {
+            border-radius: 15px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
         }
-
-        .notice-content p {
-            margin: 5px 0;
-            font-size: 14px;
-            color: #555;
+        .modal-header {
+            background-color: #007bff;
+            color: #fff;
+            border-bottom: none;
         }
-
-        .notice-content small {
-            font-size: 12px;
-            color: #888;
+        .modal-footer .btn-secondary {
+            background-color: #6c757d;
         }
-
+        .modal-footer .btn-success {
+            background-color: #28a745;
+        }
+        .back-btn {
+            margin-bottom: 20px;
+        }
         .no-notices {
             text-align: center;
             padding: 20px;
             font-size: 16px;
             color: #888;
         }
-
-        /* Modal Styles */
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            overflow: auto;
-            background-color: rgba(0, 0, 0, 0.5);
+        .media-download {
+            margin-top: 10px;
         }
-
-        .modal-content {
-            background-color: #fff;
-            margin: 10% auto;
-            padding: 20px;
-            border-radius: 10px;
-            width: 90%;
-            max-width: 500px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-        }
-
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid #ddd;
-            padding-bottom: 10px;
-        }
-
-        .modal-header h5 {
-            margin: 0;
-            font-size: 1.2rem;
-        }
-
-        .modal-body {
-            margin: 20px 0;
-        }
-
-        .modal-footer {
-            display: flex;
-            justify-content: flex-end;
-            gap: 10px;
-        }
-
-        .close {
-            background: none;
-            border: none;
-            font-size: 20px;
-            cursor: pointer;
-        }
-
-        .form-group label {
-            font-weight: bold;
-            margin-bottom: 5px;
-            display: block;
-        }
-
-        .form-control {
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            padding: 10px;
-            font-size: 14px;
-            width: 100%;
-        }
-
-        .form-control:focus {
-            border-color: #007bff;
-            box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
-        }
-
-        .back-button-container {
-            padding: 10px;
+        .media-not-available {
+            color: #888;
+            font-style: italic;
         }
     </style>
 </head>
 <body>
-    <div class="container"></div>
-        <header class="header">
-            <h1>Manage Notices</h1>
-            <button class="btn btn-primary" id="openModal">
-                <i class="fas fa-plus"></i> Add Notice
-            </button>
-        </header>
-        <div class="back-button-container"></div>
-            <a href="javascript:history.back()" class="btn btn-secondary">
-                <i class="fas fa-arrow-left"></i> Back
-            </a>
-        </div>
-
-        <!-- Main Content -->
-        <main>
-            <ul class="notice-list">
-                {% for notice in notices %}
-                <li class="notice-item">
-                    <div class="notice-content">
-                        <h5>{{ notice.title }}</h5>
-                        <p>{{ notice.description }}</p>
-                        <small>Posted on: {{ notice.created_at|date:"F j, Y, g:i a" }}</small>
+    <div class="container">
+        <a href="javascript:history.back()" class="btn btn-secondary back-btn">
+            <i class="fas fa-arrow-left"></i> Back
+        </a>
+        <h1><i class="fas fa-bullhorn"></i> Manage Notices</h1>
+        <button class="btn btn-primary mb-3" id="openModal">
+            <i class="fas fa-plus"></i> Add Notice
+        </button>
+        <ul class="list-group">
+            {% for notice in notices %}
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                <div>
+                    <h5 class="mb-1">{{ notice.title }}</h5>
+                    <p class="mb-1">{{ notice.description }}</p>
+                    <small>Posted on: {{ notice.created_at|date:"F j, Y, g:i a" }}</small>
+                    <div class="mt-2">
+                        {% if notice.media %}
+                        <a href="{{ notice.media.url }}" class="btn btn-info btn-sm media-download" download>
+                            <i class="fas fa-download"></i> Download Media
+                        </a>
+                        {% else %}
+                        <span class="media-not-available">Media Not Available</span>
+                        {% endif %}
                     </div>
-                    <div>
-                        <button class="btn btn-danger delete-btn" data-id="{{ notice.id }}">
-                            <i class="fas fa-trash-alt"></i> Delete
-                        </button>
-                    </div>
-                </li>
-                {% empty %}
-                <p class="no-notices">No notices available.</p>
-                {% endfor %}
-            </ul>
-        </main>
+                </div>
+                <button class="btn btn-danger btn-sm delete-btn" data-id="{{ notice.id }}">
+                    <i class="fas fa-trash-alt"></i> Delete
+                </button>
+            </li>
+            {% empty %}
+            <p class="no-notices">No notices available.</p>
+            {% endfor %}
+        </ul>
     </div>
 
     <!-- Add Notice Modal -->
-    <div class="modal" id="addNoticeModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5><i class="fas fa-plus-circle"></i> Add Notice</h5>
-                <button class="close" id="closeModal">&times;</button>
+    <div class="modal fade" id="addNoticeModal" tabindex="-1" role="dialog" aria-labelledby="addNoticeModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addNoticeModalLabel"><i class="fas fa-plus-circle"></i> Add Notice</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <form method="post" id="addNoticeForm" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label for="id_title"><i class="fas fa-heading"></i> Title</label>
+                            <input type="text" id="id_title" name="title" class="form-control" placeholder="Enter notice title" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="id_description"><i class="fas fa-align-left"></i> Description</label>
+                            <textarea id="id_description" name="description" class="form-control" rows="4" placeholder="Enter notice description" required></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="id_media"><i class="fas fa-file-upload"></i> Media (Optional)</label>
+                            <input type="file" id="id_media" name="media" class="form-control">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal"><i class="fas fa-times"></i> Close</button>
+                        <button type="submit" class="btn btn-success"><i class="fas fa-check"></i> Add Notice</button>
+                    </div>
+                </form>
             </div>
-            <form method="post" id="addNoticeForm">
-                {% csrf_token %}
-                <div class="modal-body">
-                    <div class="form-group">
-                        <label for="id_title"><i class="fas fa-heading"></i> Title</label>
-                        <input type="text" id="id_title" name="title" class="form-control" placeholder="Enter notice title" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="id_description"><i class="fas fa-align-left"></i> Description</label>
-                        <textarea id="id_description" name="description" class="form-control" rows="4" placeholder="Enter notice description" required></textarea>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" id="closeModalFooter">Close</button>
-                    <button type="submit" class="btn btn-success"><i class="fas fa-save"></i> Add Notice</button>
-                </div>
-            </form>
         </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script>
         // Open Modal
         $('#openModal').on('click', function() {
-            $('#addNoticeModal').fadeIn();
-        });
-
-        // Close Modal
-        $('#closeModal, #closeModalFooter').on('click', function() {
-            $('#addNoticeModal').fadeOut();
+            $('#addNoticeModal').modal('show');
         });
 
         // Add Notice Form Submission
         $(document).on('submit', '#addNoticeForm', function(e) {
             e.preventDefault();
-            const formData = $(this).serialize();
+            const formData = new FormData(this);
             $.ajax({
                 url: "{% url 'add_notice' %}",
                 type: "POST",
                 data: formData,
+                processData: false,
+                contentType: false,
                 success: function(response) {
                     if (response.success) {
                         alert('Notice added successfully.');

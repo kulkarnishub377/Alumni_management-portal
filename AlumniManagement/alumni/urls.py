@@ -1,6 +1,6 @@
 from django.urls import path
 from . import views
-from .views import delete_alumni_confirm, verify_details, verify_otp, reset_password
+from .views import delete_alumni_confirm, verify_details, verify_otp, reset_password, download_notice_media
 
 # URL patterns for the alumni management application
 urlpatterns = [
@@ -66,6 +66,7 @@ urlpatterns = [
     path('manage-notices/', views.manage_notices, name='manage_notices'),
     path('add-notice/', views.add_notice, name='add_notice'),
     path('delete-notice/<int:id>/', views.delete_notice, name='delete_notice'),
+    path('download-notice-media/<int:notice_id>/', download_notice_media, name='download_notice_media'),
     
     # Event management URLs
     path('manage-events/', views.manage_events, name='manage_events'),

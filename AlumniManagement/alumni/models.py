@@ -176,6 +176,7 @@ class BatchMentor(models.Model):
 class Notice(models.Model):
     title = models.CharField(max_length=255)
     description = models.TextField()
+    media = models.FileField(upload_to='notices/', max_length=255, blank=True, null=True)  # Optional media field
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
