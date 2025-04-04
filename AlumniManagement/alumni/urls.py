@@ -1,6 +1,6 @@
 from django.urls import path
 from . import views
-from .views import delete_alumni_confirm
+from .views import delete_alumni_confirm, verify_details, verify_otp, reset_password
 
 # URL patterns for the alumni management application
 urlpatterns = [
@@ -53,4 +53,12 @@ urlpatterns = [
 
     # Remove assigned batch URL
     path('remove_assigned_batch/<int:mentor_id>/<int:year_id>/', views.remove_assigned_batch, name='remove_assigned_batch'),
+
+    # Verification URLs
+    path('verify-details/', verify_details, name='verify_details'),
+    path('verify-otp/', verify_otp, name='verify_otp'),
+    path('reset-password/', reset_password, name='reset_password'),
+
+    # Resend OTP URL
+    path('resend-otp/', views.resend_otp, name='resend_otp'),
 ]

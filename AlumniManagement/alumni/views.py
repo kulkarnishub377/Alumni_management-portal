@@ -25,8 +25,15 @@ from django.contrib.auth.hashers import check_password, make_password
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.timezone import now
 import logging
+import json
+from django.core.mail import send_mail
+import random
+from django.core.validators import validate_email
+from django.core.exceptions import ValidationError
 
 logger = logging.getLogger(__name__)
+
+otp_storage = {}
 
 # Home Page
 def home(request):
@@ -516,3 +523,77 @@ def delete_mentor(request, id):
         messages.success(request, 'Mentor deleted successfully.')
         return redirect('manage_batch_mentors')
     return render(request, 'alumni_coordinator/manage_batch_mentors.html', {'mentors': BatchMentor.objects.all()})
+
+# Verify Details
+def verify_details(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        email = data.get('email')
+        mobile = data.get('phone')
+        user_type = data.get('user_type')  # Added user_type to distinguish between users
+
+        # Validate email format
+        try:
+            validate_email(email)
+        except ValidationError:
+            return JsonResponse({'success': False, 'error': 'Invalid email address.'})
+
+        try:
+            if user_type == 'batch_mentor':
+                user = BatchMentor.objects.get(email=email, mobile=mobile)
+            else:
+                user = Alumni.objects.get(email=email, mobile=mobile)
+
+            otp = random.randint(100000, 999999)
+            otp_storage[email] = otp
+            request.session['email'] = email
+            send_mail(
+                'Password Reset OTP - Alumni Management System',
+                f"Dear User,\n\n"
+                f"We received a request to reset your password for your account associated with this email address. "
+                f"To proceed, please use the One-Time Password (OTP) provided below:\n\n"
+                f"OTP: {otp}\n\n"
+                f"Please note that this OTP is valid for only 2 minutes. If you did not request a password reset, "
+                f"please ignore this email or contact our support team immediately.\n\n"
+                f"Thank you for using the Alumni Management System.\n\n"
+                f"Best regards,\n"
+                f"Alumni Management Team",
+                'noreply@alumnimanagement.com',
+                [email]
+            )
+            return JsonResponse({'success': True})
+        except (BatchMentor.DoesNotExist, Alumni.DoesNotExist):
+            return JsonResponse({'success': False, 'error': 'Invalid email or phone number.'})
+
+def verify_otp(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        otp = data.get('otp')  # Ensure OTP is retrieved as a string
+        email = request.session.get('email')  # Retrieve email from session
+
+        if email in otp_storage and otp_storage[email] == int(otp):  # Compare OTP as an integer
+            del otp_storage[email]  # Remove OTP after successful verification
+            return JsonResponse({'success': True})
+        return JsonResponse({'success': False, 'error': 'Invalid OTP.'})
+
+# Reset Password
+def reset_password(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        new_password = data.get('newPassword')
+        email = request.session.get('email')
+
+        try:
+            alumni = Alumni.objects.get(email=email)
+            alumni.set_password(new_password)
+            alumni.save()
+            return JsonResponse({'success': True})
+        except Alumni.DoesNotExist:
+            return JsonResponse({'success': False, 'error': 'User not found.'})
+
+def resend_otp(request):
+    if request.method == 'POST':
+        # Logic to resend OTP (e.g., send OTP to user's email or phone)
+        # For now, we'll simulate success.
+        return JsonResponse({'success': True, 'message': 'OTP resent successfully.'})
+    return JsonResponse({'success': False, 'error': 'Invalid request method.'})

@@ -85,6 +85,18 @@
             cursor: pointer;
             color: #6c757d;
         }
+        .hidden {
+            display: none;
+        }
+        .modal-content {
+            border-radius: 15px;
+        }
+        .modal-header {
+            border-bottom: none;
+        }
+        .modal-footer {
+            border-top: none;
+        }
     </style>
 </head>
 <body>
@@ -110,6 +122,74 @@
             <div class="footer-links">
                 <a href="{% url 'home' %}">Home</a>
                 <a href="{% url 'alumni_registration' %}">Register</a>
+                <a href="#" data-toggle="modal" data-target="#forgotPasswordModal">Forgot Password?</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Forgot Password Modal -->
+    <div class="modal fade" id="forgotPasswordModal" tabindex="-1" role="dialog" aria-labelledby="forgotPasswordModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="forgotPasswordModalLabel">Forgot Password</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <!-- Loader -->
+                    <div id="loader" class="hidden text-center mb-3">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="sr-only">Loading...</span>
+                        </div>
+                    </div>
+
+                    <!-- Step 1: Enter Email and Phone -->
+                    <div id="step1">
+                        <form id="step1Form">
+                            <div class="form-group">
+                                <label for="resetEmail"><i class="fas fa-envelope"></i> Email</label>
+                                <input type="email" id="resetEmail" name="email" class="form-control" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="resetPhone"><i class="fas fa-phone"></i> Phone</label>
+                                <input type="text" id="resetPhone" name="phone" class="form-control" required>
+                            </div>
+                            <button type="button" class="btn btn-primary" id="verifyDetails">Verify</button>
+                            <div class="text-danger" id="step1Error"></div>
+                        </form>
+                    </div>
+
+                    <!-- Step 2: OTP Verification -->
+                    <div id="step2" class="hidden">
+                        <form id="step2Form">
+                            <div class="form-group">
+                                <label for="otp"><i class="fas fa-key"></i> Enter OTP</label>
+                                <input type="text" id="otp" name="otp" class="form-control" required>
+                            </div>
+                            <button type="button" class="btn btn-primary" id="verifyOtp">Verify OTP</button>
+                            <button type="button" class="btn btn-secondary" id="resendOtp" disabled>Resend OTP (<span id="otpTimer">120</span>s)</button>
+                            <div class="text-danger" id="step2Error"></div>
+                        </form>
+                    </div>
+
+                    <!-- Step 3: Reset Password -->
+                    <div id="step3" class="hidden">
+                        <form id="step3Form">
+                            <div class="form-group">
+                                <label for="newPassword"><i class="fas fa-lock"></i> New Password</label>
+                                <input type="password" id="newPassword" name="newPassword" class="form-control" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="confirmPassword"><i class="fas fa-lock"></i> Confirm Password</label>
+                                <input type="password" id="confirmPassword" name="confirmPassword" class="form-control" required>
+                            </div>
+                            <button type="button" class="btn btn-primary" id="resetPassword">Reset Password</button>
+                            <div class="text-danger" id="step3Error"></div>
+                        </form>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -123,6 +203,118 @@
             const type = passwordField.getAttribute('type') === 'password' ? 'text' : 'password';
             passwordField.setAttribute('type', type);
             this.classList.toggle('fa-eye-slash');
+        });
+
+        let otpTimer;
+        let countdownInterval;
+
+        function showLoader(show) {
+            const loader = document.getElementById('loader');
+            loader.classList.toggle('hidden', !show);
+        }
+
+        // Step 1: Verify Email and Phone
+        document.getElementById('verifyDetails').addEventListener('click', function () {
+            const email = document.getElementById('resetEmail').value;
+            const phone = document.getElementById('resetPhone').value;
+
+            showLoader(true);
+
+            fetch("{% url 'verify_details' %}", {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}' },
+                body: JSON.stringify({ email, phone })
+            })
+            .then(response => response.json())
+            .then(data => {
+                showLoader(false);
+                if (data.success) {
+                    document.getElementById('step1').classList.add('hidden');
+                    document.getElementById('step2').classList.remove('hidden');
+                    startOtpTimer();
+                } else {
+                    document.getElementById('step1Error').textContent = data.error;
+                }
+            });
+        });
+
+        // Step 2: Verify OTP
+        document.getElementById('verifyOtp').addEventListener('click', function () {
+            const otp = document.getElementById('otp').value;
+
+            showLoader(true);
+
+            fetch("{% url 'verify_otp' %}", {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}' },
+                body: JSON.stringify({ otp })
+            })
+            .then(response => response.json())
+            .then(data => {
+                showLoader(false);
+                if (data.success) {
+                    document.getElementById('step2').classList.add('hidden');
+                    document.getElementById('step3').classList.remove('hidden');
+                } else {
+                    document.getElementById('step2Error').textContent = data.error;
+                }
+            });
+        });
+
+        // Step 3: Reset Password
+        document.getElementById('resetPassword').addEventListener('click', function () {
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+
+            if (newPassword !== confirmPassword) {
+                document.getElementById('step3Error').textContent = 'Passwords do not match.';
+                return;
+            }
+
+            showLoader(true);
+
+            fetch("{% url 'reset_password' %}", {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}' },
+                body: JSON.stringify({ newPassword })
+            })
+            .then(response => response.json())
+            .then(data => {
+                showLoader(false);
+                if (data.success) {
+                    alert('Password reset successfully!');
+                    $('#forgotPasswordModal').modal('hide');
+                } else {
+                    document.getElementById('step3Error').textContent = data.error;
+                }
+            });
+        });
+
+        // OTP Timer
+        function startOtpTimer() {
+            let timeLeft = 120;
+            const resendButton = document.getElementById('resendOtp');
+            const otpTimerDisplay = document.getElementById('otpTimer');
+            resendButton.disabled = true;
+
+            countdownInterval = setInterval(() => {
+                timeLeft--;
+                otpTimerDisplay.textContent = timeLeft;
+                if (timeLeft <= 0) {
+                    clearInterval(countdownInterval);
+                    resendButton.disabled = false;
+                    otpTimerDisplay.textContent = '';
+                }
+            }, 1000);
+        }
+
+        document.getElementById('resendOtp').addEventListener('click', function () {
+            startOtpTimer();
+            // Logic to resend OTP
+            fetch("{% url 'resend_otp' %}", {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}' }
+            });
         });
     </script>
 </body>
