@@ -504,7 +504,7 @@
                             <label for="emailMedia">
                                 <i class="fas fa-paperclip"></i> Media (Optional)
                             </label>
-                            <input type="file" id="emailMedia" name="media" class="form-control" accept="image/*,video/*">
+                            <input type="file" id="emailMedia" name="media" class="form-control" accept="*/*">
                         </div>
                         <div class="form-group">
                             <label for="emailRecipients">
@@ -665,6 +665,44 @@
                 alert('An error occurred: ' + error.message);
             });
         });
+
+        // Function to fetch and populate graduation years
+        function fetchGraduationYears() {
+            fetch('/api/graduation_years/') // Ensure this endpoint is mapped to the updated get_graduation_years view
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`Failed to fetch graduation years: ${response.statusText}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    const emailRecipients = document.getElementById('emailRecipients');
+                    // Clear existing batch options
+                    emailRecipients.innerHTML = `
+                        <option value="all">All Alumni and Batch Mentors</option>
+                        <option value="alumni">All Alumni</option>
+                        <option value="mentors">All Batch Mentors</option>
+                    `;
+                    // Add new batch options dynamically
+                    if (data.graduation_years && Array.isArray(data.graduation_years)) {
+                        data.graduation_years.forEach(batch => {
+                            const option = document.createElement('option');
+                            option.value = batch.graduation_year;
+                            option.textContent = `Graduation Year: ${batch.graduation_year}`;
+                            emailRecipients.appendChild(option);
+                        });
+                    } else {
+                        console.error('Invalid data format for graduation years:', data);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching graduation years:', error);
+                    alert('Failed to update graduation years. Please try again later.');
+                });
+        }
+
+        // Call the function on page load
+        document.addEventListener('DOMContentLoaded', fetchGraduationYears);
     </script>
 </body>
 </html>

@@ -761,3 +761,19 @@ def send_email_notification(request):
         except Exception as e:
             return JsonResponse({'success': False, 'error': str(e)}, status=500)
     return JsonResponse({'success': False, 'error': 'Invalid request method.'}, status=400)
+
+from django.http import JsonResponse
+from alumni.models import GraduationYear
+from django.db.models import Count
+
+def get_graduation_years(request):
+    if request.method == 'GET':
+        # Fetch unique graduation years from the Alumni model
+        graduation_years = (
+            Alumni.objects.values('graduation_year')
+            .annotate(count=Count('graduation_year'))
+            .filter(count__gt=0)
+            .order_by('graduation_year')
+        )
+        return JsonResponse({'graduation_years': list(graduation_years)})
+    return JsonResponse({'error': 'Invalid request method'}, status=400)

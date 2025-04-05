@@ -5,6 +5,8 @@ from django.conf import settings
 import datetime
 from datetime import datetime
 from django.core.validators import MinValueValidator, MaxValueValidator
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
 class Admin(models.Model):
     name = models.CharField(max_length=255)
@@ -199,3 +201,8 @@ class Event(models.Model):
 
     def __str__(self):
         return self.title
+
+@receiver(post_save, sender=Alumni)
+def populate_graduation_year(sender, instance, **kwargs):
+    if instance.graduation_year:  # Ensure graduation_year is not null
+        GraduationYear.objects.get_or_create(year=instance.graduation_year)

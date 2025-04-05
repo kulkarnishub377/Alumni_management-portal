@@ -1,6 +1,6 @@
 from django.urls import path
 from . import views
-from .views import delete_alumni_confirm, verify_details, verify_otp, reset_password, download_notice_media
+from .views import delete_alumni_confirm, verify_details, verify_otp, reset_password, download_notice_media, get_graduation_years
 
 # URL patterns for the alumni management application
 urlpatterns = [
@@ -74,4 +74,7 @@ urlpatterns = [
     path('add-event/', views.add_event, name='add_event'),
     path('delete-event/<int:event_id>/', views.delete_event, name='delete_event'),
     path('download-event-media/<int:event_id>/', views.download_event_media, name='download_event_media'),
+
+    # API URLs
+    path('api/graduation_years/', get_graduation_years, name='get_graduation_years'),
 ]
