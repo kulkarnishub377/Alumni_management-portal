@@ -202,6 +202,12 @@ class Event(models.Model):
     def __str__(self):
         return self.title
 
+class Visitor(models.Model):
+    count = models.PositiveIntegerField(default=0)
+
+    def __str__(self):
+        return f"Visitor Count: {self.count}"
+
 @receiver(post_save, sender=Alumni)
 def populate_graduation_year(sender, instance, **kwargs):
     if instance.graduation_year:  # Ensure graduation_year is not null

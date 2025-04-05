@@ -17,67 +17,125 @@
         }
 
         body {
-            font-family: 'Roboto', sans-serif;
-            color: white;
-            background-color: black;
+            font-family: 'Poppins', sans-serif;
+            color: #333;
+            background: linear-gradient(135deg, #ff9a9e, #fad0c4, #fbc2eb);
             display: flex;
             flex-direction: column;
             min-height: 100vh;
         }
 
-        /* Header styles */
-        .header {
-            padding: 20px;
+        html, body {
+            overflow-x: hidden;
+        }
+
+        /* Redesigned Navbar Styles */
+        .navbar-container {
+            background: linear-gradient(90deg, #ff6a00, #ee0979);
+            color: #fff;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            z-index: 3;
+            padding: 15px 30px;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            transition: height 0.3s ease;
         }
 
-        .logo {
-            padding-left: 40px;
+        .navbar-container.expanded {
+            height: auto;
+            flex-direction: column;
+            align-items: flex-start;
         }
 
-        .logo h1 {
-            font-size: 48px;
+        .navbar-logo {
+            font-size: 28px;
             font-weight: bold;
-            color: #ffcc00;
+            color: #fff;
+            text-transform: uppercase;
+            cursor: pointer;
         }
 
-        .portal {
-            font-size: 48px;
-            font-weight: lighter;
-            color: yellow;
+        .navbar ul {
+            list-style: none;
+            display: flex;
+            gap: 25px;
+            margin: 0;
+            padding: 0;
         }
 
-        .buttons {
-            padding-right: 50px;
-            text-align: right;
-        }
-
-        .buttons a {
-            background-color: #ffcc00;
-            border: none;
-            color: black;
-            padding: 12px 25px;
-            font-size: 18px;
-            margin: 8px;
-            text-decoration: none;
-            border-radius: 8px;
+        .navbar ul li {
             display: inline-block;
+        }
+
+        .navbar ul li a {
+            color: #fff;
+            text-decoration: none;
+            font-size: 16px;
+            font-weight: 500;
+            padding: 10px 20px;
+            border-radius: 8px;
             transition: background-color 0.3s ease, transform 0.2s ease;
-            font-weight: bold;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
         }
 
-        .buttons a:hover {
-            background-color: #e6b800;
+        .navbar ul li a:hover {
+            background-color: rgba(255, 255, 255, 0.2);
             transform: translateY(-3px);
-            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
         }
 
-        .buttons a i {
-            margin-right: 8px;
+        .navbar-toggle {
+            display: none;
+            background-color: #fff;
+            border: none;
+            color: #ff6a00;
+            padding: 10px 15px;
+            font-size: 18px;
+            font-weight: bold;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .navbar-toggle:hover {
+            background-color: #ff9a9e;
+        }
+
+        @media (max-width: 1024px) {
+            .navbar ul {
+                flex-direction: column;
+                gap: 15px;
+                display: none;
+                background-color: #ff6a00;
+                width: 100%;
+                padding: 15px 0;
+            }
+
+            .navbar ul.active {
+                display: flex;
+            }
+
+            .navbar-container.expanded .navbar ul {
+                display: flex;
+            }
+
+            .navbar-toggle {
+                display: block;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .navbar ul li a {
+                font-size: 14px;
+                padding: 8px 12px;
+            }
+
+            .navbar-toggle {
+                font-size: 16px;
+                padding: 8px 12px;
+            }
         }
 
         /* Background image and overlay */
@@ -87,11 +145,9 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background-image: url("{% static 'images/Img-1.png' %}");
-            background-size: cover;
-            background-position: center;
+            background: linear-gradient(135deg, #ff9a9e, #fad0c4, #fbc2eb);
             z-index: 1;
-            filter: blur(2px);
+            filter: brightness(0.9);
         }
 
         .overlay {
@@ -100,7 +156,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: linear-gradient(to bottom, rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.3));
+            background: rgba(255, 255, 255, 0.5);
             z-index: 2;
         }
 
@@ -109,39 +165,42 @@
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
-            padding: 20px;
+            padding: 30px;
             z-index: 3;
             position: relative;
+            flex-grow: 1;
+            overflow-y: auto;
         }
 
         /* Notice Board Styles */
         .notice-board, .event-board {
             flex: 1;
-            margin: 10px;
-            padding: 20px;
-            background-color: rgba(0, 0, 0, 0.85);
-            border-radius: 15px;
-            max-height: 400px;
+            margin: 15px;
+            padding: 25px;
+            background: linear-gradient(135deg, #ff6a00, #ee0979);
+            color: #fff;
+            border-radius: 20px;
+            max-height: 450px;
             overflow: hidden;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
             transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
 
         .notice-board:hover, .event-board:hover {
-            transform: scale(1.02);
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.7);
+            transform: scale(1.03);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
         }
 
         .notice-board h2, .event-board h2 {
-            font-size: 36px;
+            font-size: 32px;
             margin-bottom: 20px;
-            color: #ffcc00;
+            color: #fff;
             text-align: center;
             text-transform: uppercase;
-            letter-spacing: 2px;
-            background-color: rgba(0, 0, 0, 0.9);
-            padding: 10px;
-            border-radius: 10px;
+            letter-spacing: 1.5px;
+            background-color: rgba(255, 255, 255, 0.2);
+            padding: 12px;
+            border-radius: 12px;
             position: sticky;
             top: 0;
             z-index: 5;
@@ -151,134 +210,229 @@
             list-style: none;
             padding: 0;
             margin: 0;
-            animation: scroll-content 20s linear infinite;
         }
 
         .notice-board li, .event-board li {
-            margin-bottom: 15px;
-            padding: 15px;
-            background-color: rgba(255, 255, 255, 0.1);
-            border-radius: 10px;
+            margin-bottom: 20px;
+            padding: 20px;
+            background-color: rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
             transition: transform 0.3s, background-color 0.3s;
         }
 
         .notice-board li:hover, .event-board li:hover {
             transform: scale(1.05);
-            background-color: rgba(255, 255, 255, 0.2);
+            background-color: rgba(255, 255, 255, 0.3);
         }
 
         .notice-board h4, .event-board h4 {
-            font-size: 22px;
-            color: #ffcc00;
-            margin-bottom: 8px;
+            font-size: 20px;
+            color: #fff;
+            margin-bottom: 10px;
             font-weight: bold;
         }
 
         .notice-board p, .event-board p {
             font-size: 16px;
-            color: white;
-            line-height: 1.5;
+            color: #f8f9fa;
+            line-height: 1.6;
         }
 
         .notice-board small, .event-board small {
             font-size: 14px;
-            color: gray;
+            color: #f8f9fa;
             display: block;
-            margin-top: 5px;
+            margin-top: 8px;
         }
 
         .event-board small.date {
             font-size: 18px;
-            color: #ffcc00;
+            color: #fff;
             font-weight: bold;
-        }
-
-        /* Scrolling animation */
-        @keyframes scroll-content {
-            0% {
-                transform: translateY(0);
-            }
-            100% {
-                transform: translateY(calc(-100%));
-            }
-        }
-
-        /* Pause scrolling on hover */
-        .notice-board ul:hover, .event-board ul:hover {
-            animation-play-state: paused;
         }
 
         /* Footer styles */
         footer {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            background-color: rgba(0, 0, 0, 0.95);
-            color: white;
-            text-align: center;
-            padding: 15px 0;
+            background: linear-gradient(90deg, #ee0979, #ff6a00);
+            color: #fff;
+            text-align: left;
+            padding: 25px 40px;
             z-index: 4;
             font-size: 14px;
             letter-spacing: 1px;
+            box-shadow: 0 -2px 6px rgba(0, 0, 0, 0.3);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 25px;
+            align-items: flex-start;
+            margin-top: auto;
+        }
+
+        footer .footer-left {
+            flex: 1;
         }
 
         footer p {
-            margin: 5px 0;
+            margin: 0;
+            line-height: 1.6;
+        }
+
+        footer #current-datetime,
+        footer #visitor-count {
+            font-size: 16px;
+            margin-top: 12px;
+            padding: 12px;
+            background-color: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            display: inline-block;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s ease, background-color 0.3s ease;
+        }
+
+        footer #current-datetime:hover,
+        footer #visitor-count:hover {
+            background-color: rgba(255, 255, 255, 0.3);
+            transform: scale(1.05);
+        }
+
+        footer #current-datetime span,
+        footer #visitor-count span {
+            font-weight: bold;
+            color: #fff;
+        }
+
+        footer p:first-child {
+            font-size: 16px;
+            font-weight: bold;
+            color: #fff;
+        }
+
+        #footer-sidebar3 {
+            flex: 1;
+            max-width: 300px;
+            background-color: rgba(255, 255, 255, 0.2);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        #footer-sidebar3 iframe {
+            border-radius: 12px;
+            width: 100%;
+            height: 200px;
+            border: none;
+        }
+
+        #footer-sidebar3 .widget-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #fff;
+            margin-bottom: 12px;
+            text-align: center;
+        }
+
+        /* Responsive styles */
+        @media (max-width: 1200px) {
+            .main-container {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .notice-board, .event-board {
+                max-width: 90%;
+                margin: 15px 0;
+            }
+        }
+
+        @media (max-width: 768px) {
+            footer {
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+            }
+
+            #footer-sidebar3 {
+                max-width: 100%;
+                margin-top: 20px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .notice-board h2, .event-board h2 {
+                font-size: 24px;
+            }
+
+            .notice-board h4, .event-board h4 {
+                font-size: 16px;
+            }
+
+            .notice-board p, .event-board p {
+                font-size: 14px;
+            }
+
+            footer {
+                padding: 20px;
+            }
+
+            footer #current-datetime, footer #visitor-count {
+                font-size: 14px;
+                padding: 10px;
+            }
+
+            #footer-sidebar3 iframe {
+                height: 150px;
+            }
         }
     </style>
 </head>
 <body>
-    <!-- Header Section -->
-    <div class="header">
+    <!-- Navigation Bar -->
+    <div class="navbar-container">
         <div class="logo">
             <span>DR. VITHALRAO VIKHE PATIL COLLEGE OF ENGINEERING AHMEDNAGAR</span>
             <h1>ALUMNI <br><span class="portal">PORTAL</span></h1>
         </div>
-        <div class="buttons">
-            <a href="{% url 'alumni_login' %}" class="btn btn-info">
-                <i class="fas fa-user-graduate"></i> Alumni Login
-            </a>
-            <a href="{% url 'alumni_registration' %}" class="btn btn-primary">
-                <i class="fas fa-user-plus"></i> Alumni Registration
-            </a>
-            <a href="{% url 'alumni_coordinator_login' %}" class="btn btn-danger">
-                <i class="fas fa-sign-in-alt"></i> Alumni Coordinator Login
-            </a>
-            <a href="{% url 'gallery' %}" class="btn btn-success">
-                <i class="fas fa-images"></i> Gallery
-            </a>
-            <a href="{% url 'about_us' %}" class="btn btn-dark">
-                <i class="fas fa-info-circle"></i> About Us
-            </a>
-            <a href="{% url 'batch_mentor_login' %}" class="btn btn-warning">
-                <i class="fas fa-user-tie"></i> Batch Mentor Login
-            </a>
-            <a href="{% url 'batch_mentor_register' %}" class="btn btn-secondary">
-                <i class="fas fa-user-plus"></i> Batch Mentor Registration
-            </a>
-        </div>
+        <button class="navbar-toggle" onclick="toggleNavbar()">☰</button>
+        <nav class="navbar">
+            <ul>
+                <li><a href="{% url 'alumni_login' %}"><i class="fas fa-user-graduate"></i> Alumni Login</a></li>
+                <li><a href="{% url 'alumni_registration' %}"><i class="fas fa-user-plus"></i> Alumni Registration</a></li>
+                <li><a href="{% url 'alumni_coordinator_login' %}"><i class="fas fa-sign-in-alt"></i> Coordinator Login</a></li>
+                <li><a href="{% url 'gallery' %}"><i class="fas fa-images"></i> Gallery</a></li>
+                <li><a href="{% url 'about_us' %}"><i class="fas fa-info-circle"></i> About Us</a></li>
+                <li><a href="{% url 'batch_mentor_login' %}"><i class="fas fa-user-tie"></i> Mentor Login</a></li>
+            </ul>
+        </nav>
     </div>
+    <script>
+        function toggleNavbar() {
+            const navbarContainer = document.querySelector('.navbar-container');
+            const navbar = document.querySelector('.navbar ul');
+            const toggleButton = document.querySelector('.navbar-toggle');
+            navbar.classList.toggle('active');
+            navbarContainer.classList.toggle('expanded');
+            toggleButton.textContent = navbar.classList.contains('active') ? '✖' : '☰';
+        }
+    </script>
 
     <!-- Full Background Image and Overlay -->
     <div class="background-image"></div>
     <div class="overlay"></div>
-
     <!-- Main Container -->
     <div class="main-container">
         <!-- Notice Board Section -->
         <div class="notice-board">
-            <h2>Notice Board</h2>
+            <h2><i class="fas fa-bullhorn"></i> Notice Board</h2>
             <ul>
                 {% for notice in notices %}
                 <li>
                     <h4>
                         {% if notice.media %}
                         <a href="{% url 'download_notice_media' notice.id %}" class="text-primary">
-                            {{ notice.title }}
+                            <i class="fas fa-file-alt"></i> {{ notice.title }}
                         </a>
                         {% else %}
-                        {{ notice.title }}
+                        <i class="fas fa-file-alt"></i> {{ notice.title }}
                         {% endif %}
                     </h4>
                     <p>{{ notice.description }}</p>
@@ -292,16 +446,16 @@
 
         <!-- Event Board Section -->
         <div class="event-board">
-            <h2>Event Board</h2>
+            <h2><i class="fas fa-calendar-alt"></i> Event Board</h2>
             <ul>
                 {% for event in events %}
                 <li>
                     <h4>
                         <a href="{% if event.media %}{% url 'download_event_media' event.id %}{% else %}#{% endif %}" class="event-title">
-                            {{ event.title }}
+                            <i class="fas fa-calendar-check"></i> {{ event.title }}
                         </a>
                     </h4>
-                    <small class="date">Date: {{ event.date|date:"d-m-Y" }}</small><br>
+                    <small class="date"><i class="fas fa-clock"></i> Date: {{ event.date|date:"d-m-Y" }}</small><br>
                     <p>{{ event.description }}</p>
                     <small>Posted on: {{ event.created_at|timezone:"Asia/Kolkata"|date:"d-m-Y, h:i A" }}</small>
                 </li>
@@ -314,7 +468,36 @@
 
     <!-- Footer -->
     <footer>
-        <p>&copy; 2023 Alumni Portal. All rights reserved.</p>
+        <div class="footer-left">
+            <p>&copy; Alumni Portal. All rights reserved.</p>
+            <p id="current-datetime"><i class="fas fa-clock"></i> Date & Time: <span></span></p>
+            <p id="visitor-count"><i class="fas fa-users"></i> Visitors: <span>{{ visitor_count }}</span></p>
+        </div>
+        <div id="footer-sidebar3" class="footer-right">
+            <aside id="text-11" class="widget widget_text">
+                <h3 class="widget-title"><i class="fas fa-map-marker-alt"></i> Campus Location</h3>
+                <div class="textwidget">
+                    <iframe src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d966228.4695311349!2d74.38937776309645!3d18.916783731568234!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bdcbbe061fe9e81%3A0x1972733fbb666d7e!2sPadmashri+Dr.+Vithalrao+Vikhe+Patil+College+Of+Engineering!5e0!3m2!1sen!2sin!4v1438259175305" 
+                        title="Campus Location Map" allowfullscreen=""></iframe>
+                </div>
+            </aside>
+        </div>
     </footer>
+
+    <script>
+        // Update current date and time
+        function updateDateTime() {
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' };
+            document.querySelector('#current-datetime span').textContent = now.toLocaleString('en-US', options);
+        }
+        setInterval(updateDateTime, 1000);
+
+        // Simulate visitor count (replace with backend integration if needed)
+        let visitorCount = localStorage.getItem('visitorCount') || 0;
+        visitorCount++;
+        localStorage.setItem('visitorCount', visitorCount);
+        document.querySelector('#visitor-count span').textContent = visitorCount;
+    </script>
 </body>
 </html>

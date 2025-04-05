@@ -6,7 +6,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout, get_user_model
 from django.contrib.auth.models import User, Group
 from django.contrib import messages
-from .models import Alumni, AlumniCoordinator, Comment, GalleryPhoto, BatchMentor, GraduationYear, Notice, Event
+from .models import Alumni, AlumniCoordinator, Comment, GalleryPhoto, BatchMentor, GraduationYear, Notice, Event, Visitor
 from .forms import (
     AdminRegistrationForm, AlumniRegistrationForm, AlumniCoordinatorRegistrationForm,
     AlumniEditForm, GalleryPhotoForm, CommentForm, AlumniCoordinatorEditForm,
@@ -37,9 +37,20 @@ otp_storage = {}
 
 # Home Page with Notices
 def home(request):
-    notices = Notice.objects.all().order_by('-created_at')[:5]  # Fetch the latest two notices
-    events = Event.objects.all().order_by('-date', '-created_at')  # Order by date and creation time
-    return render(request, 'home.html', {'notices': notices, 'events': events})
+    # Increment visitor count
+    visitor, created = Visitor.objects.get_or_create(id=1)
+    visitor.count += 1
+    visitor.save()
+
+    # Fetch notices and events
+    notices = Notice.objects.all().order_by('-created_at')[:5]
+    events = Event.objects.all().order_by('-date', '-created_at')
+
+    return render(request, 'home.html', {
+        'notices': notices,
+        'events': events,
+        'visitor_count': visitor.count
+    })
 
 # Alumni Coordinator Login
 def alumni_coordinator_login(request):  
