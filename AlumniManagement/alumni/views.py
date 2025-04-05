@@ -113,6 +113,8 @@ def edit_alumni_coordinator_profile(request):
         form = AlumniCoordinatorEditForm(instance=request.user.alumnicoordinator)
     return render(request, 'alumni/edit_alumni_coordinator_profile.html', {'form': form})
 
+from django.core.mail import EmailMessage
+
 # Alumni Registration
 def alumni_registration(request):
     if request.method == 'POST':
@@ -123,7 +125,25 @@ def alumni_registration(request):
                 if 'is_international' not in request.POST:
                     alumni.is_international = False
                 alumni.save()
-                messages.success(request, 'Registration successful. Please log in.')
+
+                # Send welcome email with login credentials
+                email_subject = "Welcome to Alumni Portal"
+                email_body = render_to_string('email_templates/welcome_email.html', {
+                    'full_name': alumni.full_name,
+                    'email': alumni.email,
+                    'password': form.cleaned_data['password1'],
+                    'profile_photo_url': alumni.profile_photo.url if alumni.profile_photo else None,
+                })
+                email = EmailMessage(
+                    subject=email_subject,
+                    body=email_body,
+                    from_email='noreply@alumnimanagement.com',
+                    to=[alumni.email],
+                )
+                email.content_subtype = 'html'
+                email.send()
+
+                messages.success(request, 'Registration successful. Please check your email for login details.')
                 return redirect('alumni_login')
             else:
                 messages.error(request, 'Passwords do not match.')

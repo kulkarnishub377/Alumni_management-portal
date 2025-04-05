@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome to Alumni Portal</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 0;
+            color: #333;
+        }
+        .email-container {
+            max-width: 600px;
+            margin: 40px auto;
+            background: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+            border: 1px solid #e0e0e0;
+        }
+        .header {
+            background: linear-gradient(90deg, #007bff, #0056b3);
+            color: #ffffff;
+            text-align: center;
+            padding: 30px 20px;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: bold;
+        }
+        .content {
+            padding: 30px 20px;
+            text-align: left;
+            line-height: 1.6;
+        }
+        .content p {
+            margin: 15px 0;
+        }
+        .profile-card {
+            display: inline-block;
+            text-align: center;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            padding: 20px;
+            background-color: #f9f9f9;
+            margin: 20px 0;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .profile-card img {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-bottom: 15px;
+            border: 3px solid #007bff;
+        }
+        .profile-card h2 {
+            margin: 0;
+            font-size: 20px;
+            color: #333;
+            font-weight: bold;
+        }
+        .content a {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: #ffffff;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+            transition: background-color 0.3s ease;
+        }
+        .content a:hover {
+            background-color: #0056b3;
+        }
+        .footer {
+            background-color: #f1f1f1;
+            text-align: center;
+            padding: 15px 20px;
+            font-size: 14px;
+            color: #666;
+        }
+        .footer p {
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <div class="header">
+            <h1>Welcome to Alumni Portal</h1>
+        </div>
+        <div class="content">
+            <p>Dear {{ full_name }},</p>
+            <p>Thank you for registering on the Alumni Portal. Below are your login credentials:</p>
+            <div class="profile-card">
+                {% if profile_photo_url %}
+                    <img src="{{ profile_photo_url }}" alt="Profile Photo">
+                {% else %}
+                    <img src="https://via.placeholder.com/120" alt="Default Profile Photo">
+                {% endif %}
+                <h2>{{ full_name }}</h2>
+            </div>
+            <p><strong>Email:</strong> {{ email }}</p>
+            <p><strong>Password:</strong> {{ password }}</p>
+            <p>Please log in to your account and update your profile if needed.</p>
+            <a href="https://yourdomain.com/alumni_login">Click here to log in</a>
+        </div>
+        <div class="footer">
+            <p>Best regards,</p>
+            <p>The Alumni Portal Team</p>
+            <p>&copy; {{ current_year }} Alumni Portal. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>
