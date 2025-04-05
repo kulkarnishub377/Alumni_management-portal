@@ -310,10 +310,17 @@
 
         document.getElementById('resendOtp').addEventListener('click', function () {
             startOtpTimer();
-            // Logic to resend OTP
             fetch("{% url 'resend_otp' %}", {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}' }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('OTP resent successfully. Please check your email.');
+                } else {
+                    alert('Failed to resend OTP. Please try again.');
+                }
             });
         });
     </script>

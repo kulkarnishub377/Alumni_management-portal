@@ -26,7 +26,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.utils.timezone import now
 import logging
 import json
-from django.core.mail import send_mail
+from django.core.mail import send_mail, EmailMultiAlternatives
 import random
 from django.core.validators import validate_email
 from django.core.exceptions import ValidationError
@@ -551,20 +551,31 @@ def verify_details(request):
             otp = random.randint(100000, 999999)
             otp_storage[email] = otp
             request.session['email'] = email
-            send_mail(
-                'Password Reset OTP - Alumni Management System',
-                f"Dear User,\n\n"
-                f"We received a request to reset your password for your account associated with this email address. "
-                f"To proceed, please use the One-Time Password (OTP) provided below:\n\n"
-                f"OTP: {otp}\n\n"
-                f"Please note that this OTP is valid for only 2 minutes. If you did not request a password reset, "
-                f"please ignore this email or contact our support team immediately.\n\n"
-                f"Thank you for using the Alumni Management System.\n\n"
-                f"Best regards,\n"
-                f"Alumni Management Team",
-                'noreply@alumnimanagement.com',
-                [email]
+
+            # Prepare email content
+            email_subject = "Your OTP for Password Reset"
+            email_body_html = render_to_string('email_templates/otp_email.html', {
+                'otp': otp,
+                'user_name': user.full_name,
+            })
+            email_body_text = f"Dear {user.full_name},\n\nYour OTP for password reset is {otp}.\n\nThank you."
+
+            # Send email with proper headers
+            email = EmailMultiAlternatives(
+                subject=email_subject,
+                body=email_body_text,
+                from_email='noreply@alumnimanagement.com',
+                to=[email],
+                reply_to=['support@alumnimanagement.com']
             )
+            email.attach_alternative(email_body_html, "text/html")
+            email.extra_headers = {
+                'X-Priority': '1',
+                'Importance': 'High',
+                'X-MSMail-Priority': 'High',
+            }
+            email.send()
+
             return JsonResponse({'success': True})
         except (BatchMentor.DoesNotExist, Alumni.DoesNotExist):
             return JsonResponse({'success': False, 'error': 'Invalid email or phone number.'})
