@@ -10,15 +10,18 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Nunito', sans-serif;
             background-color: #f9f9f9;
             color: #333;
+            margin: 0;
         }
         .about-container {
             padding: 20px;
             background-color: #ffffff;
             border-radius: 5px;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin: 20px auto;
+            max-width: 1200px;
         }
         .about-title {
             font-size: 2rem;
@@ -27,8 +30,44 @@
             text-align: center;
             margin-bottom: 20px;
         }
-        .about-content p {
-            margin-bottom: 15px;
+        .welcome-heading {
+            font-size: 2.5rem;
+            font-weight: bold;
+            text-align: center;
+            color: #ff6347;
+            text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
+            margin-bottom: 30px;
+        }
+        .responsive-container-block {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 40px;
+        }
+        .mainImg {
+            width: 100%;
+            max-width: 500px;
+            height: auto;
+            box-shadow: rgba(0, 0, 0, 0.05) 0px 5px 10px 7px;
+            border-radius: 10px;
+            margin: 10px;
+        }
+        .allText {
+            max-width: 600px;
+            margin: 10px;
+            text-align: center;
+        }
+        .headingText {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: rgb(51, 51, 51);
+            margin-bottom: 10px;
+        }
+        .description {
+            font-size: 1rem;
+            line-height: 1.6;
+            color: rgb(102, 102, 102);
         }
         footer {
             margin-top: 40px;
@@ -37,344 +76,33 @@
             color: white;
             text-align: center;
         }
-        .welcome-heading {
-            font-size: 50px;
-            font-weight: bold;
-            font-family: 'Arial', sans-serif;
-            text-align: center;
-            color: #ff6347;
-            text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
-        }
-        * {
-            font-family: Nunito, sans-serif;
-        }
-        .responsive-container-block {
-            min-height: 75px;
-            height: fit-content;
+        iframe {
             width: 100%;
-            padding: 10px;
-            display: flex;
-            flex-wrap: wrap;
-            margin: 0 auto;
-            justify-content: flex-start;
-        }
-        .text-blk {
-            margin: 0;
-            padding: 10px;
-            line-height: 25px;
-        }
-        .responsive-container-block.bigContainer {
-            padding: 10px 30px;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-        }
-        .mainImg {
-            color: black;
-            width: 55%;
+            max-width: 960px;
             height: auto;
-            box-shadow: rgba(0, 0, 0, 0.05) 0px 5px 10px 7px;
-            border-radius: 10px;
-        }
-        .text-blk.headingText {
-            font-size: 25px;
-            font-weight: 700;
-            line-height: 34px;
-            color: rgb(51, 51, 51);
-            padding: 0 10px;
-            margin: 0 0 10px 0;
-        }
-        .allText {
-            padding: 0;
-            margin: 0 0 0 40px;
-            width: 40%;
-        }
-        .text-blk.subHeadingText {
-            color: rgb(102, 102, 102);
-            font-size: 25px;
-            line-height: 34px;
-            font-weight: 700;
-            padding: 0 10px;
-            margin: 0 0 15px 0;
-        }
-        .text-blk.description {
-            font-size: 25px;
-            line-height: 34px;
-            color: rgb(102, 102, 102);
-            margin: 0 0 50px 0;
-            padding: 0 10px;
-        }
-        .explore {
-            font-size: 20px;
-            line-height: 28px;
-            color: rgb(255, 255, 255);
-            background-color: rgb(244, 152, 146);
-            padding: 10px 50px;
-            border: 0;
-            cursor: pointer;
-        }
-        .explore:hover {
-            background-color: rgb(255, 235, 234);
-            color: rgb(244, 152, 146);
-        }
-        .responsive-container-block.Container {
-            margin: 80px auto 50px auto;
-            justify-content: center;
-            align-items: center;
-            max-width: 1320px;
-            padding: 10px;
-        }
-        .responsive-container-block.Container.bottomContainer {
-            margin: 100px auto 50px auto;
-            flex-direction: row-reverse;
-        }
-        .allText.aboveText {
-            margin: 0 0 0 40px;
-        }
-        .allText.bottomText {
-            margin: 0 40px 0 0;
-        }
-        @media (max-width: 1024px) {
-            .responsive-container-block.Container {
-                max-width: 850px;
-            }
-            .mainImg {
-                width: 55%;
-            }
-            .text-blk.description {
-                font-size: 20px;
-            }
-            .allText {
-                width: 40%;
-                margin-left: 20px;
-            }
-            .responsive-container-block.bigContainer {
-                padding: 10px;
-            }
-            .text-blk.subHeadingText {
-                font-size: 22px;
-            }
-            .responsive-container-block.Container.bottomContainer {
-                margin: 80px auto 50px auto;
-            }
-            .allText.aboveText {
-                margin: 30px 0 0 40px;
-            }
-            .allText.bottomText {
-                margin: 30px 40px 0 0;
-            }
+            aspect-ratio: 16 / 9;
+            border: none;
         }
         @media (max-width: 768px) {
-            .mainImg {
-                width: 90%;
+            .welcome-heading {
+                font-size: 2rem;
             }
-            .allText {
-                width: 100%;
-                display: flex;
-                flex-direction: column;
-                justify-content: center;
-                align-items: center;
-                padding: 0;
+            .headingText {
+                font-size: 1.25rem;
             }
-            .responsive-container-block.Container {
-                flex-direction: column;
-            }
-            .text-blk.headingText,
-            .text-blk.subHeadingText,
-            .text-blk.description {
-                text-align: center;
-                font-size: 25px;
-            }
-            .allText {
-                margin-top: 40px;
-            }
-            .allText.aboveText {
-                margin: 40px 0 0 0;
-            }
-            .responsive-container-block.Container {
-                margin: 80px auto 50px auto;
-            }
-            .responsive-container-block.Container.bottomContainer {
-                margin: 50px auto 50px auto;
-            }
-            .allText.bottomText {
-                margin: 40px 0 0 0;
+            .description {
+                font-size: 0.9rem;
             }
         }
-        @media (max-width: 500px) {
-            .responsive-container-block.Container {
-                padding: 10px 0;
-                width: 100%;
-                max-width: 100%;
+        @media (max-width: 576px) {
+            .welcome-heading {
+                font-size: 1.75rem;
             }
-            .mainImg {
-                width: 100%;
+            .headingText {
+                font-size: 1rem;
             }
-            .responsive-container-block.bigContainer {
-                padding: 10px 25px;
-            }
-            .text-blk.subHeadingText,
-            .text-blk.description {
-                font-size: 25px;
-                padding: 0;
-            }
-            .allText {
-                width: 100%;
-                padding: 0;
-            }
-        }
-        @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@200;300;400;600;700;800&display=swap');
-        * {
-            box-sizing: border-box;
-        }
-        body {
-            margin: 0;
-        }
-        .wk-desk-1 {
-            width: 8.333333%;
-        }
-        .wk-desk-2 {
-            width: 16.666667%;
-        }
-        .wk-desk-3 {
-            width: 25%;
-        }
-        .wk-desk-4 {
-            width: 33.333333%;
-        }
-        .wk-desk-5 {
-            width: 41.666667%;
-        }
-        .wk-desk-6 {
-            width: 50%;
-        }
-        .wk-desk-7 {
-            width: 58.333333%;
-        }
-        .wk-desk-8 {
-            width: 66.666667%;
-        }
-        .wk-desk-9 {
-            width: 75%;
-        }
-        .wk-desk-10 {
-            width: 83.333333%;
-        }
-        .wk-desk-11 {
-            width: 91.666667%;
-        }
-        .wk-desk-12 {
-            width: 100%;
-        }
-        @media (max-width: 1024px) {
-            .wk-ipadp-1 {
-                width: 8.333333%;
-            }
-            .wk-ipadp-2 {
-                width: 16.666667%;
-            }
-            .wk-ipadp-3 {
-                width: 25%;
-            }
-            .wk-ipadp-4 {
-                width: 33.333333%;
-            }
-            .wk-ipadp-5 {
-                width: 41.666667%;
-            }
-            .wk-ipadp-6 {
-                width: 50%;
-            }
-            .wk-ipadp-7 {
-                width: 58.333333%;
-            }
-            .wk-ipadp-8 {
-                width: 66.666667%;
-            }
-            .wk-ipadp-9 {
-                width: 75%;
-            }
-            .wk-ipadp-10 {
-                width: 83.333333%;
-            }
-            .wk-ipadp-11 {
-                width: 91.666667%;
-            }
-            .wk-ipadp-12 {
-                width: 100%;
-            }
-        }
-        @media (max-width: 768px) {
-            .wk-tab-1 {
-                width: 8.333333%;
-            }
-            .wk-tab-2 {
-                width: 16.666667%;
-            }
-            .wk-tab-3 {
-                width: 25%;
-            }
-            .wk-tab-4 {
-                width: 33.333333%;
-            }
-            .wk-tab-5 {
-                width: 41.666667%;
-            }
-            .wk-tab-6 {
-                width: 50%;
-            }
-            .wk-tab-7 {
-                width: 58.333333%;
-            }
-            .wk-tab-8 {
-                width: 66.666667%;
-            }
-            .wk-tab-9 {
-                width: 75%;
-            }
-            .wk-tab-10 {
-                width: 83.333333%;
-            }
-            .wk-tab-11 {
-                width: 91.666667%;
-            }
-            .wk-tab-12 {
-                width: 100%;
-            }
-        }
-        @media (max-width: 500px) {
-            .wk-mobile-1 {
-                width: 8.333333%;
-            }
-            .wk-mobile-2 {
-                width: 16.666667%;
-            }
-            .wk-mobile-3 {
-                width: 25%;
-            }
-            .wk-mobile-4 {
-                width: 33.333333%;
-            }
-            .wk-mobile-5 {
-                width: 41.666667%;
-            }
-            .wk-mobile-6 {
-                width: 50%;
-            }
-            .wk-mobile-7 {
-                width: 58.333333%;
-            }
-            .wk-mobile-8 {
-                width: 66.666667%;
-            }
-            .wk-mobile-9 {
-                width: 75%;
-            }
-            .wk-mobile-10 {
-                width: 83.333333%;
-            }
-            .wk-mobile-12 {
-                width: 100%;
+            .description {
+                font-size: 0.85rem;
             }
         }
     </style>
@@ -384,40 +112,37 @@
         <h1 class="about-title"><i class="fas fa-info-circle"></i> About Us</h1>
         <a href="{% url 'home' %}" class="btn btn-secondary mb-3"><i class="fas fa-home"></i> Home</a>
         <h1 class="welcome-heading">Welcome to E&TC Department</h1>
-        <div class="responsive-container-block Container">
+        <div class="responsive-container-block">
             <img class="mainImg" src="{% static 'images/Img-1.png' %}" alt="About Us Image 3">
-            <div class="allText aboveText">
-                <p class="text-blk headingText">Our Values</p>
-                <p class="text-blk description">
+            <div class="allText">
+                <p class="headingText">Our Values</p>
+                <p class="description">
                     We believe in integrity, innovation, and inclusiveness. Our department strives to foster a culture of continuous learning and improvement.
                 </p>
             </div>
         </div>
-        <div class="responsive-container-block Container">
+        <div class="responsive-container-block">
             <img class="mainImg" src="{% static 'images/Img-2.jpg' %}" alt="About Us Image 1">
-            <div class="allText aboveText">
-                <p class="text-blk headingText">Our Mission</p>
-                <p class="text-blk description">
+            <div class="allText">
+                <p class="headingText">Our Mission</p>
+                <p class="description">
                     To incorporate the professional technical Excellence in the field of Electronics & Telecommunication Engineering to develop competent engineers to contribute for the industries with social and ethical awareness.
                 </p>
             </div>
         </div>
-        <div class="responsive-container-block Container bottomContainer">
+        <div class="responsive-container-block">
             <img class="mainImg" src="{% static 'images/vision.jpg' %}" alt="About Us Image 2">
-            <div class="allText bottomText">
-                <p class="text-blk headingText">Our Vision</p>
-                <p class="text-blk description">
-                    <br><b>M1:</b> To develop students to become technically proficient, in the field of Electronics & Telecommunication Engineering as per the society’s current and future needs.
-                    <br><b>M2:</b> To motivate the students for technical competencies through a healthy relationship with industries and Alumni.
-                    <br><b>M3:</b> To cultivate the spirit of teamwork and leadership among the students to make them socially and ethically responsible engineers.
+            <div class="allText">
+                <p class="headingText">Our Vision</p>
+                <p class="description">
+                    <b>M1:</b> To develop students to become technically proficient, in the field of Electronics & Telecommunication Engineering as per the society’s current and future needs.<br>
+                    <b>M2:</b> To motivate the students for technical competencies through a healthy relationship with industries and Alumni.<br>
+                    <b>M3:</b> To cultivate the spirit of teamwork and leadership among the students to make them socially and ethically responsible engineers.
                 </p>
             </div>
         </div>
-        <div class="responsive-container-block bigContainer" id="video2">
-            <div class="responsive-container-block Container">
-                <div class="html5-video-container" data-layer="0"></div>
-                <iframe width="960" height="540" src="https://www.youtube.com/embed/t8sNONMsazk?si=ofSar44iS50qtvt8" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
-            </div>
+        <div class="responsive-container-block">
+            <iframe src="https://www.youtube.com/embed/t8sNONMsazk?si=ofSar44iS50qtvt8" title="YouTube video player" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
         </div>
     </div>
     <footer>
