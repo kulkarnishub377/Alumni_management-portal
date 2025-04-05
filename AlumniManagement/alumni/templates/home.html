@@ -19,7 +19,7 @@
         body {
             font-family: 'Poppins', sans-serif;
             color: #333;
-            background: linear-gradient(135deg, #ff9a9e, #fad0c4, #fbc2eb);
+            background: linear-gradient(135deg, #a2d9ff, #d4f1ff, #b3e5fc);
             display: flex;
             flex-direction: column;
             min-height: 100vh;
@@ -31,7 +31,7 @@
 
         /* Redesigned Navbar Styles */
         .navbar-container {
-            background: linear-gradient(90deg, #ff6a00, #ee0979);
+            background: linear-gradient(90deg, #007bff, #0056b3);
             color: #fff;
             display: flex;
             justify-content: space-between;
@@ -81,16 +81,18 @@
         }
 
         .navbar ul li a:hover {
-            background-color: rgba(255, 255, 255, 0.2);
+            background-color: rgba(0, 0, 0, 0.5);
+            color: #fff;
+            text-decoration: underline;
             transform: translateY(-3px);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
         }
 
         .navbar-toggle {
             display: none;
             background-color: #fff;
             border: none;
-            color: #ff6a00;
+            color: #007bff;
             padding: 10px 15px;
             font-size: 18px;
             font-weight: bold;
@@ -100,15 +102,15 @@
         }
 
         .navbar-toggle:hover {
-            background-color: #ff9a9e;
+            background-color: #a2d9ff;
         }
 
-        @media (max-width: 1024px) {
+        @media (max-width: 1280px) {
             .navbar ul {
                 flex-direction: column;
                 gap: 15px;
                 display: none;
-                background-color: #ff6a00;
+                background-color: #007bff;
                 width: 100%;
                 padding: 15px 0;
             }
@@ -126,7 +128,7 @@
             }
         }
 
-        @media (max-width: 768px) {
+        @media (max-width: 1024px) {
             .navbar ul li a {
                 font-size: 14px;
                 padding: 8px 12px;
@@ -145,7 +147,8 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: linear-gradient(135deg, #ff9a9e, #fad0c4, #fbc2eb);
+            background: url("{% static 'images/image.png' %}") no-repeat center center;
+            background-size: cover;
             z-index: 1;
             filter: brightness(0.9);
         }
@@ -177,10 +180,10 @@
             flex: 1;
             margin: 15px;
             padding: 25px;
-            background: linear-gradient(135deg, #ff6a00, #ee0979);
+            background: linear-gradient(135deg, #007bff, #0056b3);
             color: #fff;
             border-radius: 20px;
-            max-height: 450px;
+            max-height: 350px;
             overflow: hidden;
             box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
             transition: transform 0.3s ease, box-shadow 0.3s ease;
@@ -198,38 +201,84 @@
             text-align: center;
             text-transform: uppercase;
             letter-spacing: 1.5px;
-            background-color: rgba(255, 255, 255, 0.2);
+            background-color: #0056b3; /* Solid background color */
             padding: 12px;
             border-radius: 12px;
             position: sticky;
             top: 0;
-            z-index: 5;
+            z-index: 10; /* Ensure it stays on the top layer */
         }
 
         .notice-board ul, .event-board ul {
             list-style: none;
             padding: 0;
             margin: 0;
+            overflow: hidden;
+            height: 400px; /* Adjust height as needed */
+            position: relative;
+            animation: scroll-content 20s linear infinite;
+        }
+
+        @keyframes scroll-content {
+            0% {
+                transform: translateY(0);
+            }
+            100% {
+                transform: translateY(-100%);
+            }
+        }
+
+        .notice-board ul:hover, .event-board ul:hover {
+            animation-play-state: paused;
         }
 
         .notice-board li, .event-board li {
-            margin-bottom: 20px;
+            margin-bottom: 10px;
             padding: 20px;
-            background-color: rgba(255, 255, 255, 0.2);
+            background-color: rgba(255, 255, 255, 0.8);
             border-radius: 12px;
-            transition: transform 0.3s, background-color 0.3s;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease, background-color 0.3s ease, box-shadow 0.3s ease;
+            overflow: hidden;
         }
 
         .notice-board li:hover, .event-board li:hover {
             transform: scale(1.05);
-            background-color: rgba(255, 255, 255, 0.3);
+            background-color: rgba(255, 255, 255, 1);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .notice-board li h4, .event-board li h4 {
+            font-size: 20px;
+            font-weight: bold;
+            color: #0056b3;
+            margin-bottom: 10px;
+        }
+
+        .notice-board li p, .event-board li p {
+            font-size: 16px;
+            color: #333;
+            line-height: 1.6;
+            margin-bottom: 10px;
+        }
+
+        .notice-board li small, .event-board li small {
+            font-size: 14px;
+            color: #555;
+            display: block;
+        }
+
+        .notice-board li:hover, .event-board li:hover {
+            transform: scale(1.05);
+            background-color: rgba(0, 0, 255, 0.3); /* Blue color */
+            border: 2px solid rgba(255, 0, 0, 0.5); /* Red border */
         }
 
         .notice-board h4, .event-board h4 {
-            font-size: 20px;
-            color: #fff;
-            margin-bottom: 10px;
-            font-weight: bold;
+            font-size: 24px;
+            color: #cbf05f;
+            margin-bottom: 15px;
+            font-weight: bolder;
         }
 
         .notice-board p, .event-board p {
@@ -253,7 +302,7 @@
 
         /* Footer styles */
         footer {
-            background: linear-gradient(90deg, #ee0979, #ff6a00);
+            background: linear-gradient(90deg, #0056b3, #007bff);
             color: #fff;
             text-align: left;
             padding: 25px 40px;
@@ -332,7 +381,7 @@
         }
 
         /* Responsive styles */
-        @media (max-width: 1200px) {
+        @media (max-width: 1440px) {
             .main-container {
                 flex-direction: column;
                 align-items: center;
@@ -344,7 +393,7 @@
             }
         }
 
-        @media (max-width: 768px) {
+        @media (max-width: 1024px) {
             footer {
                 flex-direction: column;
                 align-items: center;
@@ -357,7 +406,7 @@
             }
         }
 
-        @media (max-width: 480px) {
+        @media (max-width: 640px) {
             .notice-board h2, .event-board h2 {
                 font-size: 24px;
             }
@@ -436,7 +485,7 @@
                         {% endif %}
                     </h4>
                     <p>{{ notice.description }}</p>
-                    <small>Posted on: {{ notice.created_at|timezone:"Asia/Kolkata"|date:"d-m-Y, h:i A" }}</small>
+                    <small><i class="fas fa-clock"></i> Posted on: {{ notice.created_at|timezone:"Asia/Kolkata"|date:"d-m-Y, h:i A" }}</small>
                 </li>
                 {% empty %}
                 <p>No notices available.</p>
@@ -456,8 +505,8 @@
                         </a>
                     </h4>
                     <small class="date"><i class="fas fa-clock"></i> Date: {{ event.date|date:"d-m-Y" }}</small><br>
-                    <p>{{ event.description }}</p>
-                    <small>Posted on: {{ event.created_at|timezone:"Asia/Kolkata"|date:"d-m-Y, h:i A" }}</small>
+                    <p><i class="fas fa-info-circle"></i> {{ event.description }}</p>
+                    <small><i class="fas fa-clock"></i> Posted on: {{ event.created_at|timezone:"Asia/Kolkata"|date:"d-m-Y, h:i A" }}</small>
                 </li>
                 {% empty %}
                 <p>No events available.</p>
